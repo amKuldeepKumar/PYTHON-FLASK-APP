@@ -1,0 +1,52 @@
+<nav class="navbar navbar-expand-lg site-navbar{% if active_theme and active_theme.header_sticky_enabled %} sticky-top{% endif %}{% if active_theme and active_theme.header_transparent_enabled %} bg-transparent{% endif %}">
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-3 site-brand" href="{{ url_for('main.home') }}">
+      {% if seo_settings and seo_settings.site_logo_url %}<img src="{{ seo_settings.site_logo_url }}" alt="{{ seo_settings.site_name or 'Fluencify' }}" style="height:42px;width:auto">{% else %}<span class="brand-mark"></span>{% endif %}
+      <span class="site-brand-copy">
+        <span class="site-brand-title">{{ seo_settings.site_name if seo_settings and seo_settings.site_name else 'Fluencify' }}</span>
+        <span class="site-brand-subtitle">Language Intelligence</span>
+      </span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      {% set current_path = request.path %}
+      {% set custom_links = site_shell.header_links if site_shell and site_shell.header_links else [] %}
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1 site-nav-links">
+        {% if custom_links %}
+          {% for item in custom_links %}<li class="nav-item"><a class="nav-link{% if item.url == current_path %} active{% endif %}" href="{{ item.url }}">{{ item.label }}</a></li>{% endfor %}
+        {% else %}
+          {% for item in menu_items %}
+            {% if item.children %}
+              {% set ns = namespace(active=false) %}
+              {% for child in item.children %}{% if child.href == current_path %}{% set ns.active = true %}{% endif %}{% endfor %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle{% if ns.active %} active{% endif %}" href="{{ item.href }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ item.label }}</a>
+                <ul class="dropdown-menu dropdown-menu-end">{% for child in item.children %}<li><a class="dropdown-item{% if child.href == current_path %} active{% endif %}" href="{{ child.href }}">{{ child.label }}</a></li>{% endfor %}</ul>
+              </li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link{% if item.href == current_path %} active{% endif %}" href="{{ item.href }}">{{ item.label }}</a></li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </ul>
+
+      {% set role_code = current_user.role_code if current_user.is_authenticated and current_user.role_code is defined else (current_user.role|upper if current_user.is_authenticated else '') %}
+      <div class="site-nav-actions">
+        {% if current_user.is_authenticated %}
+          {% if role_code == 'STUDENT' %}<a class="btn btn-sm btn-primary" href="{{ url_for('student.dashboard') }}">Dashboard</a>
+          {% elif role_code in ['ADMIN', 'SUB_ADMIN', 'SEO', 'SUPPORT', 'ACCOUNTS'] %}<a class="btn btn-sm btn-primary" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+          {% elif role_code == 'SUPERADMIN' %}<a class="btn btn-sm btn-primary" href="{{ url_for('superadmin.dashboard') }}">Dashboard</a>{% endif %}
+          <div class="site-nav-actions-divider"></div>
+          <div class="site-nav-form"><form method="post" action="{{ url_for('auth.logout') }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-light" type="submit">Logout</button></form></div>
+        {% else %}
+          <a class="btn btn-sm btn-outline-light" href="{{ url_for('auth.login') }}">Login</a>
+          <a class="btn btn-sm btn-primary" href="{{ seo_settings.header_cta_url if seo_settings and seo_settings.header_cta_url else url_for('auth.register') }}">{{ seo_settings.header_cta_text if seo_settings and seo_settings.header_cta_text else 'Register' }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>

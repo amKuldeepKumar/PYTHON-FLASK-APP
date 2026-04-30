@@ -1,0 +1,104 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Practice Session • Spoken English{% endblock %}
+{% block page_title %}Practice Session{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/spoken-english.css') }}">{% endblock %}
+{% block content %}
+<div class="spoken-shell">
+  <section class="spoken-card">
+    <div class="spoken-topic__head">
+      <div>
+        <div class="small text-uppercase text-secondary mb-2">Spoken English Q&amp;A</div>
+        <h2 class="fw-bold mb-2">{{ speaking_session.prompt.title }}</h2>
+        <p class="mb-2" id="questionText">{{ speaking_session.prompt.prompt_text }}</p>
+        <p class="spoken-subtitle mb-0">{{ speaking_session.prompt.instruction_text or 'Speak or type a simple, natural answer.' }}</p>
+      </div>
+      <span class="spoken-tag">Target {{ speaking_session.prompt.effective_target_duration }}s</span>
+    </div>
+  </section>
+
+  <section class="spoken-card spoken-session-box">
+    <div class="spoken-answer spoken-voice-card"
+         id="voicePracticeCard"
+         data-auto-play-question="{{ '1' if voice_autoplay_enabled else '0' }}"
+         data-auto-start-listening="{{ '1' if voice_auto_listen_enabled else '0' }}"
+         data-beep-enabled="{{ '1' if voice_beep_enabled else '0' }}"
+         data-voice-lang="{{ voice_accent }}"
+         data-playback-rate="{{ voice_playback_speed }}"
+         data-voice-pitch="{{ voice_pitch }}"
+         data-voice-gender="{{ voice_gender }}"
+         data-voice-name="{{ voice_name }}">
+      <div class="spoken-voice-card__head">
+        <div>
+          <div class="small text-uppercase text-secondary mb-2">Guided speaking mode</div>
+          <div class="spoken-section-title mb-1">AI will read the question, play a beep, then start listening.</div>
+          <div class="spoken-subtitle mb-0">
+            Accent <strong>{{ voice_accent }}</strong>
+            · Playback <strong>{{ '%.1f'|format(voice_playback_speed) }}</strong>
+            · Pitch <strong>{{ '%.1f'|format(voice_pitch) }}</strong>
+            · Voice <strong>{{ voice_gender|title }}</strong>
+            · Beep <strong>{{ 'On' if voice_beep_enabled else 'Off' }}</strong>
+          </div>
+        </div>
+        <div class="spoken-actions">
+          <button class="btn btn-outline-secondary" type="button" id="speakQuestionBtn">Play Question</button>
+          <button class="btn btn-outline-warning" type="button" id="recordAnswerBtn">Start Speaking</button>
+        </div>
+      </div>
+      <div class="spoken-voice-status" id="voicePracticeStatus">
+        Question playback will begin automatically, then voice recording will start after the beep.
+      </div>
+    </div>
+
+    <div class="spoken-model">
+      <div class="small text-uppercase text-secondary mb-2">Model answer guide</div>
+      <div>{{ model_answer }}</div>
+    </div>
+
+    <form method="post" action="{{ url_for('student.course_spoken_english_submit', course_id=course.id, session_id=speaking_session.id) }}" enctype="multipart/form-data" class="spoken-answer">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="browser_stt_used" id="browserSttUsed" value="0">
+      <input type="hidden" name="response_mode" id="responseMode" value="typed">
+      <div class="mb-3">
+        <label class="form-label" for="responseText">Your answer</label>
+        <textarea class="form-control" id="responseText" name="transcript_text" placeholder="Type your answer or use your voice workflow if your page supports it.">{{ speaking_session.transcript_text or '' }}</textarea>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="durationSeconds">Duration seconds</label>
+          <input type="number" class="form-control" id="durationSeconds" name="duration_seconds" min="0" value="{{ speaking_session.duration_seconds or speaking_session.prompt.effective_target_duration }}">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Audio file (optional)</label>
+          <input type="file" class="form-control" name="audio_file" accept="audio/*">
+        </div>
+      </div>
+      <div class="spoken-actions mt-3">
+        <button type="submit" class="btn btn-primary">Submit Practice</button>
+        <a href="{{ url_for('student.course_spoken_english_home', course_id=course.id) }}" class="btn btn-outline-secondary">Back</a>
+      </div>
+    </form>
+  </section>
+
+  {% if attempts %}
+  <section class="spoken-card">
+    <div class="spoken-section-title">Previous attempts in this session</div>
+    <div class="spoken-subtitle mb-3">Latest tries stay visible for quick review.</div>
+    <div class="spoken-list">
+      {% for attempt in attempts %}
+      <div class="spoken-topic">
+        <div class="spoken-topic__head">
+          <strong>Attempt {{ attempt.attempt_number }}</strong>
+          <span class="spoken-tag">{{ '%.0f'|format(attempt.score or 0) }}/10</span>
+        </div>
+        <div class="spoken-subtitle mt-2">{{ attempt.transcript_text or 'No transcript saved.' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='shared/js/voice-practice.js') }}"></script>
+{% endblock %}

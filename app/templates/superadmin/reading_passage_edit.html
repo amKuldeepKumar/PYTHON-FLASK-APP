@@ -1,0 +1,44 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Reading Passage • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Edit Reading Passage{% endblock %}
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h4 class="mb-1">Edit Passage</h4>
+        <div class="small text-secondary">Saving will send this passage back to pending review.</div>
+      </div>
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_passages', topic_id=passage.topic_id, course_id=passage.course_id) }}">Back to Review Queue</a>
+    </div>
+    <form method="post" class="row g-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-12">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-control" name="title" value="{{ passage.title }}" required>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Content</label>
+        <textarea class="form-control" rows="12" name="content" required>{{ passage.content }}</textarea>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Linked course</label>
+        <select class="form-select" name="course_id">
+          <option value="0">No linked course</option>
+          {% for course in course_rows %}
+            <option value="{{ course.id }}" {% if passage.course_id == course.id %}selected{% endif %}>{{ course.title }} • {{ course.track_type|replace('_', ' ')|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Generation notes</label>
+        <textarea class="form-control" rows="3" name="generation_notes">{{ passage.generation_notes or '' }}</textarea>
+      </div>
+      <div class="col-12 d-flex gap-2 justify-content-end">
+        <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.reading_passages', topic_id=passage.topic_id, course_id=passage.course_id) }}">Cancel</a>
+        <button class="btn btn-primary" type="submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

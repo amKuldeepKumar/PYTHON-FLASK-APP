@@ -1,0 +1,128 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Listening Session • {{ lesson.title }}{% endblock %}
+{% block page_title %}Listening Session{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-listening-session.css') }}">{% endblock %}
+{% block content %}
+<div class="listening-shell" id="listeningSessionConfig" data-estimated-seconds="{{ estimated_seconds }}" data-replay-limit="{{ replay_limit }}" data-caption-default="{{ caption_default }}" data-caption-locked="{{ 1 if caption_locked else 0 }}" data-allowed-speeds="{{ allowed_speeds|join(',') }}" data-audio-url="{{ listening_audio_url or '' }}" data-script-text="{{ (script_text or '')|e }}">
+  <section class="listening-topbar">
+    <div>
+      <div class="listening-kicker">LISTENING WORKSPACE</div>
+      <h2 class="mb-2">{{ lesson.title }}</h2>
+      <div class="listening-top-copy">Use backend audio playback first. If the server audio is not ready, the player can fall back to device speech so the student is never blocked.</div>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-pill">{{ lesson.question_count }} questions</span>
+      <a class="surface-pill-btn" href="{{ url_for('student.course_listening_home', course_id=course.id) }}">Back</a>
+    </div>
+  </section>
+
+  <form method="post" id="listeningSubmitForm" action="{{ url_for('student.course_listening_session', course_id=course.id, lesson_id=lesson.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="listening-grid">
+      <section class="listening-panel">
+        <div class="panel-section">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Listening Topic</div>
+              <h3>Hidden Script Mode</h3>
+            </div>
+            <div class="audio-status-group">
+              <span class="status-pill" id="audioStatus">Ready</span><span class="status-pill" id="audioModeBadge">Checking audio</span>
+              <span class="status-pill">Timer <strong id="timerValue">{{ estimated_seconds }}</strong>s</span>
+              <span class="status-pill">Replay left <strong id="replayRemainingValue">{{ replay_limit }}</strong></span>
+            </div>
+          </div>
+          <div class="script-card is-captions-hidden" id="scriptCard">
+            <div class="caption-toolbar">
+              <span class="caption-state" id="captionState">Script hidden before submission</span>
+              <button type="button" class="surface-outline-btn" id="captionToggleBtn" disabled>Hidden</button>
+            </div>
+            <div id="scriptText" class="script-text">{{ script_text or 'Listen carefully to the audio first. The listening script stays hidden on this attempt. Read the questions, type your answers in writing, and use the notes area if needed.' }}</div>
+          </div>
+        </div>
+
+        <div class="panel-section controls-panel">
+          <div class="panel-head compact-head">
+            <div>
+              <div class="panel-kicker">Audio Controls</div>
+              <h3>TTS Playback</h3>
+            </div>
+          </div>
+          {% if listening_audio_url %}<audio id="listeningAudio" preload="metadata" src="{{ listening_audio_url }}"></audio>{% endif %}<input type="hidden" name="listening_time_spent" id="listeningTimeSpent" value="0"><input type="hidden" name="listening_replay_count" id="listeningReplayCount" value="0"><input type="hidden" name="listening_play_count" id="listeningPlayCount" value="0"><input type="hidden" name="listening_started_audio" id="listeningStartedAudio" value="0"><div class="control-row">
+            <button type="button" class="surface-primary-btn" id="playBtn">Play</button>
+            <button type="button" class="surface-outline-btn" id="pauseBtn">Pause</button>
+            <button type="button" class="surface-outline-btn" id="resumeBtn">Resume</button>
+            <button type="button" class="surface-outline-btn" id="restartBtn">Replay</button>
+          </div>
+          <div class="speed-wrap">
+            <label class="field-label" for="rateSelect">Speed control</label>
+            <select class="surface-select" id="rateSelect">{% for speed in allowed_speeds %}<option value="{{ speed }}" {% if speed == 1.0 %}selected{% endif %}>{{ "%.2f"|format(speed) }}x</option>{% endfor %}</select>
+          </div>
+          <div class="rule-note">Replay rule: the topic can be replayed up to {{ replay_limit }} times on this screen. The script stays hidden so the student listens first and answers in writing. The script stays hidden before submission so the student listens first and answers in writing.</div>
+          <div class="audio-help" id="audioHelpText">Press Play to start the listening audio.</div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head compact-head">
+            <div>
+              <div class="panel-kicker">Listening Notes</div>
+              <h3>Write while listening</h3>
+            </div>
+          </div>
+          <textarea class="notes-box" id="listeningNotes" placeholder="Type key words, facts, or short notes while listening..."></textarea>
+        </div>
+      </section>
+
+      <section class="listening-panel answer-panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Answer Input</div>
+            <h3>Listening Answers</h3>
+          </div>
+          <button type="submit" class="surface-primary-btn">Submit Result</button>
+        </div>
+        <div class="answer-stack">
+          {% for question in questions %}
+            <article class="answer-card">
+              <div class="answer-card-head">Q{{ loop.index }}</div>
+              <div class="answer-prompt">{{ question.prompt }}</div>
+              {% if question.hint_text %}<div class="answer-help">{{ question.hint_text }}</div>{% endif %}
+              <textarea name="answer_{{ question.id }}" class="answer-input" rows="3" placeholder="Type your listening answer here...">{{ answer_map.get(question.id, '') }}</textarea>
+            </article>
+          {% else %}
+            <div class="topic-empty">No active listening questions are linked to this topic yet.</div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </form>
+
+  {% if listening_result %}
+    <section class="result-board">
+      <div class="panel-head">
+        <div>
+          <div class="panel-kicker">Listening Result</div>
+          <h3>Latest submission</h3>
+        </div>
+        <div class="result-score">{{ listening_result.accuracy }}%</div>
+      </div>
+      <div class="result-summary d-flex justify-content-between align-items-center flex-wrap gap-2"><span>Correct {{ listening_result.correct }} / {{ listening_result.total }}</span>{% if listening_result.show_answers_allowed %}<a class="surface-outline-btn" href="{{ url_for('student.course_listening_session', course_id=course.id, lesson_id=lesson.id, show_answers=1) }}">Show Correct Answers</a>{% endif %}</div>
+      <div class="result-grid">
+        {% for row in listening_result.rows %}
+          <div class="result-card {% if row.is_correct %}is-correct{% else %}is-review{% endif %}">
+            <div class="result-card-head">{{ row.question.prompt }}</div>
+            <div class="result-line"><strong>Your answer:</strong> {{ row.your_answer or '—' }}</div>
+            {% if show_answers %}<div class="result-line"><strong>Correct answer:</strong> {{ row.correct_answer or '—' }}</div>{% endif %}
+            <div class="result-feedback">{{ row.feedback or '' }}{% if row.question.hint_text %} Explanation: {{ row.question.hint_text }}{% endif %}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='shared/js/student-listening-session.js') }}"></script>
+{% endblock %}

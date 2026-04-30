@@ -1,0 +1,91 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Questions • Fluencify{% endblock %}
+{% block page_title %}Questions{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h1 class="mb-2">Questions</h1>
+    <p class="text-secondary mb-0">Question bank across all courses and lessons. Mark rows and delete in bulk, or open a question to edit it.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.lessons_index') }}">Back to Lessons</a>
+  </div>
+</div>
+
+<div class="card bg-dark border-secondary rounded-4">
+  <div class="card-body p-4">
+    <form method="post" onsubmit="return confirmBulkDelete();">
+      {{ delete_form.hidden_tag() }}
+      <input type="hidden" name="action" value="bulk_delete">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="form-check mb-0">
+            <input class="form-check-input" type="checkbox" id="selectAllQuestions">
+            <label class="form-check-label" for="selectAllQuestions">Select all</label>
+          </div>
+          <span class="badge text-bg-secondary"><span id="selectedCount">0</span> selected</span>
+          <span class="badge text-bg-dark border">{{ questions|length }} total</span>
+        </div>
+        <button type="submit" class="btn btn-danger btn-sm" id="bulkDeleteBtn" disabled>Delete Selected</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width:48px;"></th>
+              <th>Course</th>
+              <th>Lesson</th>
+              <th>Prompt</th>
+              <th>Type</th>
+              <th>Language</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in questions %}
+            <tr>
+              <td>
+                <input class="form-check-input question-checkbox" type="checkbox" name="question_ids" value="{{ q.id }}">
+              </td>
+              <td>{{ q.subsection.chapter.lesson.course.title }}</td>
+              <td>{{ q.subsection.chapter.lesson.title }}</td>
+              <td>
+                <div class="fw-semibold">{{ q.title or 'Untitled question' }}</div>
+                <div class="text-secondary small">{{ q.prompt[:120] }}{% if q.prompt|length > 120 %}…{% endif %}</div>
+              </td>
+              <td>{{ q.prompt_type|title }}</td>
+              <td>{{ q.language_code|upper }}</td>
+              <td>
+                {% if q.is_active %}
+                  <span class="badge text-bg-success">Active</span>
+                {% else %}
+                  <span class="badge text-bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <div class="d-flex justify-content-end gap-2 flex-wrap">
+                  <a class="btn btn-sm btn-outline-info" href="{{ url_for('superadmin.question_detail', question_id=q.id) }}">Edit</a>
+                  <button type="submit" class="btn btn-sm btn-outline-danger single-delete-btn" name="question_ids" value="{{ q.id }}" formaction="{{ url_for('superadmin.questions_index') }}" formmethod="post" onclick="return confirm('Delete this question permanently?');">Delete</button>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-secondary">No questions found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/superadmin-questions.js') }}"></script>
+{% endblock %}

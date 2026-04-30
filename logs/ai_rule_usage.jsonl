@@ -1,0 +1,15 @@
+{"timestamp": "2026-04-08T17:15:31.725199Z", "task_key": "speaking_evaluation", "track_key": "speaking", "ok": true, "provider": null, "strictness": 3, "message": "Central speaking evaluation completed."}
+{"timestamp": "2026-04-08T17:15:39.915299Z", "task_key": "writing_evaluation", "track_key": "writing", "ok": true, "provider": null, "strictness": 3, "message": "Central writing evaluation completed."}
+{"timestamp": "2026-04-08T17:16:06.222600Z", "task_key": "writing_evaluation", "track_key": "writing", "ok": true, "provider": null, "strictness": 3, "message": "Central writing evaluation completed."}
+{"timestamp": "2026-04-08T17:16:09.666957Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-10T17:33:26.890811Z", "task_key": "speaking_evaluation", "track_key": "speaking", "ok": true, "provider": null, "strictness": 3, "message": "Central speaking evaluation completed."}
+{"timestamp": "2026-04-10T17:49:35.705854Z", "task_key": "speaking_evaluation", "track_key": "speaking", "ok": true, "provider": null, "strictness": 3, "message": "Central speaking evaluation completed."}
+{"timestamp": "2026-04-11T06:18:07.293898Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-11T09:27:47.013523Z", "task_key": "speaking_evaluation", "track_key": "speaking", "ok": true, "provider": null, "strictness": 3, "message": "Central speaking evaluation completed."}
+{"timestamp": "2026-04-11T09:27:50.064709Z", "task_key": "speaking_evaluation", "track_key": "speaking", "ok": true, "provider": null, "strictness": 3, "message": "Central speaking evaluation completed."}
+{"timestamp": "2026-04-11T09:49:19.258293Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-12T14:53:05.835305Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-12T14:53:41.809058Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-24T12:58:43.493122Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-25T06:42:52.157450Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}
+{"timestamp": "2026-04-25T07:37:02.013562Z", "task_key": "listening_review", "track_key": "listening", "ok": true, "provider": null, "strictness": 3, "message": "Central listening review completed."}

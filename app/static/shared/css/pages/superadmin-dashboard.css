@@ -1,0 +1,279 @@
+.superadmin-dashboard .card {
+  border-radius: 28px;
+}
+
+.superadmin-dashboard .sa-hero {
+  overflow: hidden;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.22), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 247, 255, 0.96));
+  box-shadow: 0 24px 70px rgba(37, 99, 235, 0.08);
+}
+
+.superadmin-dashboard .sa-kicker,
+.superadmin-dashboard .sa-section-kicker,
+.superadmin-dashboard .sa-form-label,
+.superadmin-dashboard .sa-metric-kicker,
+.superadmin-dashboard .sa-highlight-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-primary, #2563eb);
+}
+
+.superadmin-dashboard .sa-title {
+  font-size: clamp(2.2rem, 3vw, 3.45rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--heading-text, #0f172a);
+  max-width: 14ch;
+}
+
+.superadmin-dashboard .sa-copy,
+.superadmin-dashboard .sa-section-copy,
+.superadmin-dashboard .sa-capability-detail,
+.superadmin-dashboard .sa-muted-note,
+.superadmin-dashboard .sa-metric-note {
+  color: var(--text-muted, #64748b);
+  line-height: 1.7;
+}
+
+.superadmin-dashboard .sa-pill-row,
+.superadmin-dashboard .sa-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.superadmin-dashboard .sa-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.52rem 0.86rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  color: var(--heading-text, #0f172a);
+  font-size: 0.86rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.05);
+}
+
+.superadmin-dashboard .sa-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.superadmin-dashboard .sa-highlight-card,
+.superadmin-dashboard .sa-metric-card,
+.superadmin-dashboard .sa-capability-card,
+.superadmin-dashboard .sa-status-card,
+.superadmin-dashboard .sa-link-card,
+.superadmin-dashboard .sa-usage-row,
+.superadmin-dashboard .chart-card {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.05);
+}
+
+.superadmin-dashboard .sa-highlight-card {
+  padding: 1rem 1.1rem;
+}
+
+.superadmin-dashboard .sa-highlight-value,
+.superadmin-dashboard .sa-metric-value {
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--heading-text, #0f172a);
+  margin-top: 0.45rem;
+}
+
+.superadmin-dashboard .sa-highlight-value-sm {
+  font-size: clamp(1.35rem, 2.4vw, 1.95rem);
+}
+
+.superadmin-dashboard .sa-highlight-note {
+  margin-top: 0.45rem;
+  color: var(--text-muted, #64748b);
+}
+
+.superadmin-dashboard .sa-metric-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.superadmin-dashboard .sa-metric-card:hover,
+.superadmin-dashboard .sa-link-card:hover,
+.superadmin-dashboard .sa-capability-card:hover,
+.superadmin-dashboard .sa-status-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(37, 99, 235, 0.24);
+  box-shadow: 0 24px 50px rgba(37, 99, 235, 0.09);
+}
+
+.superadmin-dashboard .sa-metric-card .card-body {
+  padding: 1.25rem;
+}
+
+.superadmin-dashboard .sa-metric-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 18px;
+  color: var(--brand-primary, #2563eb);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08));
+  font-size: 1.15rem;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
+}
+
+.superadmin-dashboard .sa-section-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--heading-text, #0f172a);
+  margin-bottom: 0.35rem;
+}
+
+.superadmin-dashboard .sa-capability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.superadmin-dashboard .sa-capability-card,
+.superadmin-dashboard .sa-status-card {
+  padding: 1rem 1.05rem;
+}
+
+.superadmin-dashboard .sa-capability-title {
+  font-weight: 700;
+  color: var(--heading-text, #0f172a);
+}
+
+.superadmin-dashboard .sa-usage-stack,
+.superadmin-dashboard .sa-link-stack {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.superadmin-dashboard .sa-usage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.86rem 0.95rem;
+}
+
+.superadmin-dashboard .sa-link-card {
+  display: block;
+  padding: 1rem 1.05rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.superadmin-dashboard .chart-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 255, 0.94));
+}
+
+.superadmin-dashboard .chart-wrap {
+  min-height: 280px;
+}
+
+.superadmin-dashboard .chart-wrap canvas {
+  max-height: 320px;
+}
+
+.superadmin-dashboard .sa-live-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.superadmin-dashboard .sa-live-summary-card,
+.superadmin-dashboard .sa-data-card,
+.superadmin-dashboard .sa-access-card {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.05);
+}
+
+.superadmin-dashboard .sa-live-summary-card {
+  padding: 1rem 1.05rem;
+}
+
+.superadmin-dashboard .sa-live-summary-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-primary, #2563eb);
+}
+
+.superadmin-dashboard .sa-live-summary-value {
+  font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--heading-text, #0f172a);
+  margin-top: 0.45rem;
+}
+
+.superadmin-dashboard .sa-live-summary-note {
+  margin-top: 0.45rem;
+  color: var(--text-muted, #64748b);
+}
+
+.superadmin-dashboard .sa-data-card {
+  padding: 1.15rem;
+}
+
+.superadmin-dashboard .sa-data-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--heading-text, #0f172a);
+}
+
+.superadmin-dashboard .sa-dashboard-table thead th {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--heading-text, #0f172a);
+}
+
+.superadmin-dashboard .sa-dashboard-table tbody td {
+  color: var(--text, #1f2a44);
+}
+
+.superadmin-dashboard .sa-access-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.superadmin-dashboard .sa-access-card {
+  padding: 1rem;
+}
+
+@media (max-width: 1199.98px) {
+  .superadmin-dashboard .sa-capability-grid,
+  .superadmin-dashboard .sa-highlight-grid,
+  .superadmin-dashboard .sa-live-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .superadmin-dashboard .sa-title {
+    max-width: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .superadmin-dashboard .sa-action-row {
+    flex-direction: column;
+  }
+}

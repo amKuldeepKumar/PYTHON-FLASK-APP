@@ -1,0 +1,172 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Speaking Topic • Superadmin{% endblock %}
+{% block page_title %}Edit Speaking Topic{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Edit Topic</h4>
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('superadmin.speaking_topics', course_id=back_course_id) if back_course_id else url_for('superadmin.speaking_topics') }}">Back to Topics</a>
+        </div>
+
+        <form method="post" class="row g-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-md-6">
+            <label class="form-label">Topic code</label>
+            <input type="text" class="form-control" value="{{ topic.code }}" disabled>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Topic title</label>
+            <input type="text" class="form-control" name="title" value="{{ topic.title }}" required>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="4">{{ topic.description or '' }}</textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Level</label>
+            <select class="form-select" name="level" required>
+              {% for level in level_choices %}
+                <option value="{{ level }}" {% if topic.level == level %}selected{% endif %}>{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Language</label>
+            <select class="form-select" name="language_code">
+              {% for code, label in language_choices %}
+                <option value="{{ code }}" {% if topic.language_code == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Linked course</label>
+            <select class="form-select" name="course_id">
+              <option value="0">No linked course</option>
+              {% for course in course_choices %}
+                <option value="{{ course.id }}" {% if topic.course_id == course.id %}selected{% endif %}>{{ course.title }} • {{ course.track_type|replace('_', ' ')|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Display order</label>
+            <input type="number" class="form-control" name="display_order" min="0" value="{{ topic.display_order or 0 }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Access type</label>
+            <select class="form-select" name="access_type">
+              {% for access_type in access_type_choices %}
+                <option value="{{ access_type }}" {% if topic.access_type == access_type %}selected{% endif %}>{{ access_type.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Currency</label>
+            <input type="text" class="form-control" name="currency" value="{{ topic.currency or 'INR' }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Price</label>
+            <input type="number" step="0.01" class="form-control" name="price" value="{{ topic.price if topic.price is not none else 0 }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Discount price</label>
+            <input type="number" step="0.01" class="form-control" name="discount_price" value="{{ topic.discount_price if topic.discount_price is not none else '' }}">
+          </div>
+
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="coupon_enabled" {% if topic.coupon_enabled %}checked{% endif %}>
+              <label class="form-check-label">Coupon ready</label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Coupon code</label>
+            <input type="text" class="form-control" name="coupon_code" value="{{ topic.coupon_code or '' }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Coupon discount type</label>
+            <select class="form-select" name="coupon_discount_type">
+              <option value="">Choose type</option>
+              {% for discount_type in coupon_discount_type_choices %}
+                <option value="{{ discount_type }}" {% if topic.coupon_discount_type == discount_type %}selected{% endif %}>{{ discount_type.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Coupon discount value</label>
+            <input type="number" step="0.01" class="form-control" name="coupon_discount_value" value="{{ topic.coupon_discount_value if topic.coupon_discount_value is not none else '' }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Coupon valid from</label>
+            <input type="text" class="form-control" name="coupon_valid_from" value="{{ topic.coupon_valid_from or '' }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Coupon valid until</label>
+            <input type="text" class="form-control" name="coupon_valid_until" value="{{ topic.coupon_valid_until or '' }}">
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_active" {% if topic.is_active %}checked{% endif %}>
+              <label class="form-check-label">Active</label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_published" {% if topic.is_published %}checked{% endif %}>
+              <label class="form-check-label">Published</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('superadmin.speaking_prompts', topic_id=topic.id) }}" class="btn btn-outline-info">Manage Prompts</a>
+            <form method="post" action="{{ url_for('superadmin.speaking_topic_publish', topic_id=topic.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-outline-secondary" type="submit">{% if topic.is_published %}Unpublish{% else %}Publish{% endif %}</button>
+            </form>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="mb-3">Topic Summary</h5>
+        <div class="mb-2"><strong>Code:</strong> {{ topic.code }}</div>
+        <div class="mb-2"><strong>Prompts:</strong> {{ topic.active_prompt_count }}</div>
+        <div class="mb-2"><strong>Status:</strong> {{ 'Active' if topic.is_active else 'Inactive' }} / {{ 'Published' if topic.is_published else 'Draft' }}</div>
+        <div class="mb-2"><strong>Linked Course:</strong> {{ topic.course.title if topic.course else 'Not linked' }}</div>
+        {% if not topic.course_id %}
+          <div class="alert alert-warning mt-3 mb-2 py-2 px-3 small">
+            Real issue: this topic is not linked to any course, so Course Content Manager will keep showing 0 topics even if the topic is active and published.
+          </div>
+        {% endif %}
+        <div class="small text-secondary mt-3">Students can see active and published topics on the dashboard. Starting a topic requires at least one active prompt.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

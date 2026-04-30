@@ -1,0 +1,126 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}My Courses • Fluencify{% endblock %}
+{% block page_title %}My Courses{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-course-hub.css') }}">{% endblock %}
+
+{% block content %}
+<div class="course-hub-page my-courses-page">
+  <section class="course-hub-hero">
+    <div>
+      <div class="my-course-kicker">YOUR LEARNING SPACE</div>
+      <h1 class="my-course-title">My enrolled courses in one clean view</h1>
+      <p class="my-course-text">Resume the correct module, check your progress, and jump back into the next lesson without opening the wrong track.</p>
+    </div>
+    <div class="my-course-summary">
+      <div class="my-course-stat">
+        <div class="hero-stat-card__label">Active courses</div>
+        <div class="my-course-stat__value">{{ summary.active_courses or 0 }}</div>
+      </div>
+      <div class="my-course-stat">
+        <div class="hero-stat-card__label">Average accuracy</div>
+        <div class="my-course-stat__value">{{ summary.avg_accuracy or 0 }}%</div>
+      </div>
+      <div class="my-course-stat">
+        <div class="hero-stat-card__label">Overall completion</div>
+        <div class="my-course-stat__value">{{ summary.completion_percent or 0 }}%</div>
+      </div>
+    </div>
+  </section>
+
+  {% if enrolled_cards %}
+    <section class="course-hub-panel">
+      <div class="library-section-heading">
+        <div>
+          <div class="my-course-kicker">ENROLLED COURSES</div>
+          <h2 class="library-section-title">Continue from where you stopped</h2>
+          <p class="my-course-text mb-0">Every card below follows the same design style as the Course Library for a cleaner student dashboard.</p>
+        </div>
+        <a href="{{ url_for('student.course_library') }}" class="btn btn-outline-secondary">Open Course Library</a>
+      </div>
+
+      <div class="my-course-grid">
+        {% for card in enrolled_cards %}
+          <article class="my-course-card">
+            <div class="my-course-card__top">
+              <div class="my-course-card__badges">
+                <span class="my-course-chip my-course-chip--track">{{ card.track_label }}</span>
+                <span class="my-course-chip">{{ card.level_range_label }}</span>
+                <span class="my-course-chip {% if card.is_premium %}my-course-chip--premium{% else %}my-course-chip--free{% endif %}">{{ card.access_label }}</span>
+              </div>
+              <div class="course-library-card__price">
+                <div class="course-library-card__price-label">Status</div>
+                <div class="course-library-card__price-value">{{ card.content_badge_label or card.status_label }}</div>
+              </div>
+            </div>
+
+            <div class="my-course-card__body">
+              <div class="my-course-card__meta">
+                <span>{{ card.meta_line }}</span>
+                {% if card.card_kind != 'course' %}<span>•</span><span>{{ card.parent_course_label }}</span>{% endif %}
+                <span>•</span><span>{{ card.level_summary }}</span>
+              </div>
+
+              <h3 class="my-course-card__title">{{ card.card_title }}</h3>
+              {% if card.card_description %}
+                <p class="course-hub-text mb-0">{{ card.card_description }}</p>
+              {% endif %}
+
+              <div class="my-course-card__chips mt-3">
+                <span class="my-course-chip">{{ card.reward_label }} Rewards</span>
+                <span class="my-course-chip">Lesson {{ card.lesson_reward_base }}-{{ card.lesson_reward_high }} coins</span>
+                <span class="my-course-chip">Boss {{ card.boss_reward }}+</span>
+                {% if card.allow_coin_redemption and card.coin_redemption_price %}
+                  <span class="my-course-chip my-course-chip--premium">{{ card.coin_redemption_price }} Coin Unlock</span>
+                {% endif %}
+              </div>
+
+              <div class="my-course-card__stats">
+                <div class="my-course-stat-box">
+                  <div class="my-course-card__value">{{ card.level_range_label }}</div>
+                  <div class="course-mini-stat__label">Levels</div>
+                </div>
+                <div class="my-course-stat-box">
+                  <div class="my-course-card__value">{% if card.card_kind == 'course' %}{{ card.speaking_total or 0 }}{% else %}{{ card.track_label }}{% endif %}</div>
+                  <div class="course-mini-stat__label">{% if card.card_kind == 'course' %}Speaking{% else %}Track{% endif %}</div>
+                </div>
+                <div class="my-course-stat-box">
+                  <div class="my-course-card__value">{% if card.card_kind == 'course' %}{{ card.reading_total or 0 }}{% else %}{{ card.access_label }}{% endif %}</div>
+                  <div class="course-mini-stat__label">{% if card.card_kind == 'course' %}Reading{% else %}Access{% endif %}</div>
+                </div>
+              </div>
+
+              <div class="my-course-progress">
+                <div class="my-course-progress__head">
+                  <span>Progress</span>
+                  <strong class="my-course-progress__value">{{ card.progress_value or 0 }}%</strong>
+                </div>
+                <div class="my-course-progress__bar">
+                  <div class="my-course-progress__fill" style="width: {{ card.progress_value or 0 }}%;"></div>
+                </div>
+              </div>
+
+              <div class="my-course-card__chips">
+                <span class="my-course-chip">{{ card.track_label }}</span>
+                <span class="my-course-chip">{{ card.level_summary }}</span>
+                <span class="my-course-chip">{{ card.access_label }}</span>
+              </div>
+            </div>
+
+            <div class="my-course-card__footer">
+              <a href="{{ card.target_url }}" class="btn btn-primary">{{ 'Continue' if card.is_enrolled else (card.cta_label or 'Open') }}</a>
+              <a href="{{ url_for('student.course_detail', course_id=card.course_id) }}" class="btn btn-outline-secondary">View details</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% else %}
+    <section class="course-hub-empty">
+      <div class="my-course-kicker">NO COURSES YET</div>
+      <h2 class="library-section-title">You have not enrolled in a course yet</h2>
+      <p class="my-course-text">Go to Course Library, choose the right level, and enroll to start your first lesson.</p>
+      <a href="{{ url_for('student.course_library') }}" class="btn btn-primary">Explore courses</a>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Live AI Interview • Fluencify{% endblock %}
+{% block page_title %}Live AI Interview{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/interview-prep.css') }}">{% endblock %}
+{% block content %}
+<div class="interview-shell" data-session-id="{{ interview_session.id }}">
+  <section class="card-surface live-header">
+    <div>
+      <div class="eyebrow">{{ (interview_session.ai_persona or 'recruiter').replace('_', ' ')|title }}</div>
+      <h2 class="mb-1">{{ interview_session.profile.title }}</h2>
+      <p class="mb-0 text-secondary">Question {{ interview_session.current_turn_no }} of {{ interview_session.question_plan|length }} • No hard answer time limit • AI nudges on long silence</p>
+    </div>
+    <div class="header-badges">
+      <span class="pill">{{ interview_session.profile.english_level|title }}</span>
+      <span class="pill">{{ interview_session.profile.difficulty_level|title }}</span>
+      <span class="pill">{{ interview_session.profile.interview_style|title }}</span>
+    </div>
+  </section>
+
+  <form class="card-surface" method="post" action="{{ url_for('student.course_interview_submit', course_id=course.id, session_id=interview_session.id) }}" id="interview-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="duration_seconds" id="duration_seconds" value="0">
+    <input type="hidden" name="pause_count" id="pause_count" value="0">
+    <input type="hidden" name="long_pause_count" id="long_pause_count" value="0">
+
+    <div class="question-card">
+      <div class="small text-uppercase text-secondary mb-2">AI Question</div>
+      <h3 id="ai-question">{{ current_turn.ai_question_text }}</h3>
+      {% if current_turn.ai_followup_text %}<p class="text-secondary mb-0">Coach note: {{ current_turn.ai_followup_text }}</p>{% endif %}
+    </div>
+
+    <div class="hero-actions mb-3">
+      <button class="btn btn-outline-light" type="button" id="speak-question">Speak Question</button>
+      <button class="btn btn-outline-light" type="button" id="start-recognition">Start Voice Capture</button>
+      <button class="btn btn-outline-light" type="button" id="stop-recognition">Stop Voice Capture</button>
+    </div>
+
+    <label><span>Your answer</span>
+      <textarea name="answer_text" id="answer_text" rows="9" placeholder="Speak or type your answer here. The browser will fill this box automatically if voice recognition is supported."></textarea>
+    </label>
+
+    <div class="live-status-row">
+      <div class="status-box"><span>Session status</span><strong id="live-status">Waiting for answer</strong></div>
+      <div class="status-box"><span>Elapsed</span><strong id="elapsed">0s</strong></div>
+      <div class="status-box"><span>Pause nudges</span><strong id="pause-view">0</strong></div>
+    </div>
+
+    <div class="nudge-box" id="nudge-box">AI coach: Start when you are ready.</div>
+
+    <div class="hero-actions mt-3">
+      <button class="btn btn-primary" type="submit">Submit Answer & Next Question</button>
+      <a class="btn btn-outline-light" href="{{ url_for('student.course_interview_home', course_id=course.id) }}">Leave Interview</a>
+    </div>
+  </form>
+</div>
+
+<script>
+(() => {
+  const sessionId = {{ interview_session.id }};
+  const csrfToken = {{ csrf_token()|tojson }};
+  const textArea = document.getElementById('answer_text');
+  const elapsedEl = document.getElementById('elapsed');
+  const durationInput = document.getElementById('duration_seconds');
+  const pauseInput = document.getElementById('pause_count');
+  const longPauseInput = document.getElementById('long_pause_count');
+  const nudgeBox = document.getElementById('nudge-box');
+  const pauseView = document.getElementById('pause-view');
+  const liveStatus = document.getElementById('live-status');
+  const question = document.getElementById('ai-question').textContent.trim();
+  let elapsed = 0;
+  let silence = 0;
+  let recognition = null;
+  let lastValue = textArea.value;
+  let pauseCount = 0;
+  let longPauseCount = 0;
+
+  window.setInterval(() => {
+    elapsed += 1;
+    durationInput.value = elapsed;
+    elapsedEl.textContent = `${elapsed}s`;
+    const current = textArea.value.trim();
+    if (current && current === lastValue) {
+      silence += 1;
+    } else {
+      silence = 0;
+      lastValue = current;
+    }
+    if ([5, 9, 15].includes(silence)) {
+      fetch(`{{ url_for('student.interview_pause_check', session_id=interview_session.id) }}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({csrf_token: csrfToken, silence_seconds: String(silence)})
+      }).then(r => r.json()).then(data => {
+        if (!data.ok || !data.nudge_text) return;
+        pauseCount += 1;
+        if (silence >= 15) longPauseCount += 1;
+        pauseInput.value = pauseCount;
+        longPauseInput.value = longPauseCount;
+        pauseView.textContent = String(pauseCount);
+        nudgeBox.textContent = `AI coach: ${data.nudge_text}`;
+        liveStatus.textContent = 'Silence detected';
+      }).catch(() => {});
+    }
+  }, 1000);
+
+  document.getElementById('speak-question').addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(question);
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
+  });
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.onstart = () => liveStatus.textContent = 'Listening';
+    recognition.onend = () => liveStatus.textContent = 'Voice capture stopped';
+    recognition.onresult = (event) => {
+      let text = '';
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        text += event.results[i][0].transcript + ' ';
+      }
+      textArea.value = `${textArea.value} ${text}`.replace(/\s+/g, ' ').trim();
+      silence = 0;
+      liveStatus.textContent = 'Capturing answer';
+    };
+    document.getElementById('start-recognition').addEventListener('click', () => recognition.start());
+    document.getElementById('stop-recognition').addEventListener('click', () => recognition.stop());
+  } else {
+    document.getElementById('start-recognition').disabled = true;
+    document.getElementById('stop-recognition').disabled = true;
+    nudgeBox.textContent = 'AI coach: Browser voice capture is not supported here. You can still type your answer.';
+  }
+})();
+</script>
+{% endblock %}

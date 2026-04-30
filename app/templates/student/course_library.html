@@ -1,0 +1,73 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Course Library • Fluencify{% endblock %}
+{% block page_title %}Course Library{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-recommendation-pro.css') }}">{% endblock %}
+{% macro library_card(card) %}
+<article class="rec-course-card rec-course-card--library">
+  {% set fit = card.recommendation_fit if card.recommendation_fit is defined else None %}
+  <div class="rec-course-card__top">
+    <span>{{ card.track_label }}</span>
+    <strong>{{ card.access_label }}</strong>
+  </div>
+  <h3>{{ card.card_title or card.course_title }}</h3>
+  <p>{{ card.card_description or card.course_description }}</p>
+  <div class="rec-pill-row rec-pill-row--small">
+    <span>{{ card.level_range_label }}</span>
+    <span>{{ card.lesson_count }} lessons</span>
+    {% if card.is_enrolled %}<span>{{ card.progress_value }}% done</span>{% endif %}
+    {% if fit and placement_result %}<span>{{ fit.score }}% fit</span>{% endif %}
+  </div>
+  {% if fit and placement_result %}<p class="rec-muted rec-small">{{ fit.reason }}</p>{% endif %}
+  <div class="rec-actions">
+    {% if card.is_enrolled %}
+      <a class="btn rec-btn rec-btn--primary" href="{{ card.target_url }}">Continue</a>
+      <a class="btn rec-btn rec-btn--light" href="{{ card.secondary_url }}">Details</a>
+    {% else %}
+      <a class="btn rec-btn rec-btn--primary" href="{{ card.secondary_url }}">View Course</a>
+      {% if not card.is_premium %}
+      <form method="post" action="{{ url_for('student.enroll_free_course', course_id=card.course_id) }}" class="rec-inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ url_for('student.course_library') }}">
+        <button class="btn rec-btn rec-btn--light" type="submit">Enroll Free</button>
+      </form>
+      {% endif %}
+    {% endif %}
+  </div>
+</article>
+{% endmacro %}
+{% block content %}
+<div class="rec-page">
+  <section class="rec-hero rec-hero--library">
+    <div class="rec-hero__copy">
+      <span class="rec-kicker"><i class="bi bi-grid-1x2"></i> Learning Hub</span>
+      <h1>Find your next course fast</h1>
+      <p>Browse courses with clean filters and use your placement result to see the best fit for your level.</p>
+      <div class="rec-actions"><a class="btn rec-btn rec-btn--primary" href="{{ url_for('student.placement_test') }}">Take Placement Test</a><a class="btn rec-btn rec-btn--light" href="{{ url_for('student.learning_path') }}">My Learning Path</a></div>
+    </div>
+    <div class="rec-score-card"><div class="rec-mini-grid"><div><span>Courses</span><strong>{{ library_cards|length }}</strong></div><div><span>Enrolled</span><strong>{{ enrolled_ids|length }}</strong></div><div><span>Placement</span><strong>{% if placement_result %}{{ placement_result.recommended_level|title }}{% else %}Ready{% endif %}</strong></div></div></div>
+  </section>
+
+  <section class="rec-filter-card">
+    <form method="get" class="rec-filter-grid">
+      <input type="text" name="q" value="{{ current_query or '' }}" placeholder="Search courses">
+      <select name="category">{% for code,label in category_options %}<option value="{{ code }}" {% if current_category == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+      <select name="difficulty"><option value="">All levels</option><option value="basic" {% if current_difficulty=='basic' %}selected{% endif %}>Basic</option><option value="intermediate" {% if current_difficulty=='intermediate' %}selected{% endif %}>Intermediate</option><option value="advanced" {% if current_difficulty=='advanced' %}selected{% endif %}>Advanced</option></select>
+      <select name="access"><option value="all" {% if current_access=='all' %}selected{% endif %}>All access</option><option value="free" {% if current_access=='free' %}selected{% endif %}>Free</option><option value="premium" {% if current_access=='premium' %}selected{% endif %}>Premium</option></select>
+      <button class="btn rec-btn rec-btn--primary" type="submit">Apply</button>
+      <a class="btn rec-btn rec-btn--light" href="{{ url_for('student.course_library') }}">Reset</a>
+    </form>
+  </section>
+
+  {% if placement_result and recommended_cards %}
+  <section class="rec-section-card">
+    <div class="rec-section-head"><div><span class="rec-kicker">Recommended</span><h2>Best matches for your level</h2></div><a class="btn rec-btn rec-btn--light" href="{{ url_for('student.learning_path') }}">Open Path</a></div>
+    <div class="rec-course-grid">{% for card in recommended_cards %}{{ library_card(card) }}{% endfor %}</div>
+  </section>
+  {% endif %}
+
+  <section class="rec-section-card">
+    <div class="rec-section-head"><div><span class="rec-kicker">All courses</span><h2>{% if library_cards %}Browse available courses{% else %}No courses found{% endif %}</h2></div></div>
+    {% if library_cards %}<div class="rec-course-grid">{% for card in library_cards %}{{ library_card(card) }}{% endfor %}</div>{% else %}<div class="rec-empty-card"><div class="rec-empty-card__icon"><i class="bi bi-search"></i></div><div><h2>No courses match this filter</h2><p>Try another category or clear filters.</p></div><a class="btn rec-btn rec-btn--primary" href="{{ url_for('student.course_library') }}">Clear Filters</a></div>{% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Speaking Topics • Superadmin{% endblock %}
+{% block page_title %}Speaking Topics{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-5">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-3"><div><h4 class="mb-1">Create Topic</h4><div class="small text-secondary">Simple speaking topic publish flow like writing: create topic, link course, publish, then manage prompts.</div></div>{% if selected_course %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.course_detail', course_id=selected_course.id) }}">Back to Course</a>{% else %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.courses') }}">Back to Courses</a>{% endif %}</div>
+
+        <form method="get" class="row g-3 mb-3"><div class="col-12"><label class="form-label">Select Speaking Course</label><select class="form-select" name="course_id" onchange="this.form.submit()"><option value="">All speaking topics</option>{% for course in course_choices %}<option value="{{ course.id }}" {% if selected_course_id == course.id %}selected{% endif %}>{{ course.title }}</option>{% endfor %}</select></div></form>
+
+        <form method="post" class="row g-3" id="topicForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-12">
+            <label class="form-label">Topic code</label>
+            <input type="text" class="form-control" name="code" placeholder="daily-life" required>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Topic title</label>
+            <input type="text" class="form-control" name="title" placeholder="Daily Life" required>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="3" ></textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Level</label>
+            <select class="form-select" name="level" >
+              {% for level in level_choices %}
+                <option value="{{ level }}">{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Language</label>
+            <select class="form-select" name="language_code" >
+              {% for code, label in language_choices %}
+                <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Linked course</label>
+            <select class="form-select" name="course_id" required><option value="">Select speaking course</option>{% for course in course_choices %}<option value="{{ course.id }}" {% if selected_course_id == course.id %}selected{% endif %}>{{ course.title }}</option>{% endfor %}</select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Display order</label>
+            <input type="number" class="form-control" name="display_order" value="0" min="0" >
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Access type</label>
+            <select class="form-select" name="access_type" id="accessType" >
+              {% for access_type in access_type_choices %}
+                <option value="{{ access_type }}" {% if access_type == "free" %}selected{% endif %}>
+                  {{ access_type.title() }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Currency</label>
+            <input type="text" class="form-control" name="currency" value="INR" placeholder="INR" >
+          </div>
+
+          <div class="col-md-6 pricing-field">
+            <label class="form-label">Price</label>
+            <input type="number" step="0.01" min="0" class="form-control" name="price" id="priceField" value="0" >
+          </div>
+
+          <div class="col-md-6 pricing-field">
+            <label class="form-label">Discount price</label>
+            <input type="number" step="0.01" min="0" class="form-control" name="discount_price" id="discountPriceField" placeholder="Optional" >
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="coupon_enabled" id="couponEnabled" >
+              <label class="form-check-label" for="couponEnabled">Coupon ready</label>
+            </div>
+          </div>
+
+          <div class="col-md-6 coupon-field">
+            <label class="form-label">Coupon code</label>
+            <input type="text" class="form-control" name="coupon_code" id="couponCodeField" placeholder="SPEAK50" >
+          </div>
+
+          <div class="col-md-6 coupon-field">
+            <label class="form-label">Coupon discount type</label>
+            <select class="form-select" name="coupon_discount_type" id="couponDiscountTypeField" >
+              <option value="">Select type</option>
+              {% for discount_type in coupon_discount_type_choices %}
+                <option value="{{ discount_type }}">{{ discount_type.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6 coupon-field">
+            <label class="form-label">Coupon discount value</label>
+            <input type="number" step="0.01" min="0" class="form-control" name="coupon_discount_value" id="couponDiscountValueField" placeholder="10 or 100" >
+          </div>
+
+          <div class="col-md-6 coupon-field">
+            <label class="form-label">Coupon valid from</label>
+            <input type="datetime-local" class="form-control" name="coupon_valid_from" id="couponValidFromField" >
+          </div>
+
+          <div class="col-md-6 coupon-field">
+            <label class="form-label">Coupon valid until</label>
+            <input type="datetime-local" class="form-control" name="coupon_valid_until" id="couponValidUntilField" >
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" name="is_active" id="topicActive" checked >
+              <label class="form-check-label" for="topicActive">Active</label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" name="is_published" id="topicPublished" checked >
+              <label class="form-check-label" for="topicPublished">Published</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-grid">
+            <button type="submit" class="btn btn-primary" >Create Topic</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-7">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div><h4 class="mb-0">Topic Library</h4>{% if selected_course %}<div class="small text-secondary mt-1">Filtered by course: {{ selected_course.title }}</div>{% else %}<div class="small text-secondary mt-1">Choose a speaking course to see its topics.</div>{% endif %}</div>
+          <div class="d-flex gap-2">{% if selected_course %}<a class="btn btn-outline-light btn-sm" href="{{ url_for('superadmin.speaking_prompts') }}">Manage Prompts</a><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.courses') }}">Back to Courses</a>{% else %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.courses') }}">Open Courses</a>{% endif %}</div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Level</th>
+                <th>Language</th>
+                <th>Access</th>
+                <th>Price</th>
+                <th>Coupon</th>
+                <th>Prompts</th>
+                <th>Status</th>
+                <th>Linked Course</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if topics %}
+              {% for topic in topics %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ topic.title }}</div>
+                  <div class="small text-secondary">{{ topic.code }}</div>
+                  {% if topic.description %}
+                    <div class="small text-secondary mt-1">{{ topic.description }}</div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div>{{ topic.level|title }}{% if topic.course_level_number %} • Course Level {{ topic.course_level_number }}{% endif %}</div>
+                  <div class="small text-secondary">{{ topic.language_code|upper }}</div>
+                </td>
+
+                <td>
+                  <span class="badge text-bg-info">{{ topic.language_code|upper }}</span>
+                </td>
+
+                <td>
+                  {% if topic.access_type == "free" %}
+                    <span class="badge text-bg-success">Free</span>
+                  {% elif topic.access_type == "paid" %}
+                    <span class="badge text-bg-primary">Premium</span>
+                  {% elif topic.access_type == "coupon" %}
+                    <span class="badge text-bg-warning">Coupon</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Free</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if topic.access_type == "free" %}
+                    <div class="small fw-semibold text-success">Free</div>
+                  {% elif topic.access_type == "paid" %}
+                    <div class="small fw-semibold">{{ topic.currency }} {{ topic.price }}</div>
+                    {% if topic.discount_price is not none %}
+                      <div class="small text-secondary">
+                        Discount: {{ topic.currency }} {{ topic.discount_price }}
+                      </div>
+                    {% endif %}
+                  {% elif topic.access_type == "coupon" %}
+                    <div class="small fw-semibold text-warning">Coupon Based</div>
+                    {% if topic.price %}
+                      <div class="small text-secondary">
+                        Base: {{ topic.currency }} {{ topic.price }}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <div class="small text-success">Free</div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if topic.coupon_enabled %}
+                    <div class="small fw-semibold text-success">Enabled</div>
+                    {% if topic.coupon_code %}
+                      <div class="small text-secondary">{{ topic.coupon_code }}</div>
+                    {% endif %}
+                    {% if topic.coupon_discount_type and topic.coupon_discount_value is not none %}
+                      <div class="small text-secondary">
+                        {{ topic.coupon_discount_value }} {{ topic.coupon_discount_type }}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <span class="badge text-bg-secondary">Off</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ topic.active_prompt_count }}</td>
+
+                <td>
+                  <div class="d-flex flex-column gap-1">
+                    {% if topic.is_active %}
+                      <span class="badge text-bg-success">Active</span>
+                    {% else %}
+                      <span class="badge text-bg-secondary">Inactive</span>
+                    {% endif %}
+
+                    {% if topic.is_published %}
+                      <span class="badge text-bg-info">Published</span>
+                    {% else %}
+                      <span class="badge text-bg-dark">Draft</span>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <td class="text-end">
+                  <div class="d-flex gap-2 justify-content-end flex-wrap">
+                    <a class="btn btn-sm btn-outline-primary"
+                       href="{{ url_for('superadmin.speaking_prompts', topic_id=topic.id) }}">
+                      Prompts
+                    </a>
+
+                    <a class="btn btn-sm btn-outline-info"
+                       href="{{ url_for('superadmin.speaking_topic_edit', topic_id=topic.id, course_id=selected_course_id) }}">
+                      Edit
+                    </a>
+
+                    <form method="post"
+                          action="{{ url_for('superadmin.speaking_topic_toggle', topic_id=topic.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-sm {% if topic.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                              type="submit">
+                        {% if topic.is_active %}Disable{% else %}Enable{% endif %}
+                      </button>
+                    </form>
+
+                    <form method="post"
+                          action="{{ url_for('superadmin.speaking_topic_delete', topic_id=topic.id) }}"
+                          onsubmit="return confirm('Are you sure you want to delete this topic?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-sm btn-outline-danger" type="submit">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr>
+                <td colspan="9" class="text-center py-4 text-secondary">No topics linked to this speaking course yet.</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/superadmin-speaking-topics.js') }}"></script>
+{% endblock %}

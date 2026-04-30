@@ -1,0 +1,148 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Practice Result • Spoken English{% endblock %}
+{% block page_title %}Practice Result{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/spoken-english.css') }}">{% endblock %}
+{% block content %}
+{% set evaluation = speaking_session.evaluation_payload %}
+<div class="spoken-shell">
+  <section class="spoken-card">
+    <div class="spoken-topic__head">
+      <div>
+        <div class="small text-uppercase text-secondary mb-2">Completed practice</div>
+        <h2 class="fw-bold mb-2">{{ speaking_session.prompt.title }}</h2>
+        <p class="spoken-subtitle mb-0">Clear result screen with feedback, model answer, and next-step action.</p>
+      </div>
+      <span class="spoken-tag">Score {{ '%.0f'|format(speaking_session.evaluation_score or 0) }}/10</span>
+    </div>
+  </section>
+
+  {% if evaluation %}
+  <section class="spoken-card">
+    <div class="spoken-section-title">Detailed scoring</div>
+    <div class="spoken-subtitle mb-3">The answer is now checked across grammar, vocabulary, sentence building, relevance, and speaking flow.</div>
+    <div class="spoken-grid">
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('grammar_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Grammar</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('vocabulary_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Vocabulary</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('sentence_making_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Sentence Making</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('punctuation_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Punctuation</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('relevance_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Relevance</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('fluency_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Fluency</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('pronunciation_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Pronunciation Proxy</div>
+      </div>
+      <div class="spoken-metric">
+        <div class="spoken-metric__value">{{ '%.0f'|format(evaluation.get('requirement_score', 0)) }}%</div>
+        <div class="spoken-subtitle">Task Match</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="spoken-card">
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="spoken-answer h-100">
+          <div class="small text-uppercase text-secondary mb-2">Your answer</div>
+          <div>{{ speaking_session.transcript_text or 'No transcript available.' }}</div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="spoken-model h-100">
+          <div class="small text-uppercase text-secondary mb-2">Model answer guide</div>
+          <div>{{ model_answer }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spoken-card">
+    <div class="spoken-section-title">Tutor feedback</div>
+    <div class="spoken-subtitle mb-3">Simple explanation plus direct next-step guidance.</div>
+    <div class="spoken-list">
+      <div class="spoken-topic">
+        <div class="spoken-topic__title">Feedback</div>
+        <div class="spoken-subtitle mt-2">{{ speaking_session.feedback_text or speaking_session.result_summary or 'Good try. Keep your answer clear, relevant, and natural.' }}</div>
+      </div>
+      {% if evaluation and evaluation.get('improvements') %}
+      <div class="spoken-topic">
+        <div class="spoken-topic__title">What to improve</div>
+        <ul class="spoken-checklist mt-2 mb-0">
+          {% for item in evaluation.get('improvements', []) %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if evaluation and evaluation.get('requirement_checks') %}
+      <div class="spoken-topic">
+        <div class="spoken-topic__title">Task requirement check</div>
+        <div class="spoken-check-grid mt-2">
+          {% for check in evaluation.get('requirement_checks', []) %}
+          <div class="spoken-check {{ 'is-pass' if check.passed else 'is-fail' }}">
+            <strong>{{ check.label }}</strong>
+            <span>{{ 'Matched' if check.passed else 'Missing' }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% if evaluation and evaluation.get('improved_answer') %}
+      <div class="spoken-topic">
+        <div class="spoken-topic__title">Better next try</div>
+        <div class="spoken-subtitle mt-2">{{ evaluation.get('improved_answer') }}</div>
+      </div>
+      {% endif %}
+      {% if evaluation %}
+      <div class="spoken-topic">
+        <div class="spoken-topic__title">Evaluation details</div>
+        <div class="spoken-check-grid mt-2">
+          <div class="spoken-check">
+            <strong>Word count</strong>
+            <span>{{ evaluation.get('word_count', 0) }}</span>
+          </div>
+          <div class="spoken-check">
+            <strong>Sentence count</strong>
+            <span>{{ evaluation.get('sentence_count', 0) }}</span>
+          </div>
+          <div class="spoken-check">
+            <strong>Speed</strong>
+            <span>{{ evaluation.get('words_per_minute', 0) }} WPM</span>
+          </div>
+          <div class="spoken-check">
+            <strong>Filler words</strong>
+            <span>{{ evaluation.get('filler_count', 0) }}</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="spoken-topic">
+        <div class="spoken-topic__title">Recommended next step</div>
+        <div class="spoken-subtitle mt-2">{{ (speaking_session.recommended_next_step or 'practice_more').replace('_',' ')|title }}</div>
+      </div>
+    </div>
+    <div class="spoken-actions mt-3">
+      <a href="{{ next_url }}" class="btn btn-primary">Next Practice</a>
+      <a href="{{ home_url }}" class="btn btn-outline-secondary">Back to Spoken English</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

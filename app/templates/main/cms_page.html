@@ -1,0 +1,227 @@
+
+{% extends "layout/base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/cms-page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/public-leaderboards.css') }}">
+{% endblock %}
+
+{% block title %}{{ meta_title or page.title }}{% endblock %}
+
+{% block head %}
+  {% if meta_description %}<meta name="description" content="{{ meta_description }}">{% endif %}
+  {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+  {% if og_title %}<meta property="og:title" content="{{ og_title }}">{% endif %}
+  {% if og_description %}<meta property="og:description" content="{{ og_description }}">{% endif %}
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+  {% if twitter_card %}<meta name="twitter:card" content="{{ twitter_card }}">{% endif %}
+  {% if page_json_ld %}<script type="application/ld+json">{{ page_json_ld|safe }}</script>{% endif %}
+  
+{% endblock %}
+
+{% block content %}
+<div class="cms-page-shell">
+<section class="cms-hero-banner">
+  <div class="container cms-page-container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <div class="cms-hero-kicker">{{ page.title }}</div>
+        <h1 class="cms-display-title mb-3">{{ content.hero_title or content.title or page.title }}</h1>
+        {% if content.hero_subtitle or content.subtitle %}<p class="lead cms-hero-copy mb-4">{{ content.hero_subtitle or content.subtitle }}</p>{% endif %}
+        <div class="cms-hero-actions">
+          {% if content.hero_cta_text and content.hero_cta_url %}
+            <a href="{{ content.hero_cta_url }}" class="btn btn-primary btn-lg">{{ content.hero_cta_text }}</a>
+          {% else %}
+            <a href="{{ url_for('main.courses') }}" class="btn btn-primary btn-lg">Explore courses</a>
+          {% endif %}
+          <a href="{{ url_for('main.contact') if page.slug != 'contact' else '#main-content' }}" class="btn btn-outline-secondary btn-lg">Talk to us</a>
+        </div>
+        <div class="cms-hero-meta">
+          <span class="cms-meta-pill">{{ sections|length }} dynamic sections</span>
+          <span class="cms-meta-pill">{{ faq_items|length }} FAQs ready</span>
+          <span class="cms-meta-pill">{{ 'Published' if page.is_published else 'Draft preview' }}</span>
+        </div>
+        <div class="cms-hero-trust">
+          <span>Built for premium content experiences</span>
+          <span>Fast CMS publishing</span>
+          <span>Ready for live growth</span>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        {% if content.hero_image %}
+          <img src="{{ content.hero_image }}" alt="{{ page.title }}" class="img-fluid rounded-4 shadow-lg cms-hero-image">
+        {% else %}
+          <div class="section-card cms-placeholder-card cms-hero-visual">
+            <div class="cms-visual-topline">
+              <div class="cms-visual-badge">Live Website</div>
+              <div class="cms-visual-mini">Premium shell</div>
+            </div>
+            <div class="cms-visual-title">A premium front page should feel ready before the final content arrives.</div>
+            <div class="cms-visual-copy">Use the page builder to launch hero banners, sliders, and contact content without sacrificing polish, hierarchy, or trust.</div>
+            <div class="cms-visual-grid">
+              <div class="cms-visual-point">
+                <strong>CMS controlled</strong>
+                <span>Update sections from SuperAdmin without touching code.</span>
+              </div>
+              <div class="cms-visual-point">
+                <strong>SEO ready</strong>
+                <span>Structured metadata, front-page sections, and clean publishing flow.</span>
+              </div>
+              <div class="cms-visual-point">
+                <strong>Responsive layout</strong>
+                <span>Desktop and mobile spacing stay controlled from one system.</span>
+              </div>
+            </div>
+            <div class="cms-visual-stack">
+              <span>Elegant navigation</span>
+              <span>Section-first builder</span>
+              <span>Conversion-ready CTA</span>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if content.body_html %}
+<section class="cms-shell-section">
+  <div class="container cms-page-container">
+    <div class="section-card cms-body-card">{{ content.body_html|safe }}</div>
+  </div>
+</section>
+{% endif %}
+
+{% for section in sections %}
+  {% set section_idx = loop.index %}
+  {% set container_class = 'cms-section-container-full' if section.container == 'full' else ('cms-section-container-wide' if section.container == 'wide' else 'container') %}
+  {% set pad_map = {'sm':'2rem','md':'3rem','lg':'4rem','xl':'5rem'} %}
+  <section class="cms-shell-section{% if section.parallax %} parallax{% endif %}" style="background:{{ section.bg_color or 'var(--surface-2)' }}{% if section.background_image %} url('{{ section.background_image }}') center/cover no-repeat{% endif %}; color:{{ section.text_color or 'var(--text)' }}; padding-top:{{ pad_map.get(section.padding,'3rem') }}; padding-bottom:{{ pad_map.get(section.padding,'3rem') }};">
+    <div class="{{ container_class }}">
+      {% if section.type == 'banner_slider' %}
+        <div id="bannerSlider{{ loop.index }}" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            {% for slide in section.slides or [] %}
+              <div class="carousel-item{% if loop.first %} active{% endif %}">
+                <div class="row g-4 align-items-center">
+                  <div class="col-lg-7">
+                    <div class="section-card h-100">
+                      <div class="text-uppercase small opacity-75 mb-2">{{ section.title or 'Banner Slider' }}</div>
+                      <h2 class="cms-section-title mb-3">{{ slide.title or section.title or 'Slide title' }}</h2>
+                      <p class="mb-4 opacity-75">{{ slide.subtitle or section.body or '' }}</p>
+                      {% if slide.cta_text and slide.cta_url %}<a href="{{ slide.cta_url }}" class="btn btn-primary">{{ slide.cta_text }}</a>{% endif %}
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    {% if section.show_contact_form %}
+                      <div class="section-card h-100">
+                        <h3 class="h5">Quick contact form</h3>
+                        <form>
+                          <div class="mb-3"><input class="form-control" placeholder="Name"></div>
+                          <div class="mb-3"><input class="form-control" placeholder="Email"></div>
+                          <div class="mb-3"><textarea class="form-control" rows="4" placeholder="Message"></textarea></div>
+                          <button type="button" class="btn btn-outline-secondary">Request callback</button>
+                        </form>
+                      </div>
+                    {% elif slide.image %}
+                      <img src="{{ slide.image }}" class="img-fluid rounded-4 shadow" alt="{{ slide.title or page.title }}">
+                    {% else %}
+                      <div class="section-card cms-placeholder-card h-100 cms-inline-placeholder">
+                        <strong>Banner space ready</strong>
+                        <span>Add a slide image or switch on the contact-form card from the builder.</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          {% if (section.slides or [])|length > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#bannerSlider{{ loop.index }}" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+            <button class="carousel-control-next" type="button" data-bs-target="#bannerSlider{{ loop.index }}" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+          {% endif %}
+        </div>
+      {% elif section.type == 'course_slider' %}
+        <div class="d-flex justify-content-between align-items-end gap-3 mb-4 flex-wrap">
+          <div>
+            <div class="text-uppercase small opacity-75 mb-2">Course slider</div>
+            <h2 class="fw-bold mb-1">{{ section.title or 'Featured courses' }}</h2>
+            <p class="mb-0 opacity-75">{{ section.body or 'Highlight courses directly from the CMS page builder.' }}</p>
+          </div>
+          {% if section.cta_text and section.cta_url %}<a href="{{ section.cta_url }}" class="btn btn-outline-secondary">{{ section.cta_text }}</a>{% endif %}
+        </div>
+        <div class="row g-4">
+          {% for course in featured_courses[:(section.course_count|int if section.course_count else 6)] %}
+            <div class="col-md-6 col-xl-4">
+              <div class="cms-course-card">
+                <div class="small text-uppercase opacity-75 mb-2">{{ course.language_code or 'Language' }} • {{ course.difficulty or 'General' }}</div>
+                <h3 class="cms-card-title">{{ course.title }}</h3>
+                <p class="opacity-75 mb-3">{{ course.description or 'Structured lessons, practice, and AI support.' }}</p>
+                <a href="{{ url_for('main.courses') }}" class="btn btn-primary btn-sm">Explore course</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% elif section.type == 'faq_block' %}
+        <div class="section-card">
+          <h2 class="cms-section-title mb-4">{{ section.title or 'Frequently asked questions' }}</h2>
+          <div class="accordion" id="sectionFaq{{ section_idx }}">
+            {% for faq in faq_items %}
+              <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#sectionFaqCollapse{{ section_idx }}{{ loop.index }}">{{ faq.question }}</button></h2>
+                <div id="sectionFaqCollapse{{ section_idx }}{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#sectionFaq{{ section_idx }}"><div class="accordion-body">{{ faq.answer }}</div></div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-7">
+            <div class="section-card">
+              {% if section.subtitle %}<div class="text-uppercase small opacity-75 mb-2">{{ section.subtitle }}</div>{% endif %}
+              <h2 class="cms-section-title mb-3">{{ section.title or 'Content section' }}</h2>
+              <p class="mb-4 opacity-75">{{ section.body or '' }}</p>
+              {% if section.cta_text and section.cta_url %}<a href="{{ section.cta_url }}" class="btn btn-outline-secondary">{{ section.cta_text }}</a>{% endif %}
+            </div>
+          </div>
+          <div class="col-lg-5">
+            {% if section.background_image %}<img src="{{ section.background_image }}" alt="{{ section.title or page.title }}" class="img-fluid rounded-4 shadow">{% else %}<div class="section-card cms-placeholder-card cms-inline-placeholder h-100 d-flex align-items-center justify-content-center text-center"><strong>Visual block ready</strong><span>Add an image, color treatment, or full-width layout from the builder.</span></div>{% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endfor %}
+
+{% if faq_items and not sections|selectattr('type','equalto','faq_block')|list %}
+<section class="cms-shell-section">
+  <div class="container">
+    <div class="section-card">
+      <h2 class="cms-section-title mb-4">Frequently Asked Questions</h2>
+      <div class="accordion" id="faqAccordion">
+        {% for faq in faq_items %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="faqHeading{{ loop.index }}"><button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ loop.index }}">{{ faq.question or 'Question' }}</button></h2>
+            <div id="faqCollapse{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#faqAccordion"><div class="accordion-body">{{ faq.answer or '' }}</div></div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if redir_links %}
+<section class="cms-shell-section pt-0">
+  <div class="container cms-page-container">
+    <div class="d-flex flex-wrap gap-2">
+      {% for link in redir_links %}<a href="{{ link.url or '#' }}" class="btn btn-outline-secondary">{{ link.label or 'Open' }}</a>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if page.slug == 'home' %}
+  {% include "components/public_leaderboards.html" %}
+{% endif %}
+</div>
+{% endblock %}

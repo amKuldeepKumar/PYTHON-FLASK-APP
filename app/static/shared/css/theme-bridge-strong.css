@@ -1,0 +1,700 @@
+
+/* Final theme bridge loaded after page CSS so every role and page respects the active preset. */
+:root {
+  --theme-surface-soft: color-mix(in srgb, var(--surface) 94%, transparent);
+  --theme-surface-strong: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  --theme-primary-soft: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+html, body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+body {
+  padding-top: 0 !important;
+}
+
+main {
+  padding-top: 0 !important;
+}
+
+.public-theme .site-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  margin-top: 0 !important;
+}
+
+.public-theme .site-navbar .container {
+  min-height: 76px;
+  gap: 1rem;
+}
+
+.public-theme .site-navbar .navbar-collapse {
+  justify-content: flex-end;
+}
+
+.public-theme .site-navbar .navbar-nav {
+  row-gap: .5rem;
+}
+
+.public-theme .site-navbar .dropdown-menu {
+  margin-top: .55rem;
+  padding: .75rem;
+  border-radius: 20px;
+}
+
+.public-theme .site-navbar .dropdown-item {
+  border-radius: 14px;
+  padding: .7rem .85rem;
+}
+
+.public-theme .site-navbar .btn,
+.public-theme .site-navbar .nav-link {
+  transition: transform .22s ease, box-shadow .22s ease, background .22s ease, color .22s ease, border-color .22s ease;
+}
+
+.public-theme .site-navbar .btn:hover,
+.public-theme .site-navbar .nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.public-theme .cms-hero-banner,
+.public-theme .cms-shell-section,
+.public-theme .cms-shell-section > .container,
+.public-theme .cms-shell-section > .container-fluid,
+.public-theme .cms-shell-section > .cms-section-container-wide,
+.public-theme .cms-shell-section > .cms-section-container-full {
+  color: var(--text) !important;
+}
+
+.public-theme .cms-hero-banner {
+  padding: clamp(2.5rem, 6vw, 4rem) 0 2rem !important;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 10%, transparent), transparent 30%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 97%, transparent), color-mix(in srgb, var(--surface) 96%, transparent)) !important;
+}
+
+.public-theme .cms-shell-section {
+  padding: clamp(1.4rem, 4vw, 2.6rem) 0 !important;
+}
+
+.public-theme .cms-shell-section .section-card,
+.public-theme .cms-slide-card,
+.public-theme .cms-course-card,
+.public-theme .contact-card,
+.public-theme .faq-item,
+.public-theme .feature-card,
+.public-theme .pricing-card,
+.public-theme .card {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 97%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent)) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: calc(var(--radius, 18px) + 4px) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.public-theme .section-card,
+.public-theme .cms-slide-card,
+.public-theme .cms-course-card {
+  overflow: hidden;
+}
+
+.public-theme .form-control,
+.public-theme .form-select,
+.public-theme textarea,
+.public-theme select {
+  background: color-mix(in srgb, var(--surface) 90%, transparent) !important;
+  color: var(--text) !important;
+  border-color: var(--input-border, var(--border)) !important;
+  border-radius: calc(var(--button-radius, 14px) + 2px) !important;
+}
+
+.public-theme .form-control::placeholder,
+.public-theme textarea::placeholder {
+  color: var(--muted) !important;
+}
+
+.public-theme .border,
+.dashboard-theme .border,
+.dashboard-theme hr,
+.public-theme hr {
+  border-color: var(--border) !important;
+}
+
+.dashboard-theme,
+.dashboard-theme .container-fluid,
+.dashboard-theme .row,
+.dashboard-theme .col,
+.dashboard-theme .col-12,
+.dashboard-theme .card,
+.dashboard-theme .table,
+.dashboard-theme .table > :not(caption) > * > *,
+.dashboard-theme .list-group-item,
+.dashboard-theme .accordion-item,
+.dashboard-theme .accordion-button,
+.dashboard-theme .modal-content,
+.dashboard-theme .offcanvas,
+.dashboard-theme .dropdown-menu {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.dashboard-theme .topbar,
+.dashboard-theme .sidebar-shell,
+.dashboard-theme .sidebar-footer,
+.dashboard-theme .topbar-profile,
+.dashboard-theme .topbar-icon,
+.dashboard-theme .sidebar-user,
+.dashboard-theme .card,
+.dashboard-theme .table,
+.dashboard-theme .table-responsive,
+.dashboard-theme .list-group-item,
+.dashboard-theme .accordion-item,
+.dashboard-theme .accordion-button,
+.dashboard-theme .modal-content,
+.dashboard-theme .offcanvas,
+.dashboard-theme .dropdown-menu,
+.dashboard-theme .hero-card,
+.dashboard-theme .hero-side-card,
+.dashboard-theme .metric-card,
+.dashboard-theme .analytics-card,
+.dashboard-theme .stats-card,
+.dashboard-theme .workspace-card,
+.dashboard-theme .reading-topbar,
+.dashboard-theme .reading-panel,
+.dashboard-theme .word-support-card,
+.dashboard-theme .reading-hero,
+.dashboard-theme .analytics-hero,
+.dashboard-theme .s-hero,
+.dashboard-theme .library-hero,
+.dashboard-theme .library-filter-panel,
+.dashboard-theme .course-library-card,
+.dashboard-theme .data-card,
+.dashboard-theme .data-hero,
+.dashboard-theme .table-card,
+.dashboard-theme .tree-card,
+.dashboard-theme .rbac-form-card,
+.dashboard-theme .registry-hero,
+.dashboard-theme .cms-course-card,
+.dashboard-theme .cms-slide-card,
+.dashboard-theme .section-card {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 97%, transparent), color-mix(in srgb, var(--surface-2) 95%, transparent)) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.dashboard-theme .topbar,
+.dashboard-theme .sidebar-shell {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent)) !important;
+}
+
+.dashboard-theme .menu-link,
+.dashboard-theme .menu-parent,
+.dashboard-theme .menu-child,
+.dashboard-theme .topbar-profile,
+.dashboard-theme .topbar-icon,
+.dashboard-theme .btn,
+.dashboard-theme .course-library-card,
+.dashboard-theme .cms-course-card,
+.dashboard-theme .cms-slide-card,
+.public-theme .cms-course-card,
+.public-theme .cms-slide-card,
+.public-theme .btn {
+  transition: transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease, color .22s ease;
+}
+
+.dashboard-theme .course-library-card,
+.public-theme .cms-course-card,
+.public-theme .cms-slide-card,
+.dashboard-theme .cms-course-card,
+.dashboard-theme .cms-slide-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.dashboard-theme .course-library-card::before,
+.public-theme .cms-course-card::before,
+.public-theme .cms-slide-card::before,
+.dashboard-theme .cms-course-card::before,
+.dashboard-theme .cms-slide-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 42%, color-mix(in srgb, var(--surface-2) 35%, transparent));
+  opacity: .9;
+  z-index: -1;
+}
+
+.dashboard-theme .course-library-card:hover,
+.public-theme .cms-course-card:hover,
+.public-theme .cms-slide-card:hover,
+.dashboard-theme .cms-course-card:hover,
+.dashboard-theme .cms-slide-card:hover {
+  transform: translateY(-7px) scale(1.01);
+  box-shadow: 0 24px 56px color-mix(in srgb, var(--primary) 16%, rgba(0,0,0,.32)) !important;
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--border)) !important;
+}
+
+.dashboard-theme .course-library-card:hover .btn,
+.public-theme .cms-course-card:hover .btn,
+.public-theme .cms-slide-card:hover .btn {
+  transform: translateY(-1px);
+}
+
+.dashboard-theme .text-muted,
+.dashboard-theme .small.text-muted,
+.dashboard-theme .text-secondary,
+.dashboard-theme .form-text,
+.public-theme .text-muted,
+.public-theme .small.text-muted,
+.public-theme .text-secondary,
+.public-theme .form-text {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+.dashboard-theme h1,
+.dashboard-theme h2,
+.dashboard-theme h3,
+.dashboard-theme h4,
+.dashboard-theme h5,
+.dashboard-theme h6,
+.dashboard-theme .page-title,
+.dashboard-theme .topbar-page-title,
+.dashboard-theme .brand-title,
+.dashboard-theme .hero-title,
+.public-theme h1,
+.public-theme h2,
+.public-theme h3,
+.public-theme h4,
+.public-theme h5,
+.public-theme h6,
+.public-theme .display-5,
+.public-theme .display-6 {
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.dashboard-theme .form-control,
+.dashboard-theme .form-select,
+.dashboard-theme textarea,
+.dashboard-theme select {
+  background: color-mix(in srgb, var(--surface) 90%, transparent) !important;
+  color: var(--text) !important;
+  border-color: var(--input-border, var(--border)) !important;
+}
+
+.dashboard-theme .form-control::placeholder,
+.dashboard-theme textarea::placeholder {
+  color: var(--muted) !important;
+}
+
+.dashboard-theme .table > :not(caption) > * > *,
+.dashboard-theme .list-group-item,
+.dashboard-theme .accordion-button,
+.dashboard-theme .accordion-item {
+  background: transparent !important;
+}
+
+.dashboard-theme .progress,
+.public-theme .progress {
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent) !important;
+}
+
+.dashboard-theme .progress-bar,
+.public-theme .progress-bar {
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 55%, white)) !important;
+}
+
+.dashboard-theme .badge,
+.public-theme .badge {
+  background: var(--badge-bg) !important;
+  color: var(--badge-text) !important;
+  border: 1px solid var(--badge-border) !important;
+}
+
+.dashboard-theme .btn-primary,
+.public-theme .btn-primary,
+.dashboard-theme .btn-warning,
+.public-theme .btn-warning,
+.dashboard-theme .btn-success,
+.public-theme .btn-success,
+.dashboard-theme .btn-info,
+.public-theme .btn-info,
+.dashboard-theme .btn-orange {
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #ffffff)) !important;
+  border-color: color-mix(in srgb, var(--primary) 72%, black) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.dashboard-theme .btn-outline-light,
+.dashboard-theme .btn-outline-secondary,
+.public-theme .btn-outline-light,
+.public-theme .btn-outline-secondary {
+  background: color-mix(in srgb, var(--surface) 78%, transparent) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+.dashboard-theme .btn:hover,
+.public-theme .btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Page-specific classes that previously used hardcoded dark colors */
+.dashboard-theme .library-hero__eyebrow,
+.dashboard-theme .hero-kicker,
+.dashboard-theme .topbar-kicker,
+.dashboard-theme .menu-heading,
+.public-theme .cms-shell-section .eyebrow {
+  color: var(--workspace-kicker-text, var(--muted)) !important;
+}
+
+.dashboard-theme .library-hero__title,
+.dashboard-theme .library-hero__text,
+.dashboard-theme .hero-stat-card__label,
+.dashboard-theme .hero-stat-card__value,
+.dashboard-theme .course-library-card__meta,
+.dashboard-theme .course-library-card__price-label,
+.dashboard-theme .course-library-card__price-value,
+.dashboard-theme .hero-sub,
+.dashboard-theme .hero-pill,
+.dashboard-theme .hero-progress-label,
+.dashboard-theme .hero-foot-label,
+.dashboard-theme .hero-progress-value,
+.dashboard-theme .reading-hero,
+.dashboard-theme .analytics-hero,
+.dashboard-theme .s-hero,
+.dashboard-theme .reading-topbar,
+.dashboard-theme .reading-panel,
+.dashboard-theme .word-support-card {
+  color: inherit !important;
+}
+
+.dashboard-theme .course-library-card__title,
+.dashboard-theme .course-library-card__description,
+.dashboard-theme .course-library-card__footer,
+.dashboard-theme .course-library-card__body,
+.dashboard-theme .course-library-card__top,
+.dashboard-theme .filter-field label,
+.dashboard-theme .topbar-profile-name,
+.dashboard-theme .sidebar-user-name,
+.dashboard-theme .menu-link,
+.dashboard-theme .menu-parent,
+.dashboard-theme .menu-child,
+.dashboard-theme .topbar-profile-role,
+.dashboard-theme .brand-title,
+.dashboard-theme .sidebar-brand small,
+.dashboard-theme .hero-title,
+.dashboard-theme .hero-sub,
+.dashboard-theme .hero-progress-label,
+.dashboard-theme .hero-foot-label,
+.dashboard-theme .hero-progress-value {
+  color: var(--text) !important;
+}
+
+@media (max-width: 991.98px) {
+  .public-theme .site-navbar .container {
+    min-height: 68px;
+  }
+  .public-theme .site-navbar .navbar-collapse {
+    margin-top: .85rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+    box-shadow: var(--shadow);
+  }
+}
+
+/* === single-shot cleanup patch: enforce active theme colors across frontend + dashboards === */
+body.public-theme > main.py-4 { padding-top: 0 !important; }
+body.public-theme footer { margin-top: 0 !important; }
+
+.public-theme .cms-shell-section,
+.public-theme .cms-shell-section[style],
+.public-theme .cms-shell-section > .container,
+.public-theme .cms-shell-section > .container-fluid,
+.public-theme .cms-section-container-wide,
+.public-theme .cms-section-container-full {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+.public-theme .cms-shell-section .row,
+.public-theme .cms-shell-section .col,
+.public-theme .cms-shell-section .col-lg-5,
+.public-theme .cms-shell-section .col-lg-7,
+.public-theme .cms-shell-section .col-md-6,
+.public-theme .cms-shell-section .col-xl-4,
+.public-theme .cms-shell-section p,
+.public-theme .cms-shell-section span,
+.public-theme .cms-shell-section li,
+.public-theme .cms-shell-section label,
+.public-theme .cms-shell-section h1,
+.public-theme .cms-shell-section h2,
+.public-theme .cms-shell-section h3,
+.public-theme .cms-shell-section h4,
+.public-theme .cms-shell-section h5,
+.public-theme .cms-shell-section h6,
+.public-theme .cms-shell-section .opacity-75,
+.public-theme .cms-shell-section .small,
+.public-theme .cms-shell-section .lead,
+.public-theme .cms-shell-section .text-uppercase {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+.public-theme .cms-shell-section .section-card,
+.public-theme .cms-shell-section .section-card.text-muted,
+.public-theme .cms-shell-section .section-card.h-100,
+.public-theme .cms-hero-banner .section-card,
+.public-theme .cms-course-card,
+.public-theme .cms-slide-card,
+.public-theme .accordion-item,
+.public-theme .accordion-button,
+.public-theme .contact-card,
+.public-theme .feature-card,
+.public-theme .pricing-card,
+.public-theme .faq-item,
+.public-theme .alert,
+.public-theme .list-group-item,
+.public-theme .table,
+.public-theme .table > :not(caption) > * > *,
+.public-theme .form-control,
+.public-theme .form-select,
+.public-theme textarea,
+.public-theme select {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent)) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.public-theme .site-navbar {
+  padding: .7rem 0 !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface-2) 92%, transparent)) !important;
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--primary) 10%, transparent) !important;
+}
+.public-theme .site-navbar .container {
+  min-height: 70px !important;
+  max-width: 1320px;
+}
+.public-theme .site-navbar .navbar-brand {
+  font-family: var(--heading-font-family) !important;
+  font-size: 2rem;
+  letter-spacing: -.02em;
+}
+.public-theme .site-navbar .brand-mark {
+  width: 38px; height: 38px; border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 18%, white), color-mix(in srgb, var(--primary) 8%, transparent)) !important;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+.public-theme .site-navbar .nav-link,
+.public-theme .site-navbar .btn {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .68rem 1rem !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+}
+.public-theme .site-navbar .nav-link.active,
+.public-theme .site-navbar .nav-link:hover,
+.public-theme .site-navbar .nav-link:focus,
+.public-theme .site-navbar .nav-link.show,
+.public-theme .site-navbar .nav-item.show > .nav-link {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface)) !important;
+  color: var(--heading-text) !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.public-theme .site-navbar .dropdown-menu {
+  min-width: 220px;
+  border-radius: 22px !important;
+  padding: .85rem !important;
+}
+
+.public-theme .text-white,
+.public-theme .text-light,
+.public-theme .text-black,
+.dashboard-theme .text-white,
+.dashboard-theme .text-light,
+.dashboard-theme .text-black,
+.dashboard-theme .table-dark,
+.dashboard-theme .table-light {
+  color: var(--text) !important;
+}
+
+.dashboard-theme,
+.dashboard-theme .dashboard-content-wrap,
+.dashboard-theme .dashboard-content-wrap p,
+.dashboard-theme .dashboard-content-wrap span,
+.dashboard-theme .dashboard-content-wrap div,
+.dashboard-theme .dashboard-content-wrap li,
+.dashboard-theme .dashboard-content-wrap td,
+.dashboard-theme .dashboard-content-wrap th,
+.dashboard-theme .dashboard-content-wrap label,
+.dashboard-theme .dashboard-content-wrap small,
+.dashboard-theme .dashboard-content-wrap .opacity-75,
+.dashboard-theme .dashboard-content-wrap .opacity-50 {
+  color: var(--text) !important;
+  opacity: 1 !important;
+}
+.dashboard-theme .dashboard-content-wrap h1,
+.dashboard-theme .dashboard-content-wrap h2,
+.dashboard-theme .dashboard-content-wrap h3,
+.dashboard-theme .dashboard-content-wrap h4,
+.dashboard-theme .dashboard-content-wrap h5,
+.dashboard-theme .dashboard-content-wrap h6,
+.dashboard-theme .dashboard-content-wrap .value,
+.dashboard-theme .dashboard-content-wrap .hero-title,
+.dashboard-theme .dashboard-content-wrap .section-title,
+.dashboard-theme .dashboard-content-wrap .card-title,
+.dashboard-theme .dashboard-content-wrap .fw-bold,
+.dashboard-theme .dashboard-content-wrap .fw-semibold {
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.dashboard-theme .neo-card,
+.dashboard-theme .focus-box,
+.dashboard-theme .voice-card,
+.dashboard-theme .support-item,
+.dashboard-theme .stack-item,
+.dashboard-theme .metric-panel,
+.dashboard-theme .list-item,
+.dashboard-theme .course-cta,
+.dashboard-theme .hero-stat-card,
+.dashboard-theme .library-filter-panel,
+.dashboard-theme .course-library-card,
+.dashboard-theme .day-cell {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, transparent), color-mix(in srgb, var(--surface-2) 95%, transparent)) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.dashboard-theme .calendar-pill,
+.dashboard-theme .chip,
+.dashboard-theme .badge-soft,
+.dashboard-theme .hero-pill,
+.dashboard-theme .library-badge,
+.dashboard-theme .menu-badge,
+.dashboard-theme .badge {
+  background: var(--badge-bg) !important;
+  color: var(--badge-text) !important;
+  border-color: var(--badge-border) !important;
+}
+
+.dashboard-theme .calendar-weekdays span,
+.dashboard-theme .day-meta,
+.dashboard-theme .section-sub,
+.dashboard-theme .support-item .hint,
+.dashboard-theme .support-item .label,
+.dashboard-theme .mini-label,
+.dashboard-theme .focus-box .label,
+.dashboard-theme .focus-box .sub,
+.dashboard-theme .hero-stat-card__label,
+.dashboard-theme .course-library-card__meta,
+.dashboard-theme .course-library-card__price-label,
+.dashboard-theme .filter-field label,
+.dashboard-theme .library-hero__eyebrow,
+.dashboard-theme .menu-heading,
+.dashboard-theme .sidebar-brand small,
+.dashboard-theme .topbar-profile-role {
+  color: var(--muted) !important;
+}
+
+.dashboard-theme .library-hero,
+.dashboard-theme .hero-card,
+.dashboard-theme .analytics-hero,
+.dashboard-theme .reading-hero,
+.dashboard-theme .s-hero,
+.dashboard-theme .data-hero,
+.dashboard-theme .registry-hero {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 98%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent)) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.dashboard-theme .course-library-card__title,
+.dashboard-theme .course-library-card__description,
+.dashboard-theme .course-library-card__price-value,
+.dashboard-theme .library-hero__title,
+.dashboard-theme .library-hero__text,
+.dashboard-theme .hero-stat-card__value,
+.dashboard-theme .menu-link,
+.dashboard-theme .menu-parent,
+.dashboard-theme .menu-child,
+.dashboard-theme .topbar-profile-name,
+.dashboard-theme .brand-title,
+.dashboard-theme .sidebar-user-name {
+  color: var(--text) !important;
+}
+
+.dashboard-theme .menu-link:hover,
+.dashboard-theme .menu-parent:hover,
+.dashboard-theme .menu-child:hover,
+.dashboard-theme .menu-child.active,
+.dashboard-theme .menu-link[aria-current="page"] {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important;
+  color: var(--heading-text, var(--text)) !important;
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border)) !important;
+}
+
+.dashboard-theme .course-library-card {
+  transform-style: preserve-3d;
+}
+.dashboard-theme .course-library-card:hover {
+  transform: translateY(-10px) rotateX(1.4deg) rotateY(-1.4deg) scale(1.01) !important;
+}
+.dashboard-theme .course-library-card::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(120deg, transparent 0%, color-mix(in srgb, var(--primary) 16%, transparent) 45%, transparent 72%);
+  opacity:.75;
+  transform: translateX(-115%);
+  transition: transform .65s ease;
+}
+.dashboard-theme .course-library-card:hover::after {
+  transform: translateX(115%);
+}
+
+.dashboard-theme .progress,
+.dashboard-theme .course-library-card__progress-bar,
+.dashboard-theme .calendar-row .progress {
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent) !important;
+}
+.dashboard-theme .progress-bar,
+.dashboard-theme .course-library-card__progress-fill {
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 62%, white)) !important;
+}
+
+.dashboard-theme .day-cell.out { opacity: .5 !important; }
+.dashboard-theme .day-cell.i1 { background: color-mix(in srgb, var(--primary) 10%, var(--surface)) !important; }
+.dashboard-theme .day-cell.i2 { background: color-mix(in srgb, var(--primary) 18%, var(--surface)) !important; }
+.dashboard-theme .day-cell.i3 { background: color-mix(in srgb, var(--primary) 26%, var(--surface-2)) !important; }
+.dashboard-theme .day-cell.i4 { background: color-mix(in srgb, var(--primary) 34%, var(--surface-2)) !important; }
+
+.dashboard-theme .form-control,
+.dashboard-theme .form-select,
+.dashboard-theme textarea,
+.dashboard-theme select,
+.public-theme .form-control,
+.public-theme .form-select,
+.public-theme textarea,
+.public-theme select {
+  color: var(--text) !important;
+  caret-color: var(--primary) !important;
+}
+.dashboard-theme input::placeholder,
+.dashboard-theme textarea::placeholder,
+.public-theme input::placeholder,
+.public-theme textarea::placeholder {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}

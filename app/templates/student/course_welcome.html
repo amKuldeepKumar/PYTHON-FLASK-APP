@@ -1,0 +1,69 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ course.title }} • AI Welcome{% endblock %}
+{% block page_title %}Course Welcome{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-course-welcome.css') }}">
+{% endblock %}
+
+{% block content %}
+<div
+  class="course-welcome-screen"
+  id="courseWelcomeScreen"
+  data-message="{{ welcome_message }}"
+>
+  <div class="course-welcome-shell">
+    <div class="course-welcome-avatar" id="courseWelcomeAvatar" aria-hidden="true">
+      <div class="course-welcome-avatar-ring ring-one"></div>
+      <div class="course-welcome-avatar-ring ring-two"></div>
+      <div class="course-welcome-orb-core"></div>
+      <div class="course-welcome-wavebars">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="course-welcome-kicker">AI Course Introduction</div>
+    <h1 class="course-welcome-title">{{ course.title }}</h1>
+    <p class="course-welcome-subtitle">Listen to your course guide, watch the text appear word by word, and then start your learning journey.</p>
+
+    <div class="course-welcome-grid">
+      <section class="course-welcome-card">
+        <div class="course-welcome-section-title">What you are going to do</div>
+        <ul class="course-welcome-list">
+          {% for item in welcome_points %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+      <section class="course-welcome-card">
+        <div class="course-welcome-section-title">What you are going to learn</div>
+        <ul class="course-welcome-list">
+          {% for item in learning_outcomes %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    </div>
+
+    <div class="course-welcome-teleprompter">
+      <div class="course-welcome-typing" id="courseWelcomeTyping"></div>
+    </div>
+
+    <div class="course-welcome-actions">
+      <button type="button" class="btn btn-outline-light" id="courseWelcomeReplay">Replay AI Voice</button>
+      <form method="post" action="{{ url_for('student.course_welcome_start', course_id=course.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary btn-lg" id="courseWelcomeStart">Thanks, Start Your Course Journey</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/student-course-welcome.js') }}"></script>
+{% endblock %}

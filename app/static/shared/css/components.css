@@ -1,0 +1,576 @@
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.auth-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.auth-input:focus {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(13,110,253,.6);
+  box-shadow: none;
+  color: var(--text);
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(13,110,253,.15);
+  border: 1px solid rgba(13,110,253,.35);
+}
+
+/* ---------- Global form controls ---------- */
+.form-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.form-control,
+.form-select,
+textarea,
+select {
+  background: var(--input-bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--input-border) !important;
+  border-radius: 12px;
+  box-shadow: none !important;
+}
+
+.form-control::placeholder,
+textarea::placeholder {
+  color: var(--muted) !important;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus,
+select:focus {
+  background: rgba(255,255,255,.06) !important;
+  color: var(--text) !important;
+  border-color: rgba(13,110,253,.6) !important;
+  box-shadow: 0 0 0 0.18rem rgba(13,110,253,.15) !important;
+  outline: none;
+}
+
+/* ---------- Global dropdown/select fix ---------- */
+.form-select option,
+select option {
+  background-color: #1a2236 !important;
+  color: #f4f7ff !important;
+}
+
+.form-select optgroup,
+select optgroup {
+  background-color: #141b2d !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+/* for dark theme consistency */
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] select,
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] textarea {
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(255,255,255,.92) !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+html[data-theme="dark"] .form-select option,
+html[data-theme="dark"] select option {
+  background: #1a2236 !important;
+  color: #f4f7ff !important;
+}
+
+/* light theme safety */
+html[data-theme="light"] .form-select,
+html[data-theme="light"] select,
+html[data-theme="light"] .form-control,
+html[data-theme="light"] textarea {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: rgba(0,0,0,.14) !important;
+}
+
+html[data-theme="light"] .form-select option,
+html[data-theme="light"] select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* disabled fields */
+.form-control:disabled,
+.form-select:disabled,
+select:disabled,
+textarea:disabled {
+  background: rgba(255,255,255,.03) !important;
+  color: rgba(255,255,255,.45) !important;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* ---------- Dropdown menus ---------- */
+.dropdown-menu {
+  background: #121a2b;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+
+.dropdown-item {
+  color: rgba(255,255,255,.88);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: rgba(13,110,253,.16);
+  color: #ffffff;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background: rgba(13,110,253,.28);
+  color: #ffffff;
+}
+
+/* ---------- Checkboxes / radios ---------- */
+.form-check-input {
+  background-color: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.18);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.form-check-label {
+  color: var(--text);
+}
+
+/* WhatsApp floating button */
+.wa-float {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1050;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: rgba(37, 211, 102, .92);
+  color: #06120b;
+  text-decoration: none;
+  box-shadow: 0 14px 30px rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.22);
+}
+
+.wa-float:hover {
+  filter: brightness(1.03);
+}
+
+.wa-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.85);
+}
+
+.wa-text {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-float {
+    transition: none;
+  }
+}
+
+/* ---------- Alerts ---------- */
+.alert {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.alert-success,
+.alert-info,
+.alert-warning,
+.alert-danger {
+  color: var(--text) !important;
+}
+
+/* ---------- Tables ---------- */
+.table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-striped-bg: rgba(255,255,255,.02);
+  --bs-table-hover-color: var(--text);
+  --bs-table-hover-bg: rgba(255,255,255,.04);
+  color: var(--text) !important;
+}
+
+.table > :not(caption) > * > * {
+  background-color: transparent !important;
+  color: var(--text) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+.table thead th {
+  color: var(--heading-text, var(--text)) !important;
+  font-weight: 700;
+}
+
+.table .text-muted,
+.table .small.text-muted {
+  color: var(--muted) !important;
+}
+
+
+/* =========================================================
+   PHASE 7 / PHASE 11
+   Theme compatibility bridge
+   Safe presentation-only overrides so old dark utility classes
+   follow the active SuperAdmin theme across all dashboards.
+   ========================================================= */
+:root {
+  --button-radius: 12px;
+}
+
+body,
+.card,
+.card-body,
+.card-header,
+.card-footer,
+.modal-content,
+.offcanvas,
+.list-group-item,
+.accordion-item,
+.accordion-button,
+.nav-tabs .nav-link,
+.nav-pills .nav-link,
+.page-link,
+.breadcrumb-item,
+.dropdown-menu,
+.dropdown-item {
+  color: var(--text);
+}
+
+.bg-dark,
+.text-bg-dark,
+.table-dark,
+.border-dark,
+.bg-black,
+.bg-dark-subtle {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.table-dark {
+  --bs-table-bg: var(--surface) !important;
+  --bs-table-striped-bg: color-mix(in srgb, var(--surface-2) 90%, transparent) !important;
+  --bs-table-hover-bg: color-mix(in srgb, var(--primary) 8%, var(--surface)) !important;
+  --bs-table-color: var(--text) !important;
+  --bs-table-border-color: var(--border) !important;
+}
+
+.text-bg-dark,
+.badge.text-bg-dark,
+.badge.bg-dark {
+  background: color-mix(in srgb, var(--surface-2) 86%, transparent) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.card,
+.modal-content,
+.offcanvas,
+.list-group-item,
+.accordion-item {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+.card-header,
+.card-footer,
+.accordion-button {
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--surface)) !important;
+  border-color: var(--border) !important;
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end,
+hr {
+  border-color: var(--border) !important;
+}
+
+.text-muted,
+.small.text-muted,
+.text-secondary,
+.form-text,
+small,
+small.text-muted {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+.card .text-muted,
+.card .small.text-muted,
+.table .text-muted,
+.table .small.text-muted,
+.alert .text-muted,
+.dropdown-menu .text-muted {
+  color: color-mix(in srgb, var(--muted) 96%, var(--text) 4%) !important;
+}
+
+.btn {
+  border-radius: var(--button-radius) !important;
+}
+
+.btn-outline-light,
+.btn-outline-secondary {
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  background: color-mix(in srgb, var(--surface) 70%, transparent) !important;
+}
+
+.btn-outline-light:hover,
+.btn-outline-secondary:hover,
+.btn-outline-light:focus,
+.btn-outline-secondary:focus {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border)) !important;
+  background: color-mix(in srgb, var(--primary) 13%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+.nav-tabs,
+.nav-pills,
+.pagination,
+.breadcrumb,
+.list-group {
+  --bs-nav-tabs-border-color: var(--border);
+  --bs-nav-tabs-link-active-bg: var(--surface);
+  --bs-nav-tabs-link-active-border-color: var(--border) var(--border) var(--surface);
+  --bs-pagination-bg: var(--surface);
+  --bs-pagination-border-color: var(--border);
+  --bs-pagination-color: var(--text);
+  --bs-pagination-hover-bg: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  --bs-pagination-hover-border-color: color-mix(in srgb, var(--primary) 25%, var(--border));
+  --bs-pagination-hover-color: var(--text);
+  --bs-breadcrumb-divider-color: var(--muted);
+}
+
+.table-responsive {
+  border-radius: calc(var(--radius) * 0.75);
+}
+
+html[data-theme="light"] .dropdown-menu {
+  background: var(--surface) !important;
+}
+
+html[data-theme="light"] .form-control:focus,
+html[data-theme="light"] .form-select:focus,
+html[data-theme="light"] textarea:focus,
+html[data-theme="light"] select:focus {
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .form-control:disabled,
+html[data-theme="light"] .form-select:disabled,
+html[data-theme="light"] select:disabled,
+html[data-theme="light"] textarea:disabled {
+  background: rgba(0,0,0,.03) !important;
+  color: rgba(0,0,0,.45) !important;
+}
+
+html[data-theme="light"] .form-check-input {
+  background-color: #ffffff;
+  border-color: rgba(0,0,0,.18);
+}
+
+html[data-theme="light"] .dropdown-item:hover,
+html[data-theme="light"] .dropdown-item:focus {
+  color: var(--text) !important;
+}
+
+[class*="bg-dark"] .text-muted,
+[class*="bg-dark"] .small.text-muted,
+.bg-dark .text-secondary,
+.text-bg-dark .text-muted,
+.table-dark .text-muted {
+  color: var(--muted) !important;
+}
+/* Fix reading module content blocks in dark dashboard theme */
+body.dashboard-theme .bg-body-tertiary,
+body.dashboard-theme .bg-body-secondary,
+body.dashboard-theme .bg-light,
+body.dashboard-theme .alert,
+body.dashboard-theme .alert-info {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+body.dashboard-theme .bg-body-tertiary *,
+body.dashboard-theme .bg-body-secondary *,
+body.dashboard-theme .bg-light *,
+body.dashboard-theme .alert *,
+body.dashboard-theme .alert-info * {
+  color: inherit !important;
+}
+
+body.dashboard-theme .rounded-4.border.p-3.bg-body-tertiary {
+  background: color-mix(in srgb, var(--surface-2) 88%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+.reading-panel-soft {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(17, 24, 39, 0.08) !important;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.reading-panel-soft,
+.reading-panel-soft *,
+.reading-panel-soft p,
+.reading-panel-soft span,
+.reading-panel-soft div,
+.reading-panel-soft li,
+.reading-panel-soft strong,
+.reading-panel-soft small {
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+.reading-panel-soft .text-secondary,
+.reading-panel-soft .text-muted,
+.reading-panel-soft .small,
+.reading-panel-soft small {
+  color: #6b7280 !important;
+}
+
+/* Broader compatibility fixes for old utility classes and legacy screens. */
+.text-dark,
+.text-black,
+.text-body,
+.link-dark,
+.text-body-emphasis,
+.text-reset {
+  color: var(--text) !important;
+}
+
+.bg-light,
+.bg-white,
+.bg-body,
+.bg-body-secondary,
+.bg-body-tertiary,
+.bg-light-subtle,
+.alert,
+.alert-info,
+.alert-light,
+.alert-secondary,
+.toast,
+.popover,
+.tooltip-inner {
+  background: color-mix(in srgb, var(--surface) 94%, transparent) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.table,
+.table > :not(caption) > * > * {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.table-light,
+.table-hover,
+.table-striped,
+.table-responsive,
+thead,
+tbody,
+tr,
+td,
+th {
+  border-color: var(--border) !important;
+}
+
+.progress {
+  background: color-mix(in srgb, var(--surface-2) 84%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 82%, white 8%), color-mix(in srgb, var(--primary) 54%, #00c2ff 46%)) !important;
+}
+
+.reading-panel-soft {
+  background: color-mix(in srgb, var(--surface) 96%, white 2%) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.reading-panel-soft,
+.reading-panel-soft *,
+.reading-panel-soft p,
+.reading-panel-soft span,
+.reading-panel-soft div,
+.reading-panel-soft li,
+.reading-panel-soft strong,
+.reading-panel-soft small {
+  color: inherit !important;
+}
+
+/* Phase D1: public WhatsApp lead widget */
+.wa-float-public {
+  right: 22px;
+  bottom: 22px;
+  padding: 12px 16px 12px 12px;
+  background: linear-gradient(135deg, #25d366, #16a34a);
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, .45);
+  box-shadow: 0 18px 40px rgba(22, 163, 74, .35), 0 10px 28px rgba(0, 0, 0, .20);
+  font-weight: 800;
+}
+
+.wa-float-public .wa-icon {
+  background: rgba(255, 255, 255, .18);
+  color: #fff;
+  font-size: 1.3rem;
+}
+
+.wa-float-public:hover {
+  color: #fff !important;
+  transform: translateY(-2px);
+  filter: none;
+}
+
+@media (max-width: 575.98px) {
+  .wa-float-public {
+    width: 58px;
+    height: 58px;
+    justify-content: center;
+    padding: 10px;
+  }
+}

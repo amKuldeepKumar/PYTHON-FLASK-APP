@@ -1,0 +1,113 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Themes • SuperAdmin{% endblock %}
+{% block page_title %}Theme Presets{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 sa-studio">
+  <section class="sa-hero-panel">
+    <div class="sa-hero-grid">
+      <div>
+        <div class="sa-kicker">Brand System</div>
+        <h1 class="sa-title">Control every visual preset from one cleaner theme workspace</h1>
+        <p class="sa-copy">Create, activate, duplicate, and refine theme presets without losing consistency across the public site, student area, and admin dashboards.</p>
+        <div class="sa-pill-row">
+          <span class="sa-pill">{{ themes|length }} theme presets</span>
+          <span class="sa-pill">{{ themes|selectattr('is_active')|list|length }} active theme</span>
+          <span class="sa-pill">Live theme tokens enabled</span>
+        </div>
+      </div>
+      <div class="sa-stat-grid">
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Total Presets</div>
+          <div class="sa-stat-value">{{ themes|length }}</div>
+          <div class="sa-stat-note">Saved presets available for rollout.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Active Theme</div>
+          <div class="sa-stat-value">{{ themes|selectattr('is_active')|list|length }}</div>
+          <div class="sa-stat-note">Only one theme should be live at a time.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Theme Studio</div>
+          <div class="sa-stat-value">Ready</div>
+          <div class="sa-stat-note">Preset creation, editing, and activation are available.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sa-panel card-dark">
+    <form method="POST" action="{{ url_for('theme.create_theme') }}" class="row g-2 align-items-center">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-md-10">
+        <input name="name" class="form-control" placeholder="New theme name (e.g. Neon Purple)">
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary">Create</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="sa-table-panel card-dark">
+  <div class="sa-table-wrap table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Updated</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in themes %}
+          <tr>
+            <td class="fw-semibold">{{ t.name }}</td>
+            <td>
+              {% if t.is_active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ t.updated_at.strftime('%Y-%m-%d %H:%M') if t.updated_at else '-' }}</td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                <a class="btn btn-sm btn-outline-info" href="{{ url_for('theme.edit_theme', theme_id=t.id) }}">
+                  Edit
+                </a>
+
+                {% if not t.is_active %}
+                  <form method="POST" action="{{ url_for('theme.activate_theme', theme_id=t.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-light">Activate</button>
+                  </form>
+                {% else %}
+                  <span class="btn btn-sm btn-success disabled">In use</span>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('theme.duplicate_theme', theme_id=t.id) }}" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-sm btn-outline-warning">Duplicate</button>
+                </form>
+
+                {% if not t.is_active %}
+                  <form method="POST" action="{{ url_for('theme.delete_theme', theme_id=t.id) }}" class="d-inline"
+                        onsubmit="return confirm('Delete this theme?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  </section>
+</div>
+{% endblock %}

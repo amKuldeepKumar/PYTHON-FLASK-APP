@@ -1,0 +1,105 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Spoken English • Fluencify{% endblock %}
+{% block page_title %}Spoken English{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/spoken-english.css') }}">{% endblock %}
+{% block content %}
+<div class="spoken-shell">
+  <section class="spoken-hero">
+    <div class="spoken-hero__grid">
+      <div>
+        <div class="small text-uppercase text-secondary mb-2">Phase 15 • Spoken English</div>
+        <h2 class="fw-bold mb-3">Daily speaking practice with simple Q&amp;A flow</h2>
+        <p class="spoken-subtitle mb-3">Separate spoken course, daily practice entry, topic bank, model-answer guidance, and direct continue flow are now connected in one clean interface.</p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="spoken-pill">Topics {{ payload.topics|length }}</span>
+          <span class="spoken-pill">Ready prompts {{ payload.active_prompt_count }}</span>
+          <span class="spoken-pill">Free access</span>
+        </div>
+        <div class="spoken-actions">
+          <a href="{{ url_for('student.course_spoken_english_daily_practice', course_id=course.id) }}" class="btn btn-primary">Start Today’s Practice</a>
+          <a href="{{ url_for('student.course_continue', course_id=course.id) }}" class="btn btn-outline-light">Continue</a>
+          <a href="{{ url_for('student.course_library') }}?category=spoken_english" class="btn btn-outline-secondary">View in Library</a>
+        </div>
+      </div>
+      <div class="spoken-grid">
+        <div class="spoken-metric"><div class="small text-secondary">Current streak</div><div class="spoken-metric__value">{{ payload.streak_days }}</div></div>
+        <div class="spoken-metric"><div class="small text-secondary">Completed today</div><div class="spoken-metric__value">{{ payload.completed_today }}</div></div>
+        <div class="spoken-metric"><div class="small text-secondary">Total sessions</div><div class="spoken-metric__value">{{ payload.total_completed }}</div></div>
+        <div class="spoken-metric"><div class="small text-secondary">Average score</div><div class="spoken-metric__value">{{ payload.average_score }}/10</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spoken-card">
+    <div class="spoken-topic__head">
+      <div>
+        <div class="spoken-section-title">Today’s Practice</div>
+        <div class="spoken-subtitle">One direct spoken task for daily consistency.</div>
+      </div>
+      {% if payload.daily_topic %}<span class="spoken-tag">{{ payload.daily_topic.title }}</span>{% endif %}
+    </div>
+    {% if payload.daily_prompt %}
+      <h3 class="h5 mt-3 mb-2">{{ payload.daily_prompt.title }}</h3>
+      <p class="mb-2">{{ payload.daily_prompt.prompt_text }}</p>
+      <p class="spoken-subtitle mb-0">{{ payload.daily_prompt.instruction_text or 'Answer clearly, naturally, and with simple useful English.' }}</p>
+      <div class="spoken-actions mt-3">
+        <a href="{{ url_for('student.course_spoken_english_daily_practice', course_id=course.id) }}" class="btn btn-primary">Open Practice</a>
+      </div>
+    {% else %}
+      <div class="spoken-subtitle mt-3">No daily prompt is ready yet.</div>
+    {% endif %}
+  </section>
+
+  <section class="spoken-card">
+    <div class="spoken-section-title">Topic Bank</div>
+    <div class="spoken-subtitle mb-3">Structured daily-life speaking prompts with simple entry points.</div>
+    <div class="spoken-list">
+      {% for card in payload.category_cards %}
+        <article class="spoken-topic">
+          <div class="spoken-topic__head">
+            <div>
+              <p class="small text-uppercase text-secondary mb-1">{{ card.label }}</p>
+              <h3 class="spoken-topic__title">{{ card.topic.title }}</h3>
+              <p class="spoken-topic__desc">{{ card.topic.description or card.description }}</p>
+            </div>
+            <span class="spoken-tag">{{ card.prompt_count }} prompts</span>
+          </div>
+          <div class="spoken-actions">
+            <a href="{{ url_for('student.course_spoken_english_topic_practice', course_id=course.id, topic_id=card.topic.id) }}" class="btn btn-outline-light btn-sm">Practice This Topic</a>
+          </div>
+        </article>
+      {% else %}
+        <div class="spoken-subtitle">No spoken English topics are published yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="spoken-card">
+    <div class="spoken-section-title">Recent Progress</div>
+    <div class="spoken-subtitle mb-3">Analytics is linked through speaking sessions for this course.</div>
+    <div class="table-responsive">
+      <table class="spoken-table">
+        <thead><tr><th>Prompt</th><th>Status</th><th>Score</th><th>Action</th></tr></thead>
+        <tbody>
+        {% for row in payload.recent_sessions %}
+          <tr>
+            <td><strong>{{ row.prompt.title }}</strong><div class="small text-secondary">{{ row.topic.title }}</div></td>
+            <td>{{ (row.status or 'ready').replace('_', ' ')|title }}</td>
+            <td>{{ '%.0f'|format(row.evaluation_score or 0) }}/10</td>
+            <td>
+              {% if (row.status or '').lower() == 'completed' %}
+                <a href="{{ url_for('student.course_spoken_english_result', course_id=course.id, session_id=row.id) }}" class="btn btn-sm btn-outline-light">View</a>
+              {% else %}
+                <a href="{{ url_for('student.course_spoken_english_session', course_id=course.id, session_id=row.id) }}" class="btn btn-sm btn-primary">Resume</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="text-secondary">No spoken English practice yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "layout/superadmin_base.html" %}
+{% block title %}Special English Pathways • Fluencify{% endblock %}
+{% block page_title %}Special English Pathways{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+          <div class="text-uppercase small text-muted">Phase 15 + 16 + 17</div>
+          <h3 class="mb-1">Spoken English, Interview Preparation, English Super Advanced</h3>
+          <p class="text-muted mb-0">Create or refresh the three special English pathways in one safe shot.</p>
+        </div>
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-primary">Create / Refresh Pathways</button>
+        </form>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4"><div class="rounded-4 border p-3 h-100"><h5>Spoken English</h5><div class="text-muted small">Separate practice-first speaking course with daily conversation topics and model-direction prompts.</div></div></div>
+        <div class="col-md-4"><div class="rounded-4 border p-3 h-100"><h5>Interview Preparation</h5><div class="text-muted small">HR questions, self introduction, and mock interview style speaking practice.</div></div></div>
+        <div class="col-md-4"><div class="rounded-4 border p-3 h-100"><h5>English Super Advanced</h5><div class="text-muted small">Premium advanced pathway with debate writing, vocabulary control, and formal writing tasks.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+          <div class="text-uppercase small text-muted">Phase 17 Live Status</div>
+          <h4 class="mb-1">English Super Advanced Readiness</h4>
+          <p class="text-muted mb-0">These checks come from the actual premium course, linked topics, tasks, pricing, and submissions.</p>
+        </div>
+      </div>
+      <div class="row g-3">
+        {% for item in phase17_status %}
+          {% set badge_class = 'text-bg-success' if item.state == 'ready' else ('text-bg-warning' if item.state == 'partial' else 'text-bg-danger') %}
+          {% set badge_label = 'Ready' if item.state == 'ready' else ('Partial' if item.state == 'partial' else 'Missing') %}
+          <div class="col-md-6 col-xl-4">
+            <div class="rounded-4 border p-3 h-100">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <h6 class="mb-0">{{ item.label }}</h6>
+                <span class="badge {{ badge_class }}">{{ badge_label }}</span>
+              </div>
+              <div class="text-muted small">{{ item.detail }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h4 class="mb-3">Current Pathway Courses</h4>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Course</th><th>Track</th><th>Difficulty</th><th>Status</th><th class="text-end">Open</th></tr></thead>
+          <tbody>
+            {% for course in pathway_courses %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ course.title }}</div>
+                  <div class="small text-muted">{{ course.slug }}</div>
+                </td>
+                <td>{{ (course.track_type or 'course')|replace('_', ' ')|title }}</td>
+                <td>{{ (course.difficulty or 'general')|title }}</td>
+                <td>{{ 'Published' if course.is_published else 'Draft' }}</td>
+                <td class="text-end"><a href="{{ url_for('superadmin.course_detail', course_id=course.id) }}" class="btn btn-sm btn-outline-primary">Open Course</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="text-muted">No special pathways created yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "layout/base.html" %}
+{% block title %}Test Yourself • Fluencify{% endblock %}
+
+{% block content %}
+<section class="placement-test-shell py-4">
+  <div class="container">
+    <div class="row g-4 align-items-start">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3">Free Smart Placement Test</span>
+        <h1 class="display-6 fw-bold mb-3">Test yourself and find the right English course</h1>
+        <p class="lead text-muted mb-4">Answer a few simple questions. Fluencify will check your level and suggest the best path for you.</p>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <form method="post" class="row g-4">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <div class="col-12">
+                <h2 class="h5 fw-bold mb-3">1. Your learning profile</h2>
+              </div>
+              {% for field in form_blueprint.profile_fields %}
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="{{ field.name }}">{{ field.label }}</label>
+                <select class="form-select" id="{{ field.name }}" name="{{ field.name }}" {% if field.required %}required{% endif %}>
+                  <option value="">Select</option>
+                  {% for value, label in field.options %}
+                  <option value="{{ value }}" {% if request.form.get(field.name) == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {% endfor %}
+
+              <div class="col-12 pt-2">
+                <h2 class="h5 fw-bold mb-3">2. Quick MCQ check</h2>
+              </div>
+              {% for item in form_blueprint.mcq_questions %}
+              <div class="col-12">
+                <label class="form-label fw-semibold d-block">{{ loop.index }}. {{ item.label }}</label>
+                {% for option_value, option_label in item.options %}
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="mcq_{{ item.key }}" id="{{ item.key }}_{{ option_value }}" value="{{ option_value }}" {% if request.form.get('mcq_' ~ item.key) == option_value %}checked{% endif %}>
+                  <label class="form-check-label" for="{{ item.key }}_{{ option_value }}">{{ option_label }}</label>
+                </div>
+                {% endfor %}
+              </div>
+              {% endfor %}
+
+              <div class="col-12 pt-2">
+                <h2 class="h5 fw-bold mb-3">3. Short answers</h2>
+              </div>
+              {% for item in form_blueprint.short_answer_questions %}
+              <div class="col-12">
+                <label class="form-label fw-semibold" for="answer_{{ item.key }}">{{ loop.index }}. {{ item.question }}</label>
+                <textarea class="form-control" id="answer_{{ item.key }}" name="answer_{{ item.key }}" rows="4" placeholder="{{ item.placeholder }}">{{ request.form.get('answer_' ~ item.key, '') }}</textarea>
+              </div>
+              {% endfor %}
+
+              <div class="col-12 d-flex flex-wrap gap-2">
+                <button class="btn btn-primary btn-lg" type="submit">Start Free Test</button>
+                <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('main.courses') }}">Explore Courses</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-3">Why this test helps</h2>
+            <div class="d-grid gap-3">
+              <div class="border rounded p-3"><strong>Find your level</strong><div class="small text-muted mt-1">Know whether you should start from basic, intermediate, or advanced.</div></div>
+              <div class="border rounded p-3"><strong>Choose the right course</strong><div class="small text-muted mt-1">Get recommendations based on your goal and weakest skill.</div></div>
+              <div class="border rounded p-3"><strong>Move forward after login</strong><div class="small text-muted mt-1">Students can save results and continue with the recommended learning path.</div></div>
+            </div>
+          </div>
+        </div>
+
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <span class="badge bg-success mb-3">Your Result</span>
+            <h2 class="h4 fw-bold mb-2">{{ result.recommended_level|title }} level recommended</h2>
+            <p class="text-muted mb-3">{{ result.summary }}</p>
+            <div class="row g-3 mb-3">
+              <div class="col-6"><div class="border rounded p-3 h-100"><div class="small text-muted">Overall</div><div class="h4 mb-0">{{ result.overall_score }}/100</div></div></div>
+              <div class="col-6"><div class="border rounded p-3 h-100"><div class="small text-muted">Grammar</div><div class="h4 mb-0">{{ result.grammar_score }}/100</div></div></div>
+              <div class="col-6"><div class="border rounded p-3 h-100"><div class="small text-muted">Reading</div><div class="h4 mb-0">{{ result.reading_score }}/100</div></div></div>
+              <div class="col-6"><div class="border rounded p-3 h-100"><div class="small text-muted">Writing</div><div class="h4 mb-0">{{ result.writing_score }}/100</div></div></div>
+            </div>
+            <p class="mb-3"><strong>Best next move:</strong> {{ result.fit_summary }}</p>
+            <div class="d-grid gap-2">
+              <a href="{{ login_target }}" class="btn btn-primary">Login to unlock full result</a>
+              <a href="{{ register_target }}" class="btn btn-outline-secondary">Create student account</a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

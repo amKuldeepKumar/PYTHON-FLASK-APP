@@ -1,0 +1,202 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Reading Questions • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Reading Questions{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xxl-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
+          <div>
+            <h4 class="mb-1">Generate Questions</h4>{% if selected_course %}<div class="small text-secondary mt-1">Selected course: {{ selected_course.title }}</div>{% endif %}
+            <div class="text-secondary small">Phase 4 + 6 — AI or manual question creation with stored answers, explanations, and review control.</div>
+          </div>
+          <div class="d-flex gap-2">{% if selected_course %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.course_detail', course_id=selected_course.id) }}">Back to Course</a>{% endif %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.reading_questions') }}">Clear Filter</a><a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_passages', course_id=selected_course_id) if selected_course_id else url_for('superadmin.reading_passages') }}">Reading Passages</a></div>
+        </div>
+
+        <form method="get" class="row g-3 mb-3"><div class="col-12"><label class="form-label">Select Reading Course</label><select class="form-select" name="course_id" onchange="this.form.submit()"><option value="">All reading questions</option>{% for course in passages|map(attribute='course')|select|list %}{% endfor %}{% if selected_course %}<option value="{{ selected_course.id }}" selected>{{ selected_course.title }}</option>{% endif %}</select></div></form><form method="post" class="row g-3">
+          {% if selected_course_id %}<input type="hidden" name="course_id" value="{{ selected_course_id }}">{% endif %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-12">
+            <label class="form-label">Passage</label>
+            <input type="hidden" name="course_id" value="{{ selected_course_id or '' }}"><select class="form-select" name="passage_id" required>
+              <option value="">Select passage</option>
+              {% for passage in passages %}
+                <option value="{{ passage.id }}" {% if selected_passage and selected_passage.id == passage.id %}selected{% endif %}>{{ passage.title }} • {{ passage.topic_title_snapshot }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Difficulty level</label>
+            <select class="form-select" name="level" required>
+              {% for level in level_choices %}
+                <option value="{{ level }}" {% if (selected_passage and selected_passage.level == level) or (not selected_passage and loop.first) %}selected{% endif %}>{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">MCQ count</label>
+            <input class="form-control" type="number" min="0" max="20" name="mcq_count" value="3">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Fill blank count</label>
+            <input class="form-control" type="number" min="0" max="20" name="fill_blank_count" value="3">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">True / False count</label>
+            <input class="form-control" type="number" min="0" max="20" name="true_false_count" value="3">
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="replace_existing" name="replace_existing">
+              <label class="form-check-label" for="replace_existing">Replace existing questions for this passage</label>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="rounded-4 border p-3 reading-panel-soft">
+              <div class="small text-secondary mb-1">Current question provider</div>
+              {% if default_provider %}
+                <div class="fw-semibold">{{ default_provider.name }}</div>
+                <div class="small text-secondary">{{ default_provider.provider_label }} • {{ 'Enabled' if default_provider.is_enabled else 'Disabled' }}</div>
+              {% else %}
+                <div class="fw-semibold">No provider configured</div>
+                <div class="small text-secondary">Set up the reading question registry first.</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12"><label class="form-label">Creation mode</label><select class="form-select" name="mode"><option value="ai" selected>AI generate</option><option value="manual">Manual create</option></select></div>
+          <div class="col-md-4"><label class="form-label">Manual type</label><select class="form-select" name="manual_question_type"><option value="mcq">MCQ</option><option value="fill_blank">Fill in the blank</option><option value="true_false">True / False</option></select></div>
+          <div class="col-md-8"><label class="form-label">Manual correct answer</label><input class="form-control" name="manual_correct_answer" placeholder="Correct answer"></div>
+          <div class="col-12"><label class="form-label">Manual question text</label><textarea class="form-control" name="manual_question_text" rows="4" placeholder="Write the question here."></textarea></div>
+          <div class="col-12"><label class="form-label">Manual options (one per line)</label><textarea class="form-control" name="manual_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C&#10;Option D"></textarea></div>
+          <div class="col-12"><label class="form-label">Manual explanation</label><textarea class="form-control" name="manual_explanation" rows="3" placeholder="Why this answer is correct."></textarea></div>
+          <div class="col-12 d-grid">
+            <button type="submit" class="btn btn-primary">Save Questions</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xxl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
+          <div>
+            <h4 class="mb-1">Question Library</h4>
+            <div class="text-secondary small">SuperAdmin-controlled question sets linked directly to generated passages, with stored answers and explanations.</div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.reading_api_registry', kind='question') }}">Provider Setup</a>
+            {% if selected_passage %}
+              <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_questions', course_id=selected_course_id) if selected_course_id else url_for('superadmin.reading_questions') }}">Clear Filter</a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if selected_passage %}
+          <div class="alert alert-info py-2 mb-3">Showing questions for <strong>{{ selected_passage.title }}</strong>.</div>
+
+          <div class="rounded-4 border p-3 mb-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
+              <div>
+                <div class="fw-semibold">Selected Passage Preview</div>
+                <div class="small text-secondary">{{ selected_passage.topic_title_snapshot }} • {{ selected_passage.level_label }} • {{ selected_passage.length_label }} • {{ selected_passage.word_count }} words</div>
+                <div class="small text-secondary">Provider: {{ selected_passage.provider_name_snapshot or 'System mock' }}</div>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <span class="badge {% if selected_passage.is_published %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ selected_passage.publication_label }}</span>
+                <span class="badge {% if selected_passage.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if selected_passage.is_active else 'Inactive' }}</span>
+              </div>
+            </div>
+            <div class="rounded-4 border p-3 reading-panel-soft mb-3" style="white-space: pre-wrap;">{{ selected_passage.content }}</div>
+            {% if selected_passage.generation_notes %}<div class="small text-secondary mb-3">{{ selected_passage.generation_notes }}</div>{% endif %}
+            <div class="d-flex gap-2 justify-content-end flex-wrap">
+              <form method="post" action="{{ url_for('superadmin.reading_passage_publish', passage_id=selected_passage.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm {% if selected_passage.is_published %}btn-outline-secondary{% else %}btn-outline-success{% endif %}" type="submit">{% if selected_passage.is_published %}Unpublish{% else %}Publish{% endif %}</button>
+              </form>
+              <form method="post" action="{{ url_for('superadmin.reading_passage_regenerate', passage_id=selected_passage.id) }}" onsubmit="return confirm('Regenerate this passage?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-outline-info" type="submit">Regenerate Passage</button>
+              </form>
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_passages', topic_id=selected_passage.topic_id) }}">Go to Passage Library</a>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if grouped_questions %}
+          <div class="d-flex flex-column gap-4">
+            {% for group in grouped_questions.values() %}
+  <div class="rounded-4 border p-3">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+      <div>
+        <div class="fw-semibold">{{ group["passage"].title if group["passage"] else 'Passage removed' }}</div>
+        <div class="small text-secondary">{{ group["passage"].topic_title_snapshot if group["passage"] else 'Unknown topic' }} • {{ group["items"]|length }} questions</div>
+      </div>
+      {% if group["passage"] %}
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_passages', topic_id=group['passage'].topic_id) }}">View Passage</a>
+      {% endif %}
+    </div>
+
+    <div class="d-flex flex-column gap-3">
+      {% for question in group["items"] %}
+                    <div class="rounded-4 border p-3 reading-panel-soft">
+                      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
+                        <div>
+                          <div class="fw-semibold">Q{{ question.display_order }} • {{ question.type_label }}</div>
+                          <div class="small text-secondary">{{ question.level_label }} • Provider: {{ question.provider_name_snapshot or 'System mock' }}</div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                          <span class="badge {% if question.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if question.is_active else 'Inactive' }}</span>
+                          <span class="badge text-bg-primary">{{ question.workflow_label }}</span>
+                        </div>
+                      </div>
+
+                      <div class="mb-2">{{ question.question_text }}</div>
+
+                      {% if question.options_json and question.options_json != '[]' %}
+                        <div class="small mb-2">
+                          <div class="fw-semibold mb-1">Options</div>
+                          <div>{{ question.options_json }}</div>
+                        </div>
+                      {% endif %}
+
+                      <div class="small text-secondary mb-2">Correct answer: <strong>{{ question.correct_answer or 'Not stored' }}</strong></div>
+                      {% if question.explanation %}<div class="small text-secondary mb-2">{{ question.explanation }}</div>{% endif %}
+
+                      <div class="d-flex gap-2 justify-content-end flex-wrap">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_question_edit', question_id=question.id) }}">Edit</a><form method="post" action="{{ url_for('superadmin.reading_question_submit_review', question_id=question.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-info" type="submit">Move to Review</button></form>
+                        <form method="post" action="{{ url_for('superadmin.reading_question_toggle', question_id=question.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button class="btn btn-sm {% if question.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" type="submit">{% if question.is_active %}Disable{% else %}Enable{% endif %}</button>
+                        </form>
+                        <form method="post" action="{{ url_for('superadmin.reading_question_delete', question_id=question.id) }}" onsubmit="return confirm('Delete this question?');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rounded-4 border p-4 text-center">
+            <div class="fw-semibold mb-1">No questions generated yet</div>
+            <div class="text-secondary small">Choose a passage on the left and let the AI pipeline build MCQ, fill blanks, and true/false sets.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

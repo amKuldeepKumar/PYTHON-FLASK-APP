@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- PHASE 7 / PHASE 11: layout theme bridge. Keeps frontend, auth, admin, student, and superadmin pages in sync with the active SuperAdmin theme. -->
+<html lang="en" data-theme="{{ active_theme_mode | default('dark') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="dark light">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Auth • Fluencify{% endblock %}</title>
+  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('theme.tokens_css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/components.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/layouts.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-fx.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-fonts.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/alphabet-background.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/pages-auth.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/public-theme.css') }}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  {% block head %}{% endblock %}
+<link href="{{ url_for('static', filename='shared/css/theme-stack.css') }}" rel="stylesheet">
+<link href="{{ url_for('theme.overrides_css') }}" rel="stylesheet">
+</head>
+<body class="auth-body public-theme{% if active_theme and active_theme.header_sticky_enabled %} has-sticky-header{% endif %}">
+  {% include "layout/_header.html" %}
+  {% from "layout/macros.html" import flash_messages %}
+
+  <main class="py-4">
+    <div class="auth-wrap auth-with-topbar">
+      <div class="auth-left">
+        <div class="auth-illustration">
+          <div class="auth-illu-box"></div>
+        </div>
+      </div>
+      <div class="auth-right">
+        <div class="auth-card">
+          {{ flash_messages() }}
+          {% block content %}{% endblock %}
+        </div>
+        <div class="text-center mt-3 small text-muted">© 2026 Fluencify AI</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/ai-voice.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/browser-notifications.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/alphabet-background.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Listening Topic{% endblock %}
+{% block page_title %}Edit Listening Topic{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="card shadow-sm border-0"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <div class="small text-uppercase text-muted">Listening • Topic → AI Script → Edit → TTS Audio → Questions</div>
+        <h2 class="h4 mb-0">{{ lesson.title }}</h2>
+      </div>
+      <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.listening_topics', course_id=course.id) }}">Back</a>
+    </div>
+    <form method="post" class="row g-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-md-6"><label class="form-label">Topic Title</label><input class="form-control" type="text" name="title" value="{{ lesson.title }}" required></div>
+      <div class="col-md-3"><label class="form-label">Estimated Minutes</label><input class="form-control" type="number" name="estimated_minutes" min="1" value="{{ lesson.estimated_minutes or 3 }}"></div>
+      <div class="col-md-3"><label class="form-label">Workflow</label><select class="form-select" name="workflow_status">
+        {% for status in ['draft','review','published','approved','rejected'] %}
+        <option value="{{ status }}" {% if (lesson.workflow_status or 'draft') == status %}selected{% endif %}>{{ status.title() }}</option>
+        {% endfor %}
+      </select></div>
+      <div class="col-12"><label class="form-label">Script / Audio Text</label><textarea class="form-control" rows="10" name="script_text">{{ lesson.explanation_tts_text or lesson.explanation_text or '' }}</textarea><div class="small text-muted mt-2">Recommended duration rule: Basic ≈ 1.5–2.5 min, Intermediate ≈ 3–4 min, Advanced ≈ 4–5 min. Edit the AI script here before regenerating TTS audio.</div></div>
+      <div class="col-12 d-flex gap-2 flex-wrap"><button class="btn btn-primary" type="submit">Save Topic</button><button class="btn btn-outline-dark" type="submit" formaction="{{ url_for('superadmin.listening_topic_generate_script', lesson_id=lesson.id) }}" formmethod="post">Regenerate AI Script</button><button class="btn btn-outline-primary" type="submit" formaction="{{ url_for('superadmin.listening_topic_generate_audio', lesson_id=lesson.id) }}" formmethod="post">Regenerate TTS Audio</button><a class="btn btn-outline-secondary" href="{{ url_for('superadmin.listening_questions', course_id=course.id, lesson_id=lesson.id) }}">Open Questions</a></div>
+    </form>
+  </div></div>
+</div>
+{% endblock %}

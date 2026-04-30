@@ -1,0 +1,67 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Overview • Admin • Fluencify{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="surface dashboard-hero rounded-4 p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <div class="text-uppercase small hero-kicker fw-semibold mb-2">Phase 2 / 3 Admin Console</div>
+          <h2 class="fw-bold mb-1">Admin Overview</h2>
+          <div class="dashboard-note">Use the live sidebar for users, support and roadmap placeholders for course builder features.</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge text-bg-success">Students • LIVE</span>
+          <span class="badge text-bg-warning">Courses • Phase 5</span>
+          <a class="btn btn-sm btn-outline-light" href="{{ url_for('admin.speaking_analytics') }}"><i class="bi bi-graph-up-arrow me-1"></i>Speaking Analytics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% for title, value, icon, note in [
+    ('Students', metrics.student_count, 'bi-people-fill', 'Assigned to your tenant'),
+    ('Team Members', metrics.staff_count, 'bi-person-badge-fill', 'Staff under your tenant'),
+    ('Live Students', metrics.live_students, 'bi-broadcast-pin', 'Active in last 7 days'),
+    ('Monthly Revenue', '₹' ~ metrics.monthly_revenue, 'bi-cash-coin', 'Revenue dashboard later'),
+    ('Course Hub', metrics.active_courses, 'bi-journal-richtext', 'Courses currently used'),
+    ('Teachers', metrics.teacher_count if metrics.teacher_count is defined else 0, 'bi-person-workspace', 'Teaching accounts in your scope'),
+    ('Avg Accuracy', (metrics.avg_accuracy if metrics.avg_accuracy is defined else 0) ~ '%', 'bi-bullseye', 'Latest learner answer quality'),
+  ] %}
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card dashboard-card border-0 h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3"><div><div class="small card-kicker text-uppercase">{{ title }}</div><div class="metric-value fw-bold mt-2">{{ value }}</div></div><span class="menu-icon"><i class="bi {{ icon }}"></i></span></div>
+        <div class="small metric-note">{{ note }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="col-12 col-xl-8">
+    <div class="card chart-card border-0">
+      <div class="card-body">
+        <h5 class="fw-bold mb-1">Student Growth</h5>
+        <div class="small chart-subtitle mb-3">Last 6 months student registrations in your tenant</div>
+        <div class="chart-wrap"><canvas id="adminGrowthChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-xl-4">
+    <div class="card status-card border-0">
+      <div class="card-body">
+        <h5 class="fw-bold mb-2">Live & Coming Soon</h5>
+        <div class="list-group list-group-flush status-list">
+          <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between"><span>Students</span><span class="badge text-bg-success">LIVE</span></div>
+          <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between"><span>Support Desk</span><span class="badge text-bg-success">LIVE</span></div>
+          <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between"><span>Add Course</span><span class="badge text-bg-warning">Phase 5</span></div>
+          <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between"><span>Enrollments</span><span class="badge text-bg-warning">Phase 5</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='shared/js/chart-admin-dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "layout/base.html" %}
+{% block title %}Contact • Fluencify{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h1 class="fw-bold mb-2">Contact Us</h1>
+      <p class="text-muted mb-0">Have a question, need support, or want to learn more about Fluencify?</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h4 class="fw-bold mb-3">Get in Touch</h4>
+            <p class="text-muted">We’re here to support students, parents, and institutions with practical guidance.</p>
+            <div class="mb-2"><strong>Email:</strong> support@fluencify.com</div>
+            <div class="mb-2"><strong>Phone:</strong> +91 00000 00000</div>
+            <div class="mb-0"><strong>Hours:</strong> Monday to Saturday, 9:00 AM to 6:00 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h4 class="fw-bold mb-3">Quick Links</h4>
+            <div class="d-grid gap-2">
+              <a href="{{ url_for('main.courses') }}" class="btn btn-outline-light">Browse Courses</a>
+              <a href="{{ url_for('main.about') }}" class="btn btn-outline-light">About Fluencify</a>
+              <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Create Account</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

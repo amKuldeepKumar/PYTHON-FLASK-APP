@@ -1,0 +1,14 @@
+.course-card-shell{position:relative;overflow:hidden}
+.course-badge{position:absolute;top:14px;right:14px;z-index:3;padding:.45rem .7rem;border-radius:14px;color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.25);text-align:right;max-width:180px}
+.course-badge__title{font-weight:700;font-size:.82rem;line-height:1}
+.course-badge__subtitle{font-size:.7rem;opacity:.9;margin-top:.18rem}
+.course-badge--gradient{background:linear-gradient(135deg,#7c3aed,#2563eb)}
+.course-badge--gold{background:linear-gradient(135deg,#f59e0b,#eab308);color:#1f2937}
+.course-badge--glass{background:rgba(255,255,255,.16);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.24)}
+.course-badge--ribbon{background:linear-gradient(135deg,#ef4444,#f97316)}
+@keyframes badgePulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes badgeGlow{0%{box-shadow:0 0 0 rgba(99,102,241,0)}50%{box-shadow:0 0 24px rgba(99,102,241,.5)}100%{box-shadow:0 0 0 rgba(99,102,241,0)}}
+@keyframes badgeShimmer{0%{filter:brightness(1)}50%{filter:brightness(1.2)}100%{filter:brightness(1)}}
+.badge-anim-pulse{animation:badgePulse 1.8s infinite}
+.badge-anim-glow{animation:badgeGlow 2s infinite}
+.badge-anim-shimmer{animation:badgeShimmer 2s infinite}

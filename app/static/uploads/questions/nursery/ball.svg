@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-labelledby="title desc">
+  <title id="title">Ball</title>
+  <desc id="desc">A blue ball for nursery practice.</desc>
+  <rect width="320" height="240" rx="28" fill="#eff6ff"/>
+  <circle cx="160" cy="128" r="74" fill="#3b82f6"/>
+  <path d="M102 160c26-28 70-50 126-46" fill="none" stroke="#bfdbfe" stroke-width="10" stroke-linecap="round"/>
+  <path d="M113 95c29 18 52 55 51 106" fill="none" stroke="#dbeafe" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="128" cy="94" r="13" fill="#93c5fd" opacity="0.7"/>
+</svg>

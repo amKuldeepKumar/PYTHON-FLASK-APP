@@ -1,0 +1,155 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ 'Interview Prep' if is_interview_mode else 'Speaking Practice' }} • Fluencify{% endblock %}
+{% block page_title %}{{ 'Interview Prep' if is_interview_mode else 'Speaking Practice' }}{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-speaking-home.css') }}">{% endblock %}
+
+{% block content %}
+<div class="student-track-shell track-speaking s-hero">
+  <div class="glass-card p-4 p-lg-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <div class="small text-uppercase text-secondary mb-2">Phase 6E • Analytics & Progress live</div>
+        <h2 class="fw-bold mb-3">{{ 'Interview daily. Track growth. Earn coins.' if is_interview_mode else 'Speak daily. Track growth. Earn coins.' }}</h2>
+        <p class="text-secondary mb-4">Your speaking module now tracks completions, rewards strong attempts, blocks unrealistically fast submissions, and shows score trends plus weak areas so progress is visible.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="pill">Active topics <strong>{{ topics|length }}</strong></span>
+          <span class="pill">Active prompts <strong>{{ active_prompt_count }}</strong></span>
+          <span class="pill">Completed sessions <strong>{{ motivation_stats.speaking_sessions_completed if motivation_stats else 0 }}</strong></span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          {% if course %}<a class="btn btn-outline-light btn-sm" href="{{ url_for('student.course_detail', course_id=course.id) }}"><i class="bi bi-arrow-left me-1"></i>Back to Course</a>{% endif %}<a class="btn btn-outline-light btn-sm" href="{{ url_for('student.speaking_analytics') }}"><i class="bi bi-graph-up-arrow me-1"></i>View Analytics</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="metric-box">
+              <div class="small text-secondary mb-2">Current streak</div>
+              <div class="metric-value">{{ motivation_stats.streak if motivation_stats else 0 }}</div>
+              <div class="small text-secondary mt-2">days</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="metric-box">
+              <div class="small text-secondary mb-2">Coin balance</div>
+              <div class="metric-value">{{ motivation_stats.coin_balance if motivation_stats else 0 }}</div>
+              <div class="small text-secondary mt-2">wallet</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="metric-box">
+              <div class="small text-secondary mb-2">Longest streak</div>
+              <div class="metric-value">{{ motivation_stats.longest_streak if motivation_stats else 0 }}</div>
+              <div class="small text-secondary mt-2">days</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="metric-box">
+              <div class="small text-secondary mb-2">Last 14 days</div>
+              <div class="metric-value">{{ motivation_stats.completed_last_14_days if motivation_stats else 0 }}</div>
+              <div class="small text-secondary mt-2">completions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card p-4 intelligence-strip">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <div class="small text-uppercase text-secondary mb-2">Phase 12 • AI Intelligence</div>
+        <h4 class="fw-bold mb-2">Adaptive speaking guidance</h4>
+        <p class="text-secondary mb-0">{{ intelligence_track.action }} {{ intelligence_track.reason }}</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="pill">Current {{ intelligence_track.current_band }}</span>
+        <span class="pill">Recommended {{ intelligence_track.recommended_band }}</span>
+        <span class="pill">Confidence {{ intelligence_track.confidence }}%</span>
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('student.ai_intelligence') }}">Open AI plan</a>
+      </div>
+    </div>
+  </div>
+
+  {% if topics %}
+    <div class="row g-4">
+      {% for topic in topics %}
+        <div class="col-md-6 col-xl-4">
+          <div class="topic-card p-4">
+            <div class="d-flex justify-content-between gap-2 mb-2">
+              <div class="small text-uppercase text-secondary">{{ 'Interview topic' if is_interview_mode else 'Speaking topic' }}</div>
+              <span class="badge text-bg-dark">{{ topic.active_prompt_count if topic.active_prompt_count else 1 }} ready</span>
+            </div>
+            <h4 class="fw-bold mb-2">{{ topic.title }}</h4>
+            <p class="text-secondary mb-3">{{ topic.description or 'Practice this topic with random prompts and rule-based evaluation.' }}</p>
+            <form method="get" action="{{ url_for('student.course_interview_start', course_id=course.id) if course and is_interview_mode else (url_for('student.course_speaking_start', course_id=course.id) if course else url_for('student.speaking_start')) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="topic_id" value="{{ topic.id }}">
+              <button class="btn btn-primary w-100" type="submit">{{ 'Start Interview Practice' if is_interview_mode else 'Start Speaking' }}</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state-card">
+      <div class="title">No speaking topics are available right now.</div>
+      <p class="desc mb-0">
+        Topics will appear here only after they are active, published, and have at least one active prompt.
+      </p>
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="glass-card p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Recent {{ "interview" if is_interview_mode else "speaking" }} sessions</h4>
+          <a href="{{ url_for('student.course_interview_history', course_id=course.id) if course and is_interview_mode else (url_for('student.course_speaking_history', course_id=course.id) if course else url_for('student.speaking_history')) }}" class="small text-decoration-none">View full history</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead><tr><th>Prompt</th><th>Status</th><th>Score</th><th>Coins</th></tr></thead>
+            <tbody>
+              {% for row in recent_sessions %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ row.prompt.title }}</div>
+                    <div class="small text-secondary">{{ row.topic.title }}{% if row.course %} • {{ row.course.title }}{% endif %}</div>
+                  </td>
+                  <td class="text-capitalize">{{ (row.status or 'ready').replace('_', ' ') }}</td>
+                  <td>{{ '%.0f'|format(row.evaluation_score or 0) }}/10</td>
+                  <td>{{ row.coins_awarded or 0 }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="text-center text-secondary py-4">No {{ "interview" if is_interview_mode else "speaking" }} sessions yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="glass-card p-4 h-100">
+        <h4 class="mb-3">Recent coin rewards</h4>
+        <div class="d-flex flex-column gap-3">
+          {% for reward in (motivation_stats.latest_rewards if motivation_stats else []) %}
+            <div class="border rounded-4 p-3">
+              <div class="d-flex justify-content-between gap-3">
+                <div>
+                  <div class="fw-semibold">{{ reward.title }}</div>
+                  <div class="small text-secondary">{{ reward.description or 'Speaking motivation reward' }}</div>
+                </div>
+                <div class="fw-bold">+{{ reward.coins }}</div>
+              </div>
+            </div>
+          {% else %}
+            <div class="text-secondary">Finish a speaking session to start earning coins.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

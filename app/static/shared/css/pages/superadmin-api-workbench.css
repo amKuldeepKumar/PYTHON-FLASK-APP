@@ -1,0 +1,68 @@
+.api-workbench-page {
+  gap: 1.35rem;
+}
+
+.api-workbench-page .workbench-tab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.api-workbench-page .workbench-tab-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(245,249,255,0.92));
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.api-workbench-page .workbench-tab-card:hover,
+.api-workbench-page .workbench-tab-card.active {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+}
+
+.api-workbench-page .workbench-tab-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--heading-text, #0f172a);
+}
+
+.api-workbench-page .workbench-tab-meta {
+  font-size: 0.84rem;
+  color: var(--text-muted, #64748b);
+}
+
+.api-workbench-page .workbench-table tbody td {
+  vertical-align: top;
+}
+
+.api-workbench-page .workbench-action-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.api-workbench-page .workbench-action-stack form {
+  margin: 0;
+}
+
+.api-workbench-page textarea.form-control {
+  min-height: 5.25rem;
+}
+
+@media (max-width: 767px) {
+  .api-workbench-page .workbench-action-stack {
+    flex-direction: column;
+  }
+
+  .api-workbench-page .workbench-action-stack .btn {
+    width: 100%;
+  }
+}

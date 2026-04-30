@@ -1,0 +1,348 @@
+/* Front-page theme bridge: ensures public pages, auth pages, and CMS blocks follow the active SuperAdmin theme. */
+
+:root {
+  --primary-rgb: 13, 110, 253;
+  --text-strong: var(--heading-text, var(--text));
+  --nav-bg: color-mix(in srgb, var(--surface) 82%, transparent);
+  --footer-bg: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  --hero-bg: linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, transparent), color-mix(in srgb, var(--surface) 96%, transparent));
+  --card-bg: var(--surface);
+  --card-bg-alt: var(--surface-2);
+  --button-text: #ffffff;
+  --button-outline-text: var(--text);
+  --public-display-font: "Bahnschrift SemiBold", "Segoe UI Variable Display", "Aptos Display", sans-serif;
+  --public-body-font: "Aptos", "Segoe UI Variable Text", "Trebuchet MS", sans-serif;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--public-body-font);
+}
+
+a { color: var(--primary); }
+a:hover { color: color-mix(in srgb, var(--primary) 82%, white); }
+
+.public-theme .navbar {
+  background: var(--nav-bg) !important;
+  border-bottom: 1px solid var(--border) !important;
+  backdrop-filter: blur(10px);
+}
+
+.public-theme .navbar-brand,
+.public-theme .navbar-brand:hover,
+.public-theme .nav-link,
+.public-theme .nav-link:hover,
+.public-theme .nav-link:focus,
+.public-theme .navbar-text,
+.public-theme .navbar .dropdown-toggle {
+  color: var(--text) !important;
+}
+
+.public-theme .navbar .nav-link.active,
+.public-theme .navbar .nav-link.show,
+.public-theme .navbar .dropdown-item.active,
+.public-theme .navbar .dropdown-item:active {
+  color: var(--button-text) !important;
+  background: color-mix(in srgb, var(--primary) 28%, transparent) !important;
+}
+
+.public-theme .dropdown-menu {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow);
+}
+
+.public-theme .dropdown-item { color: var(--text) !important; }
+.public-theme .dropdown-item:hover,
+.public-theme .dropdown-item:focus {
+  background: color-mix(in srgb, var(--primary) 16%, transparent) !important;
+}
+
+.public-theme .brand-mark {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.public-theme .btn {
+  border-radius: var(--button-radius, 12px) !important;
+}
+
+.public-theme .btn-primary,
+.public-theme .bg-primary,
+.public-theme .badge.bg-primary,
+.public-theme .badge.text-bg-primary {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--button-text) !important;
+}
+
+.public-theme .btn-primary:hover,
+.public-theme .btn-primary:focus,
+.public-theme .btn-primary:active {
+  background: color-mix(in srgb, var(--primary) 88%, black) !important;
+  border-color: color-mix(in srgb, var(--primary) 88%, black) !important;
+  color: var(--button-text) !important;
+}
+
+.public-theme .btn-outline-light,
+.public-theme .btn-outline-secondary {
+  color: var(--button-outline-text) !important;
+  border-color: var(--border) !important;
+  background: color-mix(in srgb, var(--surface) 60%, transparent) !important;
+}
+
+.public-theme .btn-outline-light:hover,
+.public-theme .btn-outline-secondary:hover {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface)) !important;
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--border)) !important;
+  color: var(--text) !important;
+}
+
+.public-theme .card,
+.public-theme .surface,
+.public-theme .auth-card,
+.public-theme .section-card,
+.public-theme .cms-slide-card,
+.public-theme .cms-course-card {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.public-theme .card .border,
+.public-theme .card.border,
+.public-theme .border {
+  border-color: var(--border) !important;
+}
+
+.public-theme .text-muted,
+.public-theme .frontend-muted,
+.public-theme .small.text-muted,
+.public-theme p.text-muted,
+.public-theme .lead.text-muted,
+.public-theme .auth-right .text-muted {
+  color: var(--muted) !important;
+}
+
+.public-theme h1,
+.public-theme h2,
+.public-theme h3,
+.public-theme h4,
+.public-theme h5,
+.public-theme h6,
+.public-theme .display-1,
+.public-theme .display-2,
+.public-theme .display-3,
+.public-theme .display-4,
+.public-theme .display-5,
+.public-theme .display-6 {
+  font-family: var(--public-display-font);
+  color: var(--heading-text, var(--text)) !important;
+  letter-spacing: -0.035em;
+}
+
+.public-theme p,
+.public-theme li,
+.public-theme .btn,
+.public-theme .form-control,
+.public-theme .form-select,
+.public-theme .dropdown-item,
+.public-theme .accordion-button,
+.public-theme .alert,
+.public-theme .badge,
+.public-theme .navbar,
+.public-theme .navbar-brand {
+  font-family: var(--public-body-font);
+}
+
+.public-theme .badge:not(.bg-primary):not(.text-bg-primary):not(.bg-success):not(.bg-danger):not(.bg-warning):not(.bg-info) {
+  background: var(--badge-bg) !important;
+  color: var(--badge-text) !important;
+  border: 1px solid var(--badge-border) !important;
+}
+
+.public-theme .bg-success,
+.public-theme .badge.bg-success,
+.public-theme .text-bg-success {
+  background: color-mix(in srgb, var(--primary) 65%, #198754) !important;
+  color: var(--button-text) !important;
+}
+
+.public-theme .bg-secondary,
+.public-theme .badge.bg-secondary,
+.public-theme .text-bg-secondary {
+  background: color-mix(in srgb, var(--surface-2) 88%, #6c757d) !important;
+  color: var(--text) !important;
+}
+
+.public-theme .bg-warning,
+.public-theme .badge.bg-warning,
+.public-theme .text-bg-warning {
+  background: color-mix(in srgb, var(--primary) 30%, #ffc107) !important;
+  color: #111 !important;
+}
+
+.public-theme .bg-info,
+.public-theme .badge.bg-info,
+.public-theme .text-bg-info {
+  background: color-mix(in srgb, var(--primary) 52%, #0dcaf0) !important;
+  color: var(--button-text) !important;
+}
+
+.public-theme .hero,
+.public-theme .cms-hero-banner,
+.public-theme .auth-left,
+.public-theme .auth-illustration {
+  background: var(--hero-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.public-theme .auth-card,
+.public-theme .auth-illustration,
+.public-theme .auth-left {
+  border-color: var(--border) !important;
+}
+
+.public-theme .auth-illu-box {
+  background:
+    radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--primary) 30%, transparent), transparent 55%),
+    radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--surface-2) 85%, var(--primary)), transparent 55%);
+}
+
+.public-theme footer {
+  background: var(--footer-bg);
+  border-top-color: var(--border) !important;
+  color: var(--muted);
+  font-family: var(--public-body-font);
+}
+
+.public-theme .form-control:focus,
+.public-theme .form-select:focus,
+.public-theme textarea:focus,
+.public-theme select:focus {
+  border-color: color-mix(in srgb, var(--primary) 56%, transparent) !important;
+  box-shadow: 0 0 0 0.18rem color-mix(in srgb, var(--primary) 18%, transparent) !important;
+}
+
+.public-theme .pagination .page-link {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.public-theme .pagination .page-item.active .page-link,
+.public-theme .pagination .page-link:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--button-text);
+}
+
+.public-theme .alert {
+  border-radius: calc(var(--button-radius, 12px) + 2px);
+  border-color: var(--border);
+}
+
+.public-theme .alert-primary {
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  color: var(--text);
+}
+
+.public-theme .alert-secondary,
+.public-theme .alert-light {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+
+/* Strong public-page bridge so light/colorful presets visibly repaint the full front site. */
+.public-theme,
+.public-theme main,
+.public-theme section,
+.public-theme .container,
+.public-theme .container-fluid {
+  color: var(--text);
+}
+
+.public-theme .site-navbar,
+.public-theme .navbar,
+.public-theme .navbar-collapse {
+  background: color-mix(in srgb, var(--surface) 84%, transparent) !important;
+}
+
+.public-theme .dropdown-menu,
+.public-theme .dropdown-item,
+.public-theme .list-group-item,
+.public-theme .accordion-item,
+.public-theme .accordion-button,
+.public-theme .table,
+.public-theme .table > :not(caption) > * > * {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.public-theme .table,
+.public-theme .accordion-item,
+.public-theme .accordion-button,
+.public-theme .list-group-item,
+.public-theme .bg-light,
+.public-theme .bg-white,
+.public-theme .bg-body,
+.public-theme .bg-body-secondary,
+.public-theme .bg-body-tertiary,
+.public-theme .text-bg-light,
+.public-theme .alert-light,
+.public-theme .alert-secondary {
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.public-theme .text-dark,
+.public-theme .text-black,
+.public-theme .text-body,
+.public-theme .link-dark,
+.public-theme .table-dark,
+.public-theme .table-light {
+  color: var(--text) !important;
+}
+
+.public-theme .btn-light,
+.public-theme .btn-secondary,
+.public-theme .btn-outline-primary {
+  background: color-mix(in srgb, var(--surface) 84%, transparent) !important;
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border)) !important;
+  color: var(--text) !important;
+}
+
+.public-theme .btn-light:hover,
+.public-theme .btn-secondary:hover,
+.public-theme .btn-outline-primary:hover {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface)) !important;
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.public-theme .hero,
+.public-theme .cms-shell-section,
+.public-theme .cms-slide-card,
+.public-theme .cms-course-card,
+.public-theme .faq-item,
+.public-theme .contact-card,
+.public-theme .pricing-card,
+.public-theme .feature-card {
+  background: color-mix(in srgb, var(--surface) 94%, transparent) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.public-theme .navbar .btn,
+.public-theme .site-navbar .btn {
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.public-theme .navbar .nav-link.active {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface)) !important;
+  color: var(--heading-text, var(--text)) !important;
+}

@@ -1,0 +1,50 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Certificates • Fluencify{% endblock %}
+{% block page_title %}Certificates{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent">
+      <h5 class="mb-0">Certificate Status</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Course</th><th>Completion</th><th>Status</th><th>Certificate Code</th><th>Profile Readiness</th></tr></thead>
+          <tbody>
+          {% for row in records %}
+            <tr>
+              <td>{{ row.course.title }}</td>
+              <td>{{ row.completion }}%</td>
+              <td>
+                {% if row.record %}
+                  {% if row.record.status == "eligible" %}
+                    <span class="badge text-bg-success">Eligible</span>
+                  {% elif row.record.status == "profile_pending" %}
+                    <span class="badge text-bg-warning text-dark">Profile Pending</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">{{ row.record.status|replace('_', ' ')|title }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge text-bg-secondary">In Progress</span>
+                {% endif %}
+              </td>
+              <td>{{ row.record.certificate_code if row.record and row.record.certificate_code else 'Pending' }}</td>
+              <td>
+                {% if current_user.father_name and current_user.address %}
+                  <span class="badge text-bg-success">Ready</span>
+                {% else %}
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('account.profile') }}">Complete profile</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-muted">No course records yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

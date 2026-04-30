@@ -1,0 +1,30 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Writing Tasks • Fluencify{% endblock %}
+{% block page_title %}Writing Tasks{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4"><div><h2 class="mb-1">Writing Tasks</h2><div class="text-muted">Create course-linked writing tasks with controlled length and AI-ready evaluation.</div></div><a href="{{ url_for('superadmin.courses') }}" class="btn btn-outline-secondary">Back to Courses</a></div>
+<div class="row g-4">
+  <div class="col-lg-4"><div class="card border-0 shadow-sm"><div class="card-body p-4">
+    <form method="get" class="mb-3"><label class="form-label">Select Writing Course</label><select name="course_id" class="form-select" onchange="this.form.submit()"><option value="">Choose course</option>{% for course in course_choices %}<option value="{{ course.id }}" {% if selected_course_id==course.id %}selected{% endif %}>{{ course.title }}</option>{% endfor %}</select></form>
+    {% if selected_course %}
+    <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-2"><label class="form-label">Topic</label><select class="form-select" name="topic_id">{% for topic in topics %}<option value="{{ topic.id }}">{{ topic.title }}</option>{% endfor %}</select></div>
+      <div class="mb-2"><label class="form-label">Title</label><input class="form-control" name="title" required></div>
+      <div class="mb-2"><label class="form-label">Task Type</label><select class="form-select" name="task_type">{% for item in task_type_choices %}<option value="{{ item }}">{{ item|title }}</option>{% endfor %}</select></div>
+      <div class="mb-2"><label class="form-label">Level</label><select class="form-select" name="level">{% for item in level_choices %}<option value="{{ item }}">{{ item|title }}</option>{% endfor %}</select></div>
+      <div class="row g-2"><div class="col-6"><label class="form-label">Min Words</label><input class="form-control" type="number" min="0" name="min_words" value="80"></div><div class="col-6"><label class="form-label">Max Words</label><input class="form-control" type="number" min="0" name="max_words"></div></div>
+      <div class="form-text mb-2">Set both values to keep student writing inside a controlled range.</div>
+      <div class="row g-2 mt-1"><div class="col-6"><label class="form-label">Course Level</label><input class="form-control" type="number" min="1" max="{{ selected_course.max_level or 1 }}" name="course_level_number"></div><div class="col-6"><label class="form-label">Display Order</label><input class="form-control" type="number" min="0" name="display_order" value="0"></div></div>
+      <div class="mb-2 mt-2"><label class="form-label">Language</label><select class="form-select" name="language_code">{% for code,label in language_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+      <div class="mb-2"><label class="form-label">Instructions</label><textarea class="form-control" rows="6" name="instructions" required></textarea></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" name="is_active" checked><label class="form-check-label">Active</label></div>
+      <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="is_published" checked><label class="form-check-label">Published</label></div>
+      <button class="btn btn-primary w-100">Create Task</button>
+    </form>
+    {% else %}<div class="text-muted">Select a writing course first.</div>{% endif %}
+  </div></div></div>
+  <div class="col-lg-8"><div class="card border-0 shadow-sm"><div class="card-body p-4">
+    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Task</th><th>Type</th><th>Length Control</th><th>Status</th><th></th></tr></thead><tbody>{% for task in tasks %}<tr><td><div class="fw-semibold">{{ task.title }}</div><div class="small text-muted">{{ task.topic_title_snapshot }}</div></td><td>{{ task.type_label }}</td><td>{{ task.length_label }}</td><td>{% if task.is_active %}Active{% else %}Inactive{% endif %}</td><td class="text-end"><a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.writing_task_edit', task_id=task.id) }}">Edit</a><form method="post" action="{{ url_for('superadmin.writing_task_toggle', task_id=task.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-warning">Toggle</button></form><form method="post" action="{{ url_for('superadmin.writing_task_delete', task_id=task.id) }}" class="d-inline" onsubmit="return confirm('Delete this task?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-danger">Delete</button></form></td></tr>{% else %}<tr><td colspan="5" class="text-center text-muted py-4">No writing tasks found.</td></tr>{% endfor %}</tbody></table></div>
+  </div></div></div>
+</div>
+{% endblock %}

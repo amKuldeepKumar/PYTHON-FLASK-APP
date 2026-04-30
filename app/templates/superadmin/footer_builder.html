@@ -1,0 +1,293 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Footer Builder • SuperAdmin{% endblock %}
+{% block page_title %}Footer Builder{% endblock %}
+
+{% block content %}
+<div class="footer-builder-shell">
+  <form method="POST" id="footerBuilderForm">
+    {{ form.hidden_tag() }}
+    <div class="row g-4">
+      <div class="col-xl-4">
+        <div class="builder-card h-100">
+          <div class="builder-card-head">
+            <div>
+              <div class="builder-kicker">Footer setup</div>
+              <h3>Footer wizard</h3>
+            </div>
+            <span class="builder-pill">Theme matched</span>
+          </div>
+
+          <label class="form-label">{{ form.footer_columns.label }}</label>
+          {{ form.footer_columns(class='form-control mb-3', id='footer_columns') }}
+
+          <label class="form-label">{{ form.footer_logo_url.label }}</label>
+          {{ form.footer_logo_url(class='form-control mb-3', id='footer_logo_url', placeholder='https://example.com/logo.png') }}
+
+          <label class="form-label">{{ form.footer_copyright.label }}</label>
+          {{ form.footer_copyright(class='form-control mb-4', id='footer_copyright') }}
+
+          <div class="builder-kicker mb-2">Pre-installed widgets</div>
+          <div class="widget-grid">
+            <button type="button" class="widget-card js-footer-preset" data-preset="about_brand"><i class="fa-solid fa-circle-info"></i><span>About Brand</span><small>Wide intro block</small></button>
+            <button type="button" class="widget-card js-footer-preset" data-preset="quick_links"><i class="fa-solid fa-link"></i><span>Quick Links</span><small>Navigation list</small></button>
+            <button type="button" class="widget-card js-footer-preset" data-preset="contact_info"><i class="fa-solid fa-address-book"></i><span>Contact Info</span><small>Email, phone, address</small></button>
+            <button type="button" class="widget-card js-footer-preset" data-preset="social_links"><i class="fa-solid fa-share-nodes"></i><span>Social Links</span><small>Icons auto-activate</small></button>
+            <button type="button" class="widget-card js-footer-preset" data-preset="newsletter"><i class="fa-solid fa-envelope-open-text"></i><span>Newsletter</span><small>CTA block</small></button>
+            <button type="button" class="widget-card js-footer-preset" data-preset="opening_hours"><i class="fa-regular fa-clock"></i><span>Opening Hours</span><small>Business schedule</small></button>
+          </div>
+
+          <div class="d-grid gap-2 mt-3">
+            <button type="button" class="btn btn-primary" id="loadFooterStarterPack">Load starter footer</button>
+            <button type="button" class="btn btn-outline-light" id="clearFooterWidgets">Clear widgets</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="builder-card h-100">
+          <div class="builder-card-head">
+            <div>
+              <div class="builder-kicker">Smart social section</div>
+              <h3>Social links</h3>
+            </div>
+            <span class="builder-pill">Auto icon map</span>
+          </div>
+
+          <div class="row g-3 social-form-grid">
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="facebook" placeholder="Facebook link"></div>
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="instagram" placeholder="Instagram link"></div>
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="youtube" placeholder="YouTube link"></div>
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="linkedin" placeholder="LinkedIn link"></div>
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="x" placeholder="X / Twitter link"></div>
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="whatsapp" placeholder="WhatsApp link"></div>
+            <div class="col-12"><input type="url" class="form-control js-social-input" data-platform="telegram" placeholder="Telegram link"></div>
+          </div>
+
+          <div class="d-grid gap-2 mt-3">
+            <button type="button" class="btn btn-outline-light" id="syncSocialWidget">Sync social widget into footer</button>
+          </div>
+
+          <div class="social-preview mt-3" id="socialPreview"></div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="builder-card h-100">
+          <div class="builder-card-head">
+            <div>
+              <div class="builder-kicker">Widget JSON editor</div>
+              <h3>Advanced editor</h3>
+            </div>
+            <span class="builder-pill">Column aware</span>
+          </div>
+          {{ form.footer_widgets_json(class='form-control font-monospace builder-json', rows='19', id='footer_widgets_json') }}
+          <div class="form-text mt-2">Supported widget types: <code>links</code>, <code>contact</code>, <code>social</code>, <code>newsletter</code>, <code>text</code>, <code>hours</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="builder-card mt-4">
+      <div class="builder-card-head">
+        <div>
+          <div class="builder-kicker">Live result</div>
+          <h3>Footer preview</h3>
+        </div>
+        <span class="builder-pill" id="columnBadge">4 columns</span>
+      </div>
+      <div id="footerLivePreview"></div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2 flex-wrap">
+      <button type="submit" class="btn btn-primary">Save Footer Builder</button>
+      <button type="button" class="btn btn-outline-light" id="formatFooterJson">Format JSON</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.footer-builder-shell .builder-card{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));border:1px solid var(--border);border-radius:24px;padding:1.35rem;box-shadow:var(--shadow)}
+.builder-card-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}
+.builder-kicker{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--muted);font-weight:800}
+.footer-builder-shell h3{margin:0;color:var(--heading-text);font-size:1.35rem;font-weight:800}
+.builder-pill{display:inline-flex;align-items:center;padding:.42rem .72rem;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border);font-size:.78rem;color:var(--text)}
+.widget-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+.widget-card{border:1px solid color-mix(in srgb, var(--primary) 35%, var(--border));background:linear-gradient(180deg, color-mix(in srgb, var(--primary) 18%, rgba(255,255,255,.05)), rgba(255,255,255,.03));border-radius:18px;padding:1rem;text-align:left;color:var(--text);display:grid;gap:.3rem}
+.widget-card i{font-size:1rem;color:var(--primary)}
+.widget-card span{font-weight:800}
+.widget-card small{color:var(--muted)}
+.widget-card:hover{transform:translateY(-1px);border-color:color-mix(in srgb, var(--primary) 52%, var(--border))}
+.builder-json{min-height:460px}
+.social-preview{display:flex;flex-wrap:wrap;gap:.6rem}
+.social-chip,.social-chip-disabled{width:44px;height:44px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text)}
+.social-chip-disabled{opacity:.35}
+.footer-preview-shell{border-radius:24px;padding:1.4rem;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--border)}
+.footer-preview-grid{display:grid;gap:1rem}
+.footer-widget-preview{border:1px solid var(--border);background:rgba(255,255,255,.04);border-radius:18px;padding:1rem;min-height:170px}
+.footer-widget-preview h4{font-size:1rem;font-weight:800;color:var(--heading-text);margin-bottom:.75rem}
+.footer-widget-preview ul{list-style:none;padding:0;margin:0}
+.footer-widget-preview li+li{margin-top:.45rem}
+.footer-preview-copy{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--muted)}
+.preview-logo{max-height:40px;margin-bottom:.75rem}
+@media (max-width:767.98px){.widget-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const textarea = document.getElementById('footer_widgets_json');
+  const columnsInput = document.getElementById('footer_columns');
+  const logoInput = document.getElementById('footer_logo_url');
+  const copyrightInput = document.getElementById('footer_copyright');
+  const previewEl = document.getElementById('footerLivePreview');
+  const columnBadge = document.getElementById('columnBadge');
+  const socialPreview = document.getElementById('socialPreview');
+  const socialInputs = Array.from(document.querySelectorAll('.js-social-input'));
+
+  const iconMap = {
+    facebook: 'fa-brands fa-facebook-f',
+    instagram: 'fa-brands fa-instagram',
+    youtube: 'fa-brands fa-youtube',
+    linkedin: 'fa-brands fa-linkedin-in',
+    x: 'fa-brands fa-x-twitter',
+    whatsapp: 'fa-brands fa-whatsapp',
+    telegram: 'fa-brands fa-telegram'
+  };
+
+  function currentColumns() {
+    const val = parseInt(columnsInput.value || '4', 10);
+    return Math.min(6, Math.max(1, Number.isFinite(val) ? val : 4));
+  }
+
+  function smartSpan(widget) {
+    const cols = currentColumns();
+    if (widget.span) return Math.min(cols, Math.max(1, parseInt(widget.span, 10) || 1));
+    if (widget.type === 'text' || widget.type === 'newsletter') return cols >= 4 ? 2 : 1;
+    return 1;
+  }
+
+  const presets = {
+    quick_links: () => ({ title: 'Quick Links', type: 'links', span: 1, items: [{ label: 'Home', url: '/' }, { label: 'About', url: '/about' }, { label: 'Courses', url: '/courses' }, { label: 'Contact', url: '/contact' }] }),
+    contact_info: () => ({ title: 'Contact Us', type: 'contact', span: 1, items: [{ label: 'Email', value: 'hello@fluencify.com' }, { label: 'Phone', value: '+91 98765 43210' }, { label: 'Address', value: 'Punjab, India' }] }),
+    social_links: () => ({ title: 'Follow Us', type: 'social', span: 1, items: [ 'facebook','instagram','youtube','linkedin','x','whatsapp','telegram' ].map(p => ({ platform: p, label: p.charAt(0).toUpperCase()+p.slice(1), url: '' })) }),
+    newsletter: () => ({ title: 'Newsletter', type: 'newsletter', span: currentColumns() >= 4 ? 2 : 1, text: 'Subscribe for updates, offers, and new learning resources.' }),
+    about_brand: () => ({ title: 'About Fluencify', type: 'text', span: currentColumns() >= 4 ? 2 : 1, text: 'Fluencify helps learners improve English with modern, AI-powered practice.' }),
+    opening_hours: () => ({ title: 'Opening Hours', type: 'hours', span: 1, items: [{ label: 'Mon - Fri', value: '9:00 AM - 6:00 PM' }, { label: 'Saturday', value: '10:00 AM - 4:00 PM' }, { label: 'Sunday', value: 'Closed' }] })
+  };
+
+  function parseCurrent() {
+    const raw = (textarea.value || '').trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      alert('Footer Widgets JSON is invalid. Please fix it or clear it first.');
+      return null;
+    }
+  }
+
+  function writeWidgets(widgets) {
+    textarea.value = JSON.stringify(widgets, null, 2);
+    renderPreview();
+    hydrateSocialForm();
+  }
+
+  function renderSocialPreview(items) {
+    socialPreview.innerHTML = items.map((item) => {
+      const icon = iconMap[item.platform] || 'fa-solid fa-link';
+      return item.url
+        ? `<a class="social-chip" href="${item.url}" target="_blank" rel="noopener"><i class="${icon}"></i></a>`
+        : `<span class="social-chip-disabled"><i class="${icon}"></i></span>`;
+    }).join('');
+  }
+
+  function hydrateSocialForm() {
+    const widgets = parseCurrent();
+    if (widgets === null) return;
+    const social = widgets.find((widget) => widget.type === 'social');
+    const items = social && Array.isArray(social.items) ? social.items : [];
+    socialInputs.forEach((input) => {
+      const match = items.find((item) => (item.platform || '').toLowerCase() === input.dataset.platform);
+      input.value = match && match.url ? match.url : '';
+    });
+    renderSocialPreview([ 'facebook','instagram','youtube','linkedin','x','whatsapp','telegram' ].map((platform) => ({ platform, url: (socialInputs.find((input) => input.dataset.platform === platform) || {}).value || '' })));
+  }
+
+  function renderWidget(widget, idx) {
+    const span = smartSpan(widget);
+    let body = `<div class="small text-secondary-emphasis">Widget type: <strong>${widget.type || 'text'}</strong></div>`;
+    if (widget.type === 'links' && Array.isArray(widget.items)) {
+      body = `<ul>${widget.items.map((item) => `<li>${item.label || 'Link'}${item.url ? ` <span class="text-secondary">${item.url}</span>` : ''}</li>`).join('')}</ul>`;
+    } else if (widget.type === 'contact' && Array.isArray(widget.items)) {
+      body = `<ul>${widget.items.map((item) => `<li><strong>${item.label || ''}</strong>: ${item.value || ''}</li>`).join('')}</ul>`;
+    } else if (widget.type === 'social' && Array.isArray(widget.items)) {
+      body = `<div class="social-preview">${widget.items.map((item) => item.url ? `<a class="social-chip" href="${item.url}" target="_blank" rel="noopener"><i class="${iconMap[item.platform] || 'fa-solid fa-link'}"></i></a>` : `<span class="social-chip-disabled"><i class="${iconMap[item.platform] || 'fa-solid fa-link'}"></i></span>`).join('')}</div>`;
+    } else if (widget.type === 'hours' && Array.isArray(widget.items)) {
+      body = `<ul>${widget.items.map((item) => `<li>${item.label || ''} — ${item.value || ''}</li>`).join('')}</ul>`;
+    } else {
+      body = `<div>${widget.text || widget.content || ''}</div>`;
+    }
+    const logoHtml = idx === 0 && logoInput.value ? `<img class="preview-logo" src="${logoInput.value}" alt="Footer logo">` : '';
+    return `<div class="footer-widget-preview" style="grid-column: span ${span};">${logoHtml}<h4>${widget.title || 'Untitled Widget'}</h4>${body}</div>`;
+  }
+
+  function renderPreview() {
+    const widgets = parseCurrent();
+    if (widgets === null) return;
+    const cols = currentColumns();
+    columnBadge.textContent = `${cols} column${cols > 1 ? 's' : ''}`;
+    previewEl.innerHTML = `<div class="footer-preview-shell"><div class="footer-preview-grid" style="grid-template-columns: repeat(${cols}, minmax(0, 1fr));">${widgets.map(renderWidget).join('')}</div><div class="footer-preview-copy">${copyrightInput.value || '© 2026 Fluencify AI'}</div></div>`;
+  }
+
+  document.querySelectorAll('.js-footer-preset').forEach((button) => {
+    button.addEventListener('click', function () {
+      const key = this.dataset.preset;
+      const current = parseCurrent();
+      if (current === null) return;
+      current.push(presets[key]());
+      writeWidgets(current);
+    });
+  });
+
+  document.getElementById('loadFooterStarterPack').addEventListener('click', function () {
+    writeWidgets([presets.about_brand(), presets.quick_links(), presets.contact_info(), presets.social_links()]);
+  });
+
+  document.getElementById('clearFooterWidgets').addEventListener('click', function () {
+    writeWidgets([]);
+  });
+
+  document.getElementById('formatFooterJson').addEventListener('click', function () {
+    const widgets = parseCurrent();
+    if (widgets === null) return;
+    writeWidgets(widgets);
+  });
+
+  document.getElementById('syncSocialWidget').addEventListener('click', function () {
+    const widgets = parseCurrent();
+    if (widgets === null) return;
+    const socialWidget = {
+      title: 'Follow Us',
+      type: 'social',
+      span: 1,
+      items: socialInputs.map((input) => ({
+        platform: input.dataset.platform,
+        label: input.dataset.platform.charAt(0).toUpperCase() + input.dataset.platform.slice(1),
+        url: (input.value || '').trim()
+      }))
+    };
+    const index = widgets.findIndex((widget) => widget.type === 'social');
+    if (index >= 0) widgets[index] = socialWidget; else widgets.push(socialWidget);
+    writeWidgets(widgets);
+  });
+
+  [textarea, columnsInput, logoInput, copyrightInput].forEach((el) => el.addEventListener('input', renderPreview));
+  socialInputs.forEach((input) => input.addEventListener('input', hydrateSocialForm));
+  hydrateSocialForm();
+  renderPreview();
+})();
+</script>
+{% endblock %}

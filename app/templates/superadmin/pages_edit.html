@@ -1,0 +1,236 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Page Studio • Fluencify{% endblock %}
+{% block page_title %}Page Editor{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='shared/css/page-builder.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+{% set section_items = parse_json_list(form.sections_json.data) if form.sections_json.data else [] %}
+{% set faq_items = parse_json_list(form.faq_json.data) if form.faq_json.data else [] %}
+{% set link_items = parse_json_list(form.links_json.data) if form.links_json.data else [] %}
+<div class="page-studio-shell">
+  <form method="post" id="pageStudioForm" class="page-studio-form">
+    {{ form.hidden_tag() }}
+
+    <section class="studio-hero mb-4">
+      <div>
+        <div class="studio-kicker">Front Pages builder</div>
+        <h1 class="studio-title mb-2">{% if mode == 'create' %}Create Page{% else %}Edit {{ page.title }}{% endif %}</h1>
+        <p class="studio-copy mb-0">Build landing pages with flexible sections, FAQ ordering, redirect rules, course sliders, and SEO controls.</p>
+      </div>
+      <div class="studio-hero-actions">
+        <a href="{{ url_for('superadmin.pages_list') }}" class="btn btn-ghost">Back to Pages</a>
+        {{ form.submit(class='btn btn-primary btn-glow') }}
+      </div>
+    </section>
+
+    <div class="studio-grid">
+      <div class="studio-main">
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header">
+            <div>
+              <div class="panel-kicker">Core</div>
+              <h3>Page basics</h3>
+            </div>
+          </div>
+          <div class="studio-panel-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.title.label.text }}</label>
+                {{ form.title(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.slug.label.text }}</label>
+                {{ form.slug(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.lang_code.label.text }}</label>
+                {{ form.lang_code(class='form-select form-control-dark') }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.menu_order.label.text }}</label>
+                {{ form.menu_order(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-4 d-flex gap-3 align-items-center studio-check-row">
+                <div class="form-check form-switch mt-4">
+                  {{ form.is_published(class='form-check-input') }}
+                  <label class="form-check-label">{{ form.is_published.label.text }}</label>
+                </div>
+                <div class="form-check form-switch mt-4">
+                  {{ form.is_in_menu(class='form-check-input') }}
+                  <label class="form-check-label">{{ form.is_in_menu.label.text }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header split-header">
+            <div>
+              <div class="panel-kicker">Hero</div>
+              <h3>Top banner and contact-first messaging</h3>
+              <p>Set the main page headline, CTA, image, and use sections below for slider banners or contact-form banners.</p>
+            </div>
+          </div>
+          <div class="studio-panel-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.content_title.label.text }}</label>
+                {{ form.content_title(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.subtitle.label.text }}</label>
+                {{ form.subtitle(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.hero_title.label.text }}</label>
+                {{ form.hero_title(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.hero_subtitle.label.text }}</label>
+                {{ form.hero_subtitle(class='form-control form-control-dark', rows='3') }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.hero_cta_text.label.text }}</label>
+                {{ form.hero_cta_text(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.hero_cta_url.label.text }}</label>
+                {{ form.hero_cta_url(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.hero_image.label.text }}</label>
+                {{ form.hero_image(class='form-control form-control-dark') }}
+              </div>
+              <div class="col-12">
+                <label class="form-label">{{ form.body_html.label.text }}</label>
+                {{ form.body_html(class='form-control form-control-dark code-area', rows='8') }}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header split-header">
+            <div>
+              <div class="panel-kicker">Builder</div>
+              <h3>Dynamic sections</h3>
+              <p>Add unlimited sections, control order, choose backgrounds, enable parallax, or turn a section into a course slider or top banner slider.</p>
+            </div>
+            <button type="button" class="btn btn-outline-light btn-sm" id="addSectionBtn"><i class="bi bi-plus-lg"></i> Add Section</button>
+          </div>
+          <div class="studio-panel-body">
+            {{ form.sections_json(class='d-none', id='sectionsJsonField') }}
+            <div class="builder-toolbar">
+              <div class="builder-tip"><i class="bi bi-lightbulb"></i> Use section type <strong>banner_slider</strong> for a top slider with optional contact form. Use <strong>course_slider</strong> for homepage course carousels.</div>
+            </div>
+            <div id="sectionsBuilder" class="builder-stack" data-initial='{{ section_items|tojson|safe }}'></div>
+          </div>
+        </section>
+
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header split-header">
+            <div>
+              <div class="panel-kicker">FAQ</div>
+              <h3>Professional FAQ manager</h3>
+              <p>Drag the order up or down anytime and keep schema-ready content structured for every page.</p>
+            </div>
+            <button type="button" class="btn btn-outline-light btn-sm" id="addFaqBtn"><i class="bi bi-plus-lg"></i> Add FAQ</button>
+          </div>
+          <div class="studio-panel-body">
+            {{ form.faq_json(class='d-none', id='faqJsonField') }}
+            <div id="faqBuilder" class="builder-stack" data-initial='{{ faq_items|tojson|safe }}'></div>
+          </div>
+        </section>
+
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header split-header">
+            <div>
+              <div class="panel-kicker">Supporting links</div>
+              <h3>CTA links and related buttons</h3>
+              <p>Add button blocks, footer links, or section-level supporting links for each page.</p>
+            </div>
+            <button type="button" class="btn btn-outline-light btn-sm" id="addLinkBtn"><i class="bi bi-plus-lg"></i> Add Link</button>
+          </div>
+          <div class="studio-panel-body">
+            {{ form.links_json(class='d-none', id='linksJsonField') }}
+            <div id="linksBuilder" class="builder-stack" data-initial='{{ link_items|tojson|safe }}'></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="studio-sidebar">
+        <section class="studio-panel mb-4 sticky-panel">
+          <div class="studio-panel-header"><div><div class="panel-kicker">SEO</div><h3>Search and social</h3></div></div>
+          <div class="studio-panel-body">
+            <div class="mb-3">
+              <label class="form-label">{{ form.meta_title.label.text }}</label>
+              {{ form.meta_title(class='form-control form-control-dark') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ form.meta_description.label.text }}</label>
+              {{ form.meta_description(class='form-control form-control-dark', rows='4') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ form.canonical_url.label.text }}</label>
+              {{ form.canonical_url(class='form-control form-control-dark') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ form.og_title.label.text }}</label>
+              {{ form.og_title(class='form-control form-control-dark') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ form.og_description.label.text }}</label>
+              {{ form.og_description(class='form-control form-control-dark', rows='4') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ form.og_image.label.text }}</label>
+              {{ form.og_image(class='form-control form-control-dark') }}
+            </div>
+            <div>
+              <label class="form-label">{{ form.twitter_card.label.text }}</label>
+              {{ form.twitter_card(class='form-select form-control-dark') }}
+            </div>
+          </div>
+        </section>
+
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header"><div><div class="panel-kicker">Redirection</div><h3>Path control</h3></div></div>
+          <div class="studio-panel-body">
+            <div class="mb-3">
+              <label class="form-label">Redirect From Path</label>
+              <input type="text" name="redirect_from" class="form-control form-control-dark" value="{{ page.redirect_from if page else '' }}" placeholder="/old-page">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Redirect To URL/Path</label>
+              <input type="text" name="redirect_to" class="form-control form-control-dark" value="{{ page.redirect_to if page else '' }}" placeholder="/new-page or https://...">
+            </div>
+            <div>
+              <label class="form-label">Redirect Type</label>
+              <select name="redirect_code" class="form-select form-control-dark">
+                <option value="301" {% if page and page.redirect_code == 301 %}selected{% endif %}>301 Permanent</option>
+                <option value="302" {% if page and page.redirect_code == 302 %}selected{% endif %}>302 Temporary</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="studio-panel mb-4">
+          <div class="studio-panel-header"><div><div class="panel-kicker">Advanced</div><h3>JSON-LD</h3></div></div>
+          <div class="studio-panel-body">
+            <label class="form-label">{{ form.json_ld.label.text }}</label>
+            {{ form.json_ld(class='form-control form-control-dark code-area', rows='8') }}
+          </div>
+        </section>
+      </aside>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='shared/js/page-builder.js') }}"></script>
+{% endblock %}

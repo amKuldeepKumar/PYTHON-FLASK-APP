@@ -1,0 +1,130 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Speaking Topics • Admin • Fluencify{% endblock %}
+{% block page_title %}Speaking Topics{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="mb-1">Create Topic</h4>
+            <div class="text-secondary small">Phase 6A foundation topic setup for speaking practice.</div>
+          </div>
+          <span class="badge text-bg-primary">Phase 6A</span>
+        </div>
+
+        <form method="post" class="row g-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-12">
+            <label class="form-label">Topic code</label>
+            <input type="text" class="form-control" name="code" placeholder="daily-life">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Topic title</label>
+            <input type="text" class="form-control" name="title" placeholder="Daily Life">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="3" placeholder="Simple speaking practice around real-life situations."></textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Level</label>
+            <select class="form-select" name="level">
+              {% for level in level_choices %}
+                <option value="{{ level }}">{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Display order</label>
+            <input type="number" class="form-control" name="display_order" value="0" min="0">
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="topicActive" name="is_active" checked>
+              <label class="form-check-label" for="topicActive">Active topic</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-grid">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i> Create Topic</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="mb-1">Topic Library</h4>
+            <div class="text-secondary small">Manage the topics available for student speaking sessions.</div>
+          </div>
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('admin.speaking_prompts') }}">Manage Prompts</a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Level</th>
+                <th>Prompts</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for topic in topics %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ topic.title }}</div>
+                    <div class="small text-secondary">{{ topic.code }}</div>
+                    {% if topic.description %}
+                      <div class="small text-secondary mt-1">{{ topic.description }}</div>
+                    {% endif %}
+                  </td>
+                  <td><span class="badge text-bg-info text-uppercase">{{ topic.level }}</span></td>
+                  <td>{{ topic.active_prompt_count }}</td>
+                  <td>
+                    {% if topic.is_active %}
+                      <span class="badge text-bg-success">Active</span>
+                    {% else %}
+                      <span class="badge text-bg-secondary">Inactive</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex gap-2 justify-content-end">
+                      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.speaking_prompts', topic_id=topic.id) }}">Prompts</a>
+                      <form method="post" action="{{ url_for('admin.speaking_topic_toggle', topic_id=topic.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm {% if topic.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" type="submit">
+                          {% if topic.is_active %}Disable{% else %}Enable{% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-secondary py-4">No speaking topics created yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

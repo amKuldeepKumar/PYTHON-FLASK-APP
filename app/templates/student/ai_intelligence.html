@@ -1,0 +1,114 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}AI Intelligence • Fluencify{% endblock %}
+{% block page_title %}AI Intelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-progress-analytics.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-ai-intelligence.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="student-shell intelligence-shell">
+  <section class="neo-card hero-card intelligence-hero-card">
+    <div class="hero-grid intelligence-hero-grid">
+      <div>
+        <div class="eyebrow">Phase 12 • AI Intelligence Layer</div>
+        <h1 class="hero-title">Intelligent learning system</h1>
+        <p class="hero-sub">Recommendations, adaptive difficulty, and one AI tutor layer now work together across speaking, writing, reading, and listening.</p>
+        <div class="chip-row">
+          <span class="chip"><i class="bi bi-bullseye me-1"></i>Focus {{ intelligence.summary.focus_track }}</span>
+          <span class="chip"><i class="bi bi-trophy me-1"></i>Strongest {{ intelligence.summary.strongest_track }}</span>
+          <span class="chip"><i class="bi bi-stars me-1"></i>{{ intelligence.summary.recommendations_count }} smart recommendations</span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="{{ url_for('student.progress_analytics') }}"><i class="bi bi-bar-chart me-1"></i>Progress & Analytics</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.dashboard') }}"><i class="bi bi-grid me-1"></i>Dashboard</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.course_library') }}"><i class="bi bi-collection me-1"></i>Course Library</a>
+        </div>
+      </div>
+      <aside class="hero-side intelligence-side">
+        <div class="focus-box">
+          <div class="label">Readiness score</div>
+          <div class="value">{{ '%.1f'|format(intelligence.summary.readiness_score or 0) }}%</div>
+          <div class="sub">Built from recent average performance.</div>
+        </div>
+        <div class="focus-box">
+          <div class="label">Tutor coach tip</div>
+          <div class="sub text-white">{{ intelligence.tutor.coach_tip }}</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="insight-grid intelligence-grid">
+    <article class="neo-card section-card">
+      <div class="section-head"><div><h3 class="section-title">Recommendations</h3><p class="section-sub">What the system thinks you should do next.</p></div></div>
+      <div class="stack-list">
+        {% for item in intelligence.recommendations %}
+          <div class="list-item">
+            <div>
+              <div class="fw-semibold">{{ item.title }}</div>
+              <div class="muted-note small">{{ item.summary }}</div>
+              <div class="muted-note small">{{ item.reason }}</div>
+            </div>
+            <span class="badge-soft">{{ item.badge }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head"><div><h3 class="section-title">AI Tutor</h3><p class="section-sub">Guided practice plan for the next session.</p></div></div>
+      <div class="stack-list">
+        <div class="list-item"><div><div class="fw-semibold">{{ intelligence.tutor.summary }}</div><div class="muted-note small">{{ intelligence.tutor.message }}</div></div></div>
+        {% for drill in intelligence.tutor.drills %}
+          <div class="list-item"><div class="fw-semibold">{{ drill }}</div></div>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+
+  <section class="neo-card section-card">
+    <div class="section-head"><div><h3 class="section-title">Adaptive Difficulty Map</h3><p class="section-sub">Each track receives a recommended performance band and tutor note.</p></div></div>
+    <div class="track-plan-grid">
+      {% for row in intelligence.adaptive_tracks %}
+        <article class="metric-panel intelligence-plan-card">
+          <div class="d-flex justify-content-between gap-3 align-items-start mb-3">
+            <div>
+              <div class="mini-label">{{ row.label }}</div>
+              <div class="fw-semibold">{{ row.current_band }} → {{ row.recommended_band }}</div>
+            </div>
+            <span class="badge-soft">{{ row.confidence }}%</span>
+          </div>
+          <div class="muted-note small mb-2">Average score {{ '%.1f'|format(row.avg_score or 0) }}% • Items {{ row.items_count }}</div>
+          <div class="fw-semibold mb-2">{{ row.action }}</div>
+          <div class="muted-note small mb-3">{{ row.reason }}</div>
+          <div class="muted-note small">Tutor tip: {{ row.tutor_tip }}</div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="neo-card section-card">
+    <div class="section-head"><div><h3 class="section-title">Recent Activity Input</h3><p class="section-sub">These tracked actions are feeding the intelligence layer.</p></div></div>
+    <div class="table-responsive analytics-table-wrap">
+      <table class="table align-middle mb-0 analytics-table">
+        <thead><tr><th>Track</th><th>Title</th><th>Detail</th><th>Score</th></tr></thead>
+        <tbody>
+          {% for row in analytics.recent_activity %}
+            <tr>
+              <td>{{ row.track }}</td>
+              <td>{{ row.label }}</td>
+              <td>{{ row.sub }}</td>
+              <td>{{ '%.1f'|format(row.score or 0) }}%</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center py-4 muted-note">No tracked activity yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

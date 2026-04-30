@@ -1,0 +1,413 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Overview • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-dashboard.css') }}">{% endblock %}
+
+{% block content %}
+<div class="superadmin-dashboard">
+  <div id="superadminDashboardPayload" data-chart-data="{{ chart_data|tojson|forceescape }}" hidden></div>
+  <section class="sa-hero card border-0 shadow-sm mb-4">
+    <div class="card-body p-4 p-xl-5">
+      <div class="row g-4 align-items-start">
+        <div class="col-xl-7">
+          <div class="sa-kicker">Executive Control Center</div>
+          <h1 class="sa-title mb-3">Run the whole platform from one serious dashboard</h1>
+          <p class="sa-copy mb-4">Use this area as the SuperAdmin command center for users, academy growth, AI operations, theme quality, and system readiness. The biggest controls now live under one clear path instead of being hidden across multiple pages.</p>
+          <div class="sa-pill-row mb-4">
+            <span class="sa-pill">Translation: {{ metrics.translation_provider_name }}</span>
+            <span class="sa-pill">{{ metrics.teacher_accounts }} teachers live</span>
+            <span class="sa-pill">{{ metrics.course_sales }} enrollments tracked</span>
+          </div>
+          <div class="sa-action-row">
+            <a class="btn btn-primary" href="{{ url_for('superadmin.ai_central') }}">Open AI Central</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('main.home') }}">Open Website</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.institutes_list') }}">Manage Institutes</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.ai_rule_panel') }}">Open AI Rule Panel</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.api_logs') }}">Review API Logs</a>
+          </div>
+        </div>
+        <div class="col-xl-5">
+          <div class="sa-highlight-grid">
+            <div class="sa-highlight-card">
+              <div class="sa-highlight-label">Students</div>
+              <div class="sa-highlight-value">{{ metrics.total_students }}</div>
+              <div class="sa-highlight-note">Active learner base</div>
+            </div>
+            <div class="sa-highlight-card">
+              <div class="sa-highlight-label">AI Logs</div>
+              <div class="sa-highlight-value">{{ ai_usage.total_logs }}</div>
+              <div class="sa-highlight-note">Tracked AI activity</div>
+            </div>
+            <div class="sa-highlight-card">
+              <div class="sa-highlight-label">Languages</div>
+              <div class="sa-highlight-value">{{ metrics.enabled_languages }}</div>
+              <div class="sa-highlight-note">Enabled multilingual options</div>
+            </div>
+            <div class="sa-highlight-card">
+              <div class="sa-highlight-label">Translation Balance</div>
+              <div class="sa-highlight-value sa-highlight-value-sm">{{ '%.2f'|format(metrics.translation_credits_left or 0) }}</div>
+              <div class="sa-highlight-note">{{ metrics.translation_credit_unit or 'credits' }} left</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <form class="row g-3 align-items-center" method="get" action="{{ url_for('superadmin.directory') }}">
+        <div class="col-lg-6">
+          <label class="form-label sa-form-label">Global Search</label>
+          <input type="text" name="q" class="form-control" placeholder="Search admin, institute, teacher, student">
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label sa-form-label">Search In</label>
+          <select class="form-select" name="search_in">
+            <option value="all">All records</option>
+            <option value="admin">Admins</option>
+            <option value="institute">Institutes</option>
+            <option value="teacher">Teachers</option>
+            <option value="student">Students</option>
+          </select>
+        </div>
+        <div class="col-lg-3 d-grid align-self-end">
+          <button class="btn btn-primary">Open Global Search</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <div class="row g-4 mb-4">
+    {% for title, value, icon, note in [
+      ('Total Students', metrics.total_students, 'bi-mortarboard-fill', 'All student accounts'),
+      ('Admin Team', metrics.total_admins, 'bi-people-fill', 'Admins, support, accounts, SEO, and teachers'),
+      ('Live Students', metrics.live_students, 'bi-broadcast-pin', 'Users active in the last 7 days'),
+      ('Published Pages', metrics.published_pages, 'bi-window-stack', 'Public pages currently live'),
+      ('Course Sales', metrics.course_sales, 'bi-cart-check-fill', 'Enrollment records available'),
+      ('API Activity', metrics.total_api_logs, 'bi-plug-fill', 'Logged API events so far'),
+      ('Org Learners', metrics.organization_learners, 'bi-buildings-fill', 'Students linked to admins or institutes'),
+      ('Independent Learners', metrics.independent_learners, 'bi-person-heart', 'Direct B2C learners')
+    ] %}
+    <div class="col-12 col-sm-6 col-xl-3">
+      <article class="sa-metric-card card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+              <div class="sa-metric-kicker">{{ title }}</div>
+              <div class="sa-metric-value">{{ value }}</div>
+            </div>
+            <span class="sa-metric-icon"><i class="bi {{ icon }}"></i></span>
+          </div>
+          <div class="sa-metric-note">{{ note }}</div>
+        </div>
+      </article>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-xl-8">
+      <section class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <div class="sa-section-kicker">AI Operations</div>
+              <h2 class="sa-section-title">Where to add and manage every AI API</h2>
+              <p class="sa-section-copy mb-0">Translation, STT, pronunciation, reading generation, grammar controls, multilingual support, and future systems like TTS or plagiarism should all be planned from this control block.</p>
+            </div>
+            <a class="btn btn-primary" href="{{ url_for('superadmin.ai_central') }}">Open AI Central</a>
+          </div>
+          <div class="sa-capability-grid">
+            {% for item in ai_capabilities %}
+            {% set badge_class = 'text-bg-success' if item.status == 'ready' else ('text-bg-warning text-dark' if item.status == 'partial' else 'text-bg-danger') %}
+            <article class="sa-capability-card">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div class="sa-capability-title">{{ item.label }}</div>
+                <span class="badge {{ badge_class }}">{{ item.status|title }}</span>
+              </div>
+              <div class="sa-capability-detail">{{ item.detail }}</div>
+              <a class="btn btn-sm btn-outline-secondary mt-3" href="{{ item.href }}">{{ item.action }}</a>
+            </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <section class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <div class="sa-section-kicker">Usage Snapshot</div>
+          <h2 class="sa-section-title">Current AI traffic</h2>
+          <div class="sa-usage-stack">
+            <div class="sa-usage-row"><span>Total AI/API logs</span><strong>{{ ai_usage.total_logs }}</strong></div>
+            <div class="sa-usage-row"><span>Translation logs</span><strong>{{ ai_usage.translation_logs }}</strong></div>
+            <div class="sa-usage-row"><span>Reading logs</span><strong>{{ ai_usage.reading_logs }}</strong></div>
+            <div class="sa-usage-row"><span>Speaking logs</span><strong>{{ ai_usage.speaking_logs }}</strong></div>
+            <div class="sa-usage-row"><span>Tracked tokens</span><strong>{{ ai_usage.tracked_tokens }}</strong></div>
+          </div>
+          <div class="sa-muted-note">This workspace now tracks provider events and token totals. The next deeper upgrade is better provider-level cost intelligence and budget forecasting.</div>
+        </div>
+      </section>
+
+      <section class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="sa-section-kicker">Quick Access</div>
+          <h2 class="sa-section-title">Core AI management pages</h2>
+          <div class="sa-link-stack">
+            {% for item in ai_quick_links %}
+            <a class="sa-link-card" href="{{ item.href }}">
+              <div class="fw-semibold">{{ item.label }}</div>
+              <div class="small text-muted">{{ item.detail }}</div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-xl-8">
+      <div class="card chart-card border-0 h-100 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div class="sa-section-kicker">Platform Growth</div>
+              <h2 class="sa-section-title">Growth snapshot</h2>
+              <div class="small text-muted">Student and staff registrations over the last 6 months</div>
+            </div>
+            <span class="badge text-bg-success">Live</span>
+          </div>
+          <div class="chart-wrap mt-3"><canvas id="growthChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <div class="card chart-card border-0 h-100 shadow-sm">
+        <div class="card-body p-4">
+          <div class="sa-section-kicker">User Distribution</div>
+          <h2 class="sa-section-title">Role mix</h2>
+          <div class="small text-muted mb-3">Current live role distribution</div>
+          <div class="chart-wrap chart-wrap-sm"><canvas id="roleChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+        <div>
+          <div class="sa-section-kicker">Live Commerce and Access</div>
+          <h2 class="sa-section-title">See who bought what, where they work from, and who owns the learner relationship</h2>
+          <div class="small text-muted">This block combines paid course activity, active student sessions, location, browser, login time, logout time, and institute/admin ownership into one SuperAdmin-only view.</div>
+        </div>
+        <div class="sa-action-row">
+          <a class="btn btn-primary" href="{{ url_for('superadmin.learner_ops') }}">Open Full Learner Ops View</a>
+          <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.api_logs') }}">Open Logs</a>
+        </div>
+      </div>
+
+      <div class="sa-live-summary-grid mb-4">
+        <div class="sa-live-summary-card">
+          <div class="sa-live-summary-label">Paid orders</div>
+          <div class="sa-live-summary-value">{{ live_workspace.summary.paid_orders }}</div>
+          <div class="sa-live-summary-note">Successful course purchases recorded.</div>
+        </div>
+        <div class="sa-live-summary-card">
+          <div class="sa-live-summary-label">Paid revenue</div>
+          <div class="sa-live-summary-value">{{ '%.2f'|format(live_workspace.summary.paid_revenue) }}</div>
+          <div class="sa-live-summary-note">Tracked from paid payment rows.</div>
+        </div>
+        <div class="sa-live-summary-card">
+          <div class="sa-live-summary-label">Live sessions</div>
+          <div class="sa-live-summary-value">{{ live_workspace.summary.live_sessions }}</div>
+          <div class="sa-live-summary-note">Users seen in the last 30 minutes.</div>
+        </div>
+        <div class="sa-live-summary-card">
+          <div class="sa-live-summary-label">Logins in 24h</div>
+          <div class="sa-live-summary-value">{{ live_workspace.summary.recent_logins_24h }}</div>
+          <div class="sa-live-summary-note">Successful recent logins across the platform.</div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-xl-7">
+          <div class="sa-data-card">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+              <div>
+                <div class="sa-data-title">Recent course sales and enrollments</div>
+                <div class="small text-muted">Student, course, purchase type, live status, browser, location, and institute/admin ownership.</div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0 sa-dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Access</th>
+                    <th>Live</th>
+                    <th>Environment</th>
+                    <th>Owner</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in live_workspace.sales_rows %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">{{ row.student_name }}</div>
+                      <div class="small text-muted">{{ row.student_email }}</div>
+                      <div class="small text-muted">Login: {{ row.login_at.strftime('%Y-%m-%d %H:%M') if row.login_at else 'Unknown' }}</div>
+                      <div class="small text-muted">Logout: {{ row.logout_at.strftime('%Y-%m-%d %H:%M') if row.logout_at else 'Active / not revoked' }}</div>
+                    </td>
+                    <td>
+                      <div class="fw-semibold">{{ row.course_title }}</div>
+                      <div class="small text-muted">{{ row.track_type }}</div>
+                    </td>
+                    <td>
+                      <span class="badge {% if row.purchase_state == 'Paid' %}text-bg-success{% else %}text-bg-light{% endif %}">{{ row.purchase_state }}</span>
+                      <div class="small text-muted mt-1">{{ row.purchase_scope }}</div>
+                      <div class="small text-muted">
+                        {% if row.amount > 0 %}
+                          {{ row.currency_code }} {{ '%.2f'|format(row.amount) }}
+                        {% else %}
+                          Free / direct enrollment
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge {% if row.is_live %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Live' if row.is_live else 'Idle' }}</span>
+                    </td>
+                    <td>
+                      <div>{{ row.browser_display }}</div>
+                      <div class="small text-muted">{{ row.location_display }}</div>
+                    </td>
+                    <td>
+                      <div class="fw-semibold">{{ row.owner_name }}</div>
+                      <div class="small text-muted">{{ row.owner_label }} • {{ row.institute_name }}</div>
+                      <div class="small text-muted">Teacher: {{ row.teacher_name }}</div>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="6" class="text-muted py-4">No course sale or enrollment rows are available yet.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-5">
+          <div class="sa-data-card mb-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+              <div>
+                <div class="sa-data-title">Recent platform access</div>
+                <div class="small text-muted">Student-only quick list. Click a name to open the full access profile in Student Directory.</div>
+              </div>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('superadmin.students') }}">Open Student Directory</a>
+            </div>
+            <div class="sa-access-stack">
+              {% for row in live_workspace.access_rows %}
+              <article class="sa-access-card">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                  <div>
+                    <div class="fw-semibold">
+                      <a class="text-decoration-none" href="{{ url_for('superadmin.students', focus_student_id=row.user_id) }}">{{ row.user_name }}</a>
+                    </div>
+                    <div class="small text-muted">{% if row.course_title and row.course_title != '—' %}{{ row.course_title }}{% else %}No active course{% endif %}</div>
+                  </div>
+                  <span class="badge {% if row.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if row.is_active else 'Recent' }}</span>
+                </div>
+                <div class="small text-muted">{{ row.location_display }} • {{ row.browser_display }}</div>
+                <div class="small text-muted">Last seen: {{ row.last_seen_at.strftime('%Y-%m-%d %H:%M') if row.last_seen_at else 'Unknown' }}</div>
+              </article>
+              {% else %}
+              <div class="text-muted">No recent access rows are available yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+          <div class="sa-section-kicker">Course Demand and Activity</div>
+          <h2 class="sa-section-title">Which courses are being bought and actively used</h2>
+          <div class="small text-muted">Paid demand, active enrollments, 7-day learner activity, and whether growth is organization-driven or independent.</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 sa-dashboard-table">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Track</th>
+              <th>Paid</th>
+              <th>Enrolled</th>
+              <th>Active 7d</th>
+              <th>Org learners</th>
+              <th>Independent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in live_workspace.course_rows %}
+            <tr>
+              <td class="fw-semibold">{{ row.course_title }}</td>
+              <td>{{ row.track_type }}</td>
+              <td>{{ row.paid_count }}</td>
+              <td>{{ row.enrollment_count }}</td>
+              <td>{{ row.active_learners }}</td>
+              <td>{{ row.organization_count }}</td>
+              <td>{{ row.independent_count }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-muted py-4">No course activity rows are available yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+          <div class="sa-section-kicker">Platform Quality</div>
+          <h2 class="sa-section-title">Stability and polish readiness</h2>
+          <div class="small text-muted">This is the current cleanup status for consistency, theme, routing, and final presentation quality.</div>
+        </div>
+      </div>
+      <div class="row g-3">
+        {% for item in phase18_status %}
+          {% set badge_class = 'text-bg-success' if item.state == 'ready' else ('text-bg-warning text-dark' if item.state == 'partial' else 'text-bg-danger') %}
+          {% set badge_label = 'Ready' if item.state == 'ready' else ('Partial' if item.state == 'partial' else 'Missing') %}
+          <div class="col-md-6 col-xl-4">
+            <div class="sa-status-card">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div class="fw-semibold">{{ item.label }}</div>
+                <span class="badge {{ badge_class }}">{{ badge_label }}</span>
+              </div>
+              <div class="small text-muted">{{ item.detail }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='shared/js/superadmin-dashboard.js') }}"></script>
+{% endblock %}

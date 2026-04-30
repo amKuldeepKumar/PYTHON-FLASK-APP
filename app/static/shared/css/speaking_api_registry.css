@@ -1,0 +1,443 @@
+/* =========================================================
+   Speaking API Registry
+   Clean theme-safe page styling
+   This version removes conflicting inherit rules and
+   forces clear readable text for the registry page only.
+   ========================================================= */
+/* =========================================================
+   PHASE 6F / PHASE 7 / PHASE 11
+   Speaking registry theme bridge
+   Keep page readable while still following the active theme.
+   ========================================================= */
+.speaking-registry-page {
+  --registry-text: var(--text);
+  --registry-heading: var(--heading-text, var(--text));
+  --registry-muted: color-mix(in srgb, var(--muted) 95%, var(--text) 5%);
+  --registry-soft-muted: color-mix(in srgb, var(--muted) 82%, var(--text) 18%);
+  --registry-bg: color-mix(in srgb, var(--surface) 92%, transparent);
+  --registry-bg-soft: color-mix(in srgb, var(--surface-2) 86%, transparent);
+  --registry-border: var(--border);
+  --registry-primary: var(--primary);
+  --registry-primary-soft: color-mix(in srgb, var(--primary) 18%, transparent);
+  --registry-success: #10b981;
+  --registry-success-soft: rgba(16, 185, 129, 0.16);
+  --registry-warning: #f59e0b;
+  --registry-warning-soft: rgba(245, 158, 11, 0.16);
+  --registry-info: #38bdf8;
+  --registry-info-soft: rgba(56, 189, 248, 0.16);
+  --registry-danger: #ef4444;
+  --registry-danger-soft: rgba(239, 68, 68, 0.16);
+  --registry-muted-soft: color-mix(in srgb, var(--muted) 28%, transparent);
+  color: var(--registry-text);
+}
+
+
+/* =========================================================
+   Base Text Safety
+   ========================================================= */
+.speaking-registry-page,
+.speaking-registry-page .card,
+.speaking-registry-page .card-body,
+.speaking-registry-page .card-header,
+.speaking-registry-page .table,
+.speaking-registry-page .table td,
+.speaking-registry-page .table th,
+.speaking-registry-page .form-label,
+.speaking-registry-page .form-check-label,
+.speaking-registry-page .btn,
+.speaking-registry-page a,
+.speaking-registry-page span,
+.speaking-registry-page div,
+.speaking-registry-page p,
+.speaking-registry-page small,
+.speaking-registry-page strong {
+  color: var(--registry-text);
+}
+
+/* =========================================================
+   Hero Section
+   ========================================================= */
+.registry-hero {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 92%, var(--primary) 8%), color-mix(in srgb, var(--surface-2) 96%, var(--bg) 4%));
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 1.25rem;
+}
+
+.registry-kicker {
+  color: color-mix(in srgb, var(--primary) 48%, var(--text)) !important;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.registry-title {
+  color: var(--registry-heading) !important;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.registry-subtitle {
+  color: var(--registry-muted) !important;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--registry-border);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.metric-label {
+  color: var(--registry-muted) !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+
+.metric-value {
+  color: var(--registry-heading) !important;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* =========================================================
+   Tabs
+   ========================================================= */
+.registry-tabs .nav-link {
+  color: var(--registry-soft-muted) !important;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0.85rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  padding: 0.75rem 1rem;
+}
+
+.registry-tabs .nav-link:hover {
+  color: #ffffff !important;
+  border-color: var(--registry-border);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.registry-tabs .nav-link.active {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 82%, #4f46e5), color-mix(in srgb, var(--primary) 70%, #9333ea));
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.22);
+}
+
+/* =========================================================
+   Panels
+   ========================================================= */
+.registry-panel {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent));
+  border: 1px solid var(--registry-border);
+  border-radius: 1.2rem;
+}
+
+.registry-sticky-panel {
+  position: sticky;
+  top: 1rem;
+}
+
+.registry-section-title {
+  color: var(--registry-heading) !important;
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.registry-section-subtitle {
+  color: var(--registry-muted) !important;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   Provider / Recommended Cards
+   ========================================================= */
+.provider-card,
+.recommended-card {
+  background: var(--registry-bg-soft);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.provider-card:hover,
+.recommended-card:hover {
+  border-color: rgba(124, 58, 237, 0.28);
+  transform: translateY(-2px);
+}
+
+.provider-title,
+.recommended-title {
+  color: var(--registry-heading) !important;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.provider-url,
+.recommended-subtitle,
+.recommended-meta {
+  color: var(--registry-muted) !important;
+}
+
+.recommended-meta strong {
+  color: var(--registry-heading) !important;
+}
+
+/* =========================================================
+   Meta Cards
+   ========================================================= */
+.meta-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.85rem;
+  padding: 0.9rem;
+  height: 100%;
+}
+
+.meta-label {
+  color: var(--registry-muted) !important;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+
+.meta-value {
+  color: var(--registry-heading) !important;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   Badges
+   ========================================================= */
+.registry-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.registry-badge-type {
+  color: #ddd6fe !important;
+  background: var(--registry-primary-soft) !important;
+  border-color: rgba(124, 58, 237, 0.28) !important;
+}
+
+.registry-badge-info {
+  color: #bae6fd !important;
+  background: var(--registry-info-soft) !important;
+  border-color: rgba(56, 189, 248, 0.28) !important;
+}
+
+.registry-badge-success {
+  color: #a7f3d0 !important;
+  background: var(--registry-success-soft) !important;
+  border-color: rgba(16, 185, 129, 0.28) !important;
+}
+
+.registry-badge-muted {
+  color: #e2e8f0 !important;
+  background: var(--registry-muted-soft) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+.registry-badge-danger {
+  color: #fecaca !important;
+  background: var(--registry-danger-soft) !important;
+  border-color: rgba(239, 68, 68, 0.28) !important;
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+.registry-btn-primary {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #5b5cf0, #9333ea);
+  border: 0;
+  border-radius: 0.8rem;
+  font-weight: 700;
+  padding: 0.7rem 1rem;
+}
+
+.registry-btn-primary:hover {
+  color: #ffffff !important;
+  filter: brightness(1.04);
+}
+
+.registry-btn-outline-primary,
+.registry-btn-outline-warning,
+.registry-btn-outline-success,
+.registry-btn-outline-muted,
+.registry-btn-outline-info,
+.registry-btn-outline-light {
+  border-radius: 0.8rem;
+  font-weight: 700;
+  background: transparent;
+}
+
+.registry-btn-outline-primary {
+  color: #93c5fd !important;
+  border-color: rgba(59, 130, 246, 0.38) !important;
+}
+
+.registry-btn-outline-warning {
+  color: #fde68a !important;
+  border-color: rgba(245, 158, 11, 0.38) !important;
+}
+
+.registry-btn-outline-success {
+  color: #86efac !important;
+  border-color: rgba(34, 197, 94, 0.38) !important;
+}
+
+.registry-btn-outline-muted {
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.34) !important;
+}
+
+.registry-btn-outline-info {
+  color: #bae6fd !important;
+  border-color: rgba(56, 189, 248, 0.38) !important;
+}
+
+.registry-btn-outline-light {
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.registry-btn-outline-primary:hover,
+.registry-btn-outline-warning:hover,
+.registry-btn-outline-success:hover,
+.registry-btn-outline-muted:hover,
+.registry-btn-outline-info:hover,
+.registry-btn-outline-light:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* =========================================================
+   Form
+   ========================================================= */
+.registry-form-label {
+  color: var(--registry-heading) !important;
+  font-weight: 700;
+}
+
+.registry-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--registry-border) !important;
+  color: var(--registry-heading) !important;
+  border-radius: 0.85rem;
+}
+
+.registry-input:focus {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--registry-heading) !important;
+  border-color: rgba(124, 58, 237, 0.4) !important;
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.14) !important;
+}
+
+.registry-input::placeholder {
+  color: rgba(226, 232, 240, 0.5) !important;
+}
+
+.registry-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* =========================================================
+   Empty State
+   ========================================================= */
+.registry-empty-state {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--registry-muted) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+}
+
+/* =========================================================
+   Logs
+   ========================================================= */
+.registry-log-table {
+  color: var(--registry-heading) !important;
+  margin-bottom: 0;
+}
+
+.registry-log-table thead th {
+  color: var(--registry-muted) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.registry-log-table tbody td {
+  color: var(--registry-heading) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+}
+
+/* =========================================================
+   Remove Bootstrap / Theme Interference
+   ========================================================= */
+.speaking-registry-page .text-secondary,
+.speaking-registry-page .text-muted,
+.speaking-registry-page small,
+.speaking-registry-page p {
+  color: var(--registry-muted) !important;
+}
+
+.speaking-registry-page .card,
+.speaking-registry-page .card-body,
+.speaking-registry-page .card-header,
+.speaking-registry-page .table,
+.speaking-registry-page .table td,
+.speaking-registry-page .table th,
+.speaking-registry-page label,
+.speaking-registry-page .form-check-label,
+.speaking-registry-page strong {
+  color: var(--registry-heading) !important;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 1199.98px) {
+  .registry-sticky-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .registry-title {
+    font-size: 2rem;
+  }
+
+  .provider-title,
+  .recommended-title {
+    font-size: 1.1rem;
+  }
+
+  .registry-section-title {
+    font-size: 1.3rem;
+  }
+}
+html[data-theme="light"] .speaking-registry-page .registry-tabs .nav-link {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+}

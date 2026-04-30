@@ -1,0 +1,233 @@
+{% extends "layout/base.html" %}
+{% block title %}Fluencify • Learn with Confidence{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='main/css/home_pro.css') }}">
+{% endblock %}
+
+{% macro leaderboard_label(rank, scope) -%}
+  {%- if rank == 1 -%}Champion
+  {%- elif rank == 2 -%}Runner-up
+  {%- elif rank == 3 -%}Top Performer
+  {%- else -%}Top Performer
+  {%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+<section class="home-shell">
+  <div class="container">
+    <section class="placement-showcase">
+      <div class="placement-showcase__grid">
+        <article class="placement-hero-card">
+          <span class="placement-eyebrow"><i class="bi bi-star-fill"></i> Free Placement Test</span>
+          <h1 class="placement-title">Know your <span>English level</span><br>before you choose a course</h1>
+          <p class="placement-copy">
+            Take a free smart placement test, check your strengths and weak areas,
+            and get the best course recommendation for your level.
+          </p>
+
+          <div class="placement-proof-strip" aria-label="Placement test highlights">
+            <span><strong>8–10 min</strong> test time</span>
+            <span><strong>4 skills</strong> checked</span>
+            <span><strong>Instant</strong> course path</span>
+          </div>
+
+          <div class="placement-actions">
+            <a href="{{ url_for('main.test_yourself') }}" class="placement-btn placement-btn--primary">
+              <span class="placement-btn__icon"><i class="bi bi-rocket-takeoff-fill"></i></span>
+              <span>
+                <strong>Start Free Test</strong>
+                <small>Takes 8–10 minutes</small>
+              </span>
+            </a>
+
+            {% if current_user.is_authenticated and current_user.is_student %}
+            <a href="{{ url_for('student.placement_test') }}" class="placement-btn placement-btn--secondary">
+              <span class="placement-btn__icon"><i class="bi bi-mortarboard-fill"></i></span>
+              <span>
+                <strong>Open Student Test</strong>
+                <small>Go to your dashboard test</small>
+              </span>
+            </a>
+            {% else %}
+            <a href="{{ url_for('auth.login', next=url_for('student.placement_test')) }}" class="placement-btn placement-btn--secondary">
+              <span class="placement-btn__icon"><i class="bi bi-mortarboard-fill"></i></span>
+              <span>
+                <strong>Open Student Test</strong>
+                <small>Login to continue</small>
+              </span>
+            </a>
+            {% endif %}
+          </div>
+
+          <div class="placement-trust-row">
+            <div class="trust-chip">
+              <span class="trust-chip__icon"><i class="bi bi-shield-check"></i></span>
+              <div>
+                <strong>100% Free</strong>
+                <small>No hidden charges</small>
+              </div>
+            </div>
+            <div class="trust-chip">
+              <span class="trust-chip__icon"><i class="bi bi-clock-history"></i></span>
+              <div>
+                <strong>Quick & Easy</strong>
+                <small>8–10 minutes test</small>
+              </div>
+            </div>
+            <div class="trust-chip">
+              <span class="trust-chip__icon"><i class="bi bi-bullseye"></i></span>
+              <div>
+                <strong>Personalized</strong>
+                <small>Get your best path</small>
+              </div>
+            </div>
+            <div class="trust-chip">
+              <span class="trust-chip__icon"><i class="bi bi-lock-fill"></i></span>
+              <div>
+                <strong>Secure & Private</strong>
+                <small>Your data is safe</small>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="placement-benefits-card">
+          <div class="benefit-row">
+            <span class="benefit-row__icon benefit-row__icon--peach"><i class="bi bi-bar-chart-line-fill"></i></span>
+            <div>
+              <h3>Level-based result</h3>
+              <p>Get your English level — Basic, Intermediate, or Advanced in minutes.</p>
+            </div>
+          </div>
+          <div class="benefit-row">
+            <span class="benefit-row__icon benefit-row__icon--gold"><i class="bi bi-star-fill"></i></span>
+            <div>
+              <h3>Skill-based suggestion</h3>
+              <p>See your strengths and weak areas in grammar, reading, writing, speaking, and more.</p>
+            </div>
+          </div>
+          <div class="benefit-row benefit-row--last">
+            <span class="benefit-row__icon benefit-row__icon--amber"><i class="bi bi-signpost-split-fill"></i></span>
+            <div>
+              <h3>Best next course</h3>
+              <p>Receive a personalized learning path that tells you what to start now, next, and later.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="champions-section">
+      <div class="champions-grid">
+        <article class="champions-intro-card">
+          <div class="champions-intro-card__header">
+            <span class="champions-intro-card__badge"><i class="bi bi-trophy-fill"></i></span>
+            <div>
+              <div class="section-kicker">Hall Of Champions</div>
+              <h2>Top coin earners this week and month</h2>
+            </div>
+          </div>
+          <p>
+            Students climb the front-page board by learning consistently, winning momentum,
+            and clearing more work.
+          </p>
+          <a href="{{ url_for('main.courses') }}" class="leaderboard-link leaderboard-link--warm">Explore Courses <i class="bi bi-arrow-right"></i></a>
+          <div class="champions-trophy-art" aria-hidden="true">
+            <div class="champions-trophy-art__cup"><i class="bi bi-trophy-fill"></i></div>
+            <div class="champions-trophy-art__coin champions-trophy-art__coin--left"></div>
+            <div class="champions-trophy-art__coin champions-trophy-art__coin--right"></div>
+            <span class="champions-trophy-art__spark champions-trophy-art__spark--one"></span>
+            <span class="champions-trophy-art__spark champions-trophy-art__spark--two"></span>
+            <span class="champions-trophy-art__spark champions-trophy-art__spark--three"></span>
+          </div>
+        </article>
+
+        <article class="leaderboard-card leaderboard-card--weekly">
+          <div class="leaderboard-card__header">
+            <div class="leaderboard-card__icon"><i class="bi bi-trophy-fill"></i></div>
+            <div>
+              <div class="leaderboard-card__eyebrow">Weekly Crown</div>
+              <h3>This Week's Standouts</h3>
+            </div>
+          </div>
+
+          <div class="leaderboard-card__list">
+            {% for row in weekly_leaders[:5] %}
+            <div class="leaderboard-row">
+              <div class="leaderboard-row__rank leaderboard-row__rank--{{ row.rank if row.rank <= 3 else 'plain' }}">
+                {% if row.rank <= 3 %}<i class="bi bi-award-fill"></i>{% else %}{{ row.rank }}{% endif %}
+              </div>
+              <div class="leaderboard-row__name">{{ row.display_name }}</div>
+              <div class="leaderboard-row__label">{{ leaderboard_label(row.rank, 'weekly') }}</div>
+            </div>
+            {% else %}
+              {% for demo in [
+                {'rank': 1, 'name': 'Demo S.', 'label': 'Champion'},
+                {'rank': 2, 'name': 'Alex Johnson', 'label': 'Runner-up'},
+                {'rank': 3, 'name': 'Sarah K.', 'label': 'Top Performer'},
+                {'rank': 4, 'name': 'Emma L.', 'label': 'Top Performer'},
+                {'rank': 5, 'name': 'Michael T.', 'label': 'Top Performer'}
+              ] %}
+              <div class="leaderboard-row leaderboard-row--sample">
+                <div class="leaderboard-row__rank leaderboard-row__rank--{{ demo.rank if demo.rank <= 3 else 'plain' }}">
+                  {% if demo.rank <= 3 %}<i class="bi bi-award-fill"></i>{% else %}{{ demo.rank }}{% endif %}
+                </div>
+                <div class="leaderboard-row__name">{{ demo.name }}</div>
+                <div class="leaderboard-row__label">{{ demo.label }}</div>
+              </div>
+              {% endfor %}
+            {% endfor %}
+          </div>
+
+          <a href="{{ url_for('main.courses') }}" class="leaderboard-link leaderboard-link--green">View Weekly Leaderboard <i class="bi bi-arrow-right"></i></a>
+        </article>
+
+        <article class="leaderboard-card leaderboard-card--monthly">
+          <div class="leaderboard-card__header">
+            <div class="leaderboard-card__icon leaderboard-card__icon--blue"><i class="bi bi-award-fill"></i></div>
+            <div>
+              <div class="leaderboard-card__eyebrow leaderboard-card__eyebrow--blue">Monthly Prestige</div>
+              <h3>This Month's Leaders</h3>
+            </div>
+          </div>
+
+          <div class="leaderboard-card__list">
+            {% for row in monthly_leaders[:5] %}
+            <div class="leaderboard-row">
+              <div class="leaderboard-row__rank leaderboard-row__rank--{{ row.rank if row.rank <= 3 else 'plain' }}">
+                {% if row.rank <= 3 %}<i class="bi bi-award-fill"></i>{% else %}{{ row.rank }}{% endif %}
+              </div>
+              <div class="leaderboard-row__name">{{ row.display_name }}</div>
+              <div class="leaderboard-row__label">{{ leaderboard_label(row.rank, 'monthly') }}</div>
+            </div>
+            {% else %}
+              {% for demo in [
+                {'rank': 1, 'name': 'Demo S.', 'label': 'Champion'},
+                {'rank': 2, 'name': 'Alex Johnson', 'label': 'Runner-up'},
+                {'rank': 3, 'name': 'Sarah K.', 'label': 'Top Performer'},
+                {'rank': 4, 'name': 'Emma L.', 'label': 'Top Performer'},
+                {'rank': 5, 'name': 'Michael T.', 'label': 'Top Performer'}
+              ] %}
+              <div class="leaderboard-row leaderboard-row--sample">
+                <div class="leaderboard-row__rank leaderboard-row__rank--{{ demo.rank if demo.rank <= 3 else 'plain' }}">
+                  {% if demo.rank <= 3 %}<i class="bi bi-award-fill"></i>{% else %}{{ demo.rank }}{% endif %}
+                </div>
+                <div class="leaderboard-row__name">{{ demo.name }}</div>
+                <div class="leaderboard-row__label">{{ demo.label }}</div>
+              </div>
+              {% endfor %}
+            {% endfor %}
+          </div>
+
+          <a href="{{ url_for('main.courses') }}" class="leaderboard-link leaderboard-link--blue">View Monthly Leaderboard <i class="bi bi-arrow-right"></i></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="home-bottom-note">
+      <i class="bi bi-heart-fill"></i>
+      <span>Keep learning, keep growing. Your best English is just a test away!</span>
+    </section>
+  </div>
+</section>
+{% endblock %}

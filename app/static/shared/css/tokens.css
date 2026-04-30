@@ -1,0 +1,52 @@
+:root {
+  --bg: #0b1220;
+  --surface: #0f1a2c;
+  --surface-2: #0c1628;
+  --border: rgba(255,255,255,.08);
+  --radius: 16px;
+
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.62);
+
+  --primary: #0d6efd;
+  --radius: 16px;
+  --shadow: 0 12px 30px rgba(0,0,0,.45);
+
+  --input-bg: rgba(255,255,255,.04);
+  --input-border: rgba(255,255,255,.10);
+}
+
+/* DARK THEME (default) */
+html[data-theme="dark"] {
+  --bg: #0b1220;
+  --surface: #0f1a2c;
+  --surface-2: #0c1628;
+  --border: rgba(255,255,255,.08);
+
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.62);
+
+  --primary: #0d6efd;
+  --input-bg: rgba(255,255,255,.04);
+  --input-border: rgba(255,255,255,.10);
+}
+
+/* LIGHT THEME */
+html[data-theme="light"] {
+  --bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --border: rgba(0,0,0,.10);
+
+  --text: rgba(0,0,0,.88);
+  --muted: rgba(0,0,0,.55);
+
+  --primary: #0d6efd;
+  --input-bg: rgba(0,0,0,.03);
+  --input-border: rgba(0,0,0,.14);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}

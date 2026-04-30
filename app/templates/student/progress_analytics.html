@@ -1,0 +1,245 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Progress & Analytics • Fluencify{% endblock %}
+{% block page_title %}Progress & Analytics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-progress-analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set summary = analytics.summary %}
+<div class="student-shell analytics-shell">
+  <section class="neo-card hero-card analytics-hero-card">
+    <div class="hero-grid analytics-hero-grid">
+      <div>
+        <div class="eyebrow">Phase 11 • Progress & Analytics</div>
+        <h1 class="hero-title">Student insights in one place</h1>
+        <p class="hero-sub">Track scores, progress, weak areas, and recent activity across speaking, writing, reading, and listening.</p>
+        <div class="chip-row">
+          <span class="chip"><i class="bi bi-bar-chart-line me-1"></i>{{ summary.active_tracks or 0 }} active tracks</span>
+          <span class="chip"><i class="bi bi-bullseye me-1"></i>{{ '%.1f'|format(summary.overall_avg_score or 0) }}% overall average</span>
+          <span class="chip"><i class="bi bi-clock-history me-1"></i>{{ summary.total_time_text or '0s' }} time spent</span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="{{ url_for('student.dashboard') }}"><i class="bi bi-grid me-1"></i>Dashboard</a>
+          <a class="btn btn-outline-light" href="{{ url_for('main.home') }}"><i class="bi bi-house-door me-1"></i>Home Website</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.speaking_analytics') }}"><i class="bi bi-mic me-1"></i>Speaking detail</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.ai_intelligence') }}"><i class="bi bi-stars me-1"></i>AI Intelligence</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.course_library') }}"><i class="bi bi-collection me-1"></i>Course Library</a>
+        </div>
+      </div>
+
+      <aside class="hero-side analytics-hero-side">
+        <div class="focus-box analytics-focus-box">
+          <div class="label">Overall progress</div>
+          <div class="value">{{ summary.overall_completion or 0 }}%</div>
+          <div class="sub">Completion across tracked work</div>
+        </div>
+        <div class="split-metrics analytics-split-metrics">
+          <div class="focus-box analytics-focus-box">
+            <div class="label">Practice items</div>
+            <div class="value">{{ summary.total_practice_items or 0 }}</div>
+            <div class="sub">Tracked activities</div>
+          </div>
+          <div class="focus-box analytics-focus-box">
+            <div class="label">Weak areas</div>
+            <div class="value">{{ summary.weak_areas_count or 0 }}</div>
+            <div class="sub">Need improvement</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="analytics-metric-grid">
+    <article class="analytics-metric-card">
+      <div class="metric-label">Active tracks</div>
+      <div class="metric-value">{{ summary.active_tracks or 0 }}</div>
+    </article>
+    <article class="analytics-metric-card">
+      <div class="metric-label">Overall average</div>
+      <div class="metric-value">{{ '%.1f'|format(summary.overall_avg_score or 0) }}%</div>
+    </article>
+    <article class="analytics-metric-card">
+      <div class="metric-label">Overall progress</div>
+      <div class="metric-value">{{ summary.overall_completion or 0 }}%</div>
+    </article>
+    <article class="analytics-metric-card">
+      <div class="metric-label">Practice items</div>
+      <div class="metric-value">{{ summary.total_practice_items or 0 }}</div>
+    </article>
+    <article class="analytics-metric-card">
+      <div class="metric-label">Time spent</div>
+      <div class="metric-value metric-value-sm">{{ summary.total_time_text or '0s' }}</div>
+    </article>
+    <article class="analytics-metric-card">
+      <div class="metric-label">Weak areas</div>
+      <div class="metric-value">{{ summary.weak_areas_count or 0 }}</div>
+    </article>
+  </section>
+
+  <section class="analytics-track-grid">
+    {% for track in analytics.tracks %}
+      <article class="neo-card section-card analytics-track-card">
+        <div class="track-head">
+          <div>
+            <div class="track-title">{{ track.label }}</div>
+            <div class="track-sub">Completed {{ track.completed_count }} • Total {{ track.items_count }}</div>
+          </div>
+          <div class="score-pill">{{ '%.1f'|format(track.avg_score or 0) }}%</div>
+        </div>
+        <div class="progress-line analytics-progress-line">
+          <div class="head"><span>Average score</span><strong>{{ '%.1f'|format(track.avg_score or 0) }}%</strong></div>
+          <div class="progress"><div class="progress-bar" style="width: {{ track.avg_score or 0 }}%"></div></div>
+        </div>
+        <div class="track-stats">
+          <div><span>Best</span><strong>{{ '%.1f'|format(track.best_score or 0) }}%</strong></div>
+          <div><span>Time</span><strong>{{ track.time_text or '0s' }}</strong></div>
+          <div><span>{{ track.secondary_metric_label }}</span><strong>{{ track.secondary_metric_value }}{{ track.secondary_metric_suffix }}</strong></div>
+        </div>
+        <div class="stack-list analytics-mini-list">
+          {% if track.weak_areas %}
+            {% for item in track.weak_areas[:2] %}
+              <div class="list-item analytics-mini-item"><span>{{ item.label }}</span><strong>{{ item.score|round|int }}%</strong></div>
+            {% endfor %}
+          {% else %}
+            <div class="list-item analytics-mini-item"><span>No weak area visible yet.</span><strong>--</strong></div>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+
+
+  <section class="insight-grid analytics-detail-grid analytics-ai-grid">
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Recommendations</h3>
+          <p class="section-sub">Next smart actions chosen from recent scores and weak areas.</p>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for item in intelligence.recommendations %}
+          <div class="list-item">
+            <div>
+              <div class="fw-semibold">{{ item.title }}</div>
+              <div class="muted-note small">{{ item.summary }}</div>
+              <div class="muted-note small">{{ item.reason }}</div>
+            </div>
+            <span class="badge-soft">{{ item.badge }}</span>
+          </div>
+        {% else %}
+          <div class="list-item"><div><div class="fw-semibold">No recommendation yet</div><div class="muted-note small">Complete more work so the system can adapt.</div></div><span class="badge-soft">--</span></div>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">AI Tutor</h3>
+          <p class="section-sub">One tutor voice across all tracks.</p>
+        </div>
+      </div>
+      <div class="stack-list">
+        <div class="list-item">
+          <div>
+            <div class="fw-semibold">{{ intelligence.tutor.summary }}</div>
+            <div class="muted-note small">{{ intelligence.tutor.message }}</div>
+          </div>
+          <span class="badge-soft">{{ intelligence.summary.focus_track }}</span>
+        </div>
+        {% for tip in intelligence.tutor.drills %}
+          <div class="list-item"><div class="fw-semibold">{{ tip }}</div></div>
+        {% endfor %}
+        <div class="list-item">
+          <div>
+            <div class="fw-semibold">Coach tip</div>
+            <div class="muted-note small">{{ intelligence.tutor.coach_tip }}</div>
+          </div>
+          <a class="btn btn-sm btn-outline-light" href="{{ url_for('student.ai_intelligence') }}">Open full plan</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="neo-card section-card">
+    <div class="section-head">
+      <div>
+        <h3 class="section-title">Adaptive Difficulty</h3>
+        <p class="section-sub">Each track now gets a recommended band based on actual student performance.</p>
+      </div>
+    </div>
+    <div class="table-responsive analytics-table-wrap">
+      <table class="table align-middle mb-0 analytics-table">
+        <thead><tr><th>Track</th><th>Current band</th><th>Recommended band</th><th>Confidence</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for row in intelligence.adaptive_tracks %}
+            <tr>
+              <td>{{ row.label }}</td>
+              <td>{{ row.current_band }}</td>
+              <td>{{ row.recommended_band }}</td>
+              <td>{{ row.confidence }}%</td>
+              <td>{{ row.action }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-center py-4 muted-note">No adaptive data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="insight-grid analytics-detail-grid">
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Weak Areas</h3>
+          <p class="section-sub">Lowest-performing topics and lessons to improve first.</p>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for item in analytics.weak_areas %}
+          <div class="list-item">
+            <div>
+              <div class="fw-semibold">{{ item.track }} • {{ item.label }}</div>
+              <div class="muted-note small">{{ item.note }}</div>
+            </div>
+            <div class="score-tag">{{ item.score|round|int }}%</div>
+          </div>
+        {% else %}
+          <div class="list-item"><div><div class="fw-semibold">No weak areas yet</div><div class="muted-note small">Complete more work to unlock deeper insights.</div></div><span class="badge-soft">--</span></div>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Recent Activity</h3>
+          <p class="section-sub">Your latest tracked learning actions.</p>
+        </div>
+      </div>
+      <div class="table-responsive analytics-table-wrap">
+        <table class="table align-middle mb-0 analytics-table">
+          <thead><tr><th>Track</th><th>Title</th><th>Detail</th><th>Score</th></tr></thead>
+          <tbody>
+            {% for row in analytics.recent_activity %}
+              <tr>
+                <td>{{ row.track }}</td>
+                <td>{{ row.label }}</td>
+                <td>{{ row.sub }}</td>
+                <td>{{ '%.1f'|format(row.score or 0) }}%</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="text-center py-4 muted-note">No tracked activity yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</div>
+{% endblock %}

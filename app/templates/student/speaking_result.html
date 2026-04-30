@@ -1,0 +1,152 @@
+
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ 'Interview Result' if is_interview_mode else 'Speaking Result' }} • Fluencify{% endblock %}
+{% block page_title %}{{ 'Interview Result' if is_interview_mode else 'Speaking Result' }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+          <div>
+            <span class="badge text-bg-primary mb-3">Phase 5C Real speaking evaluation</span>
+            <h2 class="fw-bold mb-2">{{ speaking_session.prompt.title }}</h2>
+            <p class="text-secondary mb-0">Your answer is scored across pronunciation, fluency, grammar, sentence making, and relevance.</p>
+          </div>
+          <div class="text-end">
+            <div class="display-6 fw-bold mb-1">{{ '%.1f'|format(speaking_session.evaluation_score or 0) }}/10</div>
+            <div class="small text-secondary">Overall score</div>
+          </div>
+        </div>
+
+        {% set dims = evaluation_payload.get('dimension_scores', {}) if evaluation_payload else {} %}
+        <div class="row g-3 mb-4">
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Pronunciation</div><div class="fw-semibold">{{ dims.get('pronunciation', evaluation_payload.get('pronunciation_score', 0))|int }}/100</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Fluency</div><div class="fw-semibold">{{ dims.get('fluency', evaluation_payload.get('fluency_score', 0))|int }}/100</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Grammar</div><div class="fw-semibold">{{ dims.get('grammar', evaluation_payload.get('grammar_score', 0))|int }}/100</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Sentence making</div><div class="fw-semibold">{{ dims.get('sentence_making', evaluation_payload.get('sentence_making_score', 0))|int }}/100</div></div></div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Relevance</div><div class="fw-semibold">{{ dims.get('relevance', speaking_session.relevance_score or 0)|int }}%</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Words</div><div class="fw-semibold">{{ speaking_session.latest_word_count }}</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Attempts</div><div class="fw-semibold">{{ speaking_session.submit_count }}</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Source</div><div class="fw-semibold text-capitalize">{{ (speaking_session.transcript_source or 'manual').replace('_', ' ') }}</div></div></div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">{{ 'Answer speed' if is_interview_mode else 'Speaking speed' }}</div><div class="fw-semibold">{{ session_metrics.words_per_minute }}</div><div class="small text-secondary">WPM · {{ session_metrics.pacing_band|title }}</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Filler words</div><div class="fw-semibold">{{ session_metrics.filler_count }}</div><div class="small text-secondary">{{ session_metrics.filler_ratio_percent }}% of words</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Sentence length</div><div class="fw-semibold">{{ session_metrics.avg_sentence_length }}</div><div class="small text-secondary">words per sentence</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary text-uppercase mb-1">Duration</div><div class="fw-semibold">{{ speaking_session.duration_seconds or 0 }} sec</div><div class="small text-secondary">Target {{ speaking_session.prompt.effective_target_duration }} • Min {{ speaking_session.prompt.effective_min_duration }} • Max {{ speaking_session.prompt.effective_max_duration }}</div></div></div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-lg-6">
+            <div class="border rounded-4 p-4 h-100">
+              <div class="small text-secondary text-uppercase mb-2">AI feedback</div>
+              <div class="fw-semibold mb-3">{{ speaking_session.feedback_text or speaking_session.result_summary or 'No feedback available.' }}</div>
+              <div class="small text-secondary">Status: {% if speaking_session.is_relevant %}On topic{% else %}Needs better topic match{% endif %}</div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="border rounded-4 p-4 h-100">
+              <div class="small text-secondary text-uppercase mb-2">Final transcript used for scoring</div>
+              <div>{{ speaking_session.transcript_text or 'No transcript stored.' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-lg-6">
+            <div class="border rounded-4 p-4 h-100">
+              <div class="small text-secondary text-uppercase mb-2">Strengths</div>
+              {% set strengths = evaluation_payload.get('strengths', []) if evaluation_payload else [] %}
+              {% if strengths %}
+                <ul class="mb-0 ps-3">
+                  {% for item in strengths %}
+                    <li class="mb-2">{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-secondary">Keep practicing to unlock stronger positive signals.</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="border rounded-4 p-4 h-100">
+              <div class="small text-secondary text-uppercase mb-2">What to improve</div>
+              {% set improvements = evaluation_payload.get('improvements', []) if evaluation_payload else [] %}
+              {% if improvements %}
+                <ul class="mb-0 ps-3">
+                  {% for item in improvements %}
+                    <li class="mb-2">{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-secondary">No major issues were detected in this attempt.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if attempts %}
+        <div class="border rounded-4 p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div class="small text-secondary text-uppercase mb-1">Attempt history</div>
+              <div class="fw-semibold">See how each attempt was scored</div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Attempt</th>
+                  <th>Overall</th>
+                  <th>Pron.</th>
+                  <th>Fluency</th>
+                  <th>Grammar</th>
+                  <th>Sentence</th>
+                  <th>Relevance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for attempt in attempts %}
+                  {% set payload = attempt_payloads.get(attempt.id, {}) if attempt_payloads is defined else {} %}
+                  {% set adims = payload.get('dimension_scores', {}) if payload else {} %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">Attempt {{ attempt.attempt_number }}</div>
+                      <div class="small text-secondary">{{ attempt.created_at.strftime('%d %b %Y %I:%M %p') }}</div>
+                    </td>
+                    <td>{{ '%.1f'|format(attempt.score or 0) }}/10</td>
+                    <td>{{ adims.get('pronunciation', payload.get('pronunciation_score', 0))|int }}</td>
+                    <td>{{ adims.get('fluency', payload.get('fluency_score', 0))|int }}</td>
+                    <td>{{ adims.get('grammar', payload.get('grammar_score', 0))|int }}</td>
+                    <td>{{ adims.get('sentence_making', payload.get('sentence_making_score', 0))|int }}</td>
+                    <td>{{ adims.get('relevance', attempt.relevance_score or 0)|int }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-2">
+          {% if speaking_session.can_retry %}
+            <form method="post" action="{{ url_for(route_payload.retry_endpoint, **route_payload.retry_kwargs) if route_payload is defined else url_for('student.speaking_retry', session_id=speaking_session.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-warning" type="submit">Retry Same Prompt</button>
+            </form>
+          {% endif %}
+          <a class="btn btn-primary" href="{{ url_for(route_payload.start_endpoint, **route_payload.start_kwargs) if route_payload is defined else url_for('student.speaking_home') }}">{{ 'Start Another Interview Question' if is_interview_mode else 'Start Another Prompt' }}</a>
+          <a class="btn btn-outline-secondary" href="{{ url_for(route_payload.history_endpoint, **route_payload.history_kwargs) if route_payload is defined else url_for('student.speaking_history') }}">View History</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

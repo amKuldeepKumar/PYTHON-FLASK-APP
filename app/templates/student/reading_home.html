@@ -1,0 +1,164 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Course Reading • Fluencify{% endblock %}
+{% block page_title %}Course Reading{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-reading-home.css') }}">{% endblock %}
+
+{% block content %}
+<div class="student-track-shell track-reading d-grid gap-4">
+  <section class="reading-hero track-hero p-4 p-lg-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-8">
+        <div class="small text-uppercase text-secondary mb-2">{{ course.title if course else "Reading" }}</div>
+        <h2 class="fw-bold mb-3">Reading is now organized inside your course.</h2>
+        <p class="text-secondary mb-4">Open approved reading sets from this course workspace with split-screen flow, mobile toggle mode, timer, progress bar, and auto-save.</p>
+        <div class="d-flex gap-2 flex-wrap mb-3"><a class="btn btn-outline-light" href="{{ url_for('student.course_detail', course_id=course.id) }}">Back to Course</a></div>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="reading-chip"><i class="bi bi-book-half"></i>{{ total_passages }} live reading set{{ '' if total_passages == 1 else 's' }}</span>
+          <span class="reading-chip"><i class="bi bi-mortarboard"></i>{{ student_level|title }} level view</span>
+          <span class="reading-chip"><i class="bi bi-cloud-check"></i>Auto-save enabled</span>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="border rounded-4 p-4 h-100" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)!important;">
+          <div class="small text-secondary text-uppercase mb-2">Course access</div>
+          <div class="fw-semibold mb-2">As soon as SuperAdmin approves and publishes a passage, and approves its questions.</div>
+          <div class="small text-secondary mb-0">This course page shows only approved, active, and published reading sets.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+
+  <section class="reading-topic-card track-panel p-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <div class="small text-secondary text-uppercase mb-1">Adaptive reading path</div>
+        <h4 class="mb-1">Current level: {{ personalization.current_level_label }}</h4>
+        <div class="text-secondary small">{{ personalization.message }}</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="reading-chip">Recent logs {{ personalization.recent_logs }}</span>
+        <span class="reading-chip">Avg accuracy {{ personalization.avg_accuracy }}%</span>
+        <span class="reading-chip">Recommended {{ personalization.recommended_level_label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="reading-topic-card track-panel p-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <div class="small text-secondary text-uppercase mb-1">AI tutor recommendation</div>
+        <h4 class="mb-1">{{ intelligence_track.action }}</h4>
+        <div class="text-secondary small">{{ intelligence_track.reason }} Tutor tip: {{ intelligence_track.tutor_tip }}</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="reading-chip">Current {{ intelligence_track.current_band }}</span>
+        <span class="reading-chip">Recommended {{ intelligence_track.recommended_band }}</span>
+        <span class="reading-chip">Confidence {{ intelligence_track.confidence }}%</span>
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('student.ai_intelligence') }}">Open AI plan</a>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section class="reading-topic-card track-panel p-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <div class="small text-secondary text-uppercase mb-1">Content rotation</div>
+        <h4 class="mb-1">Fresh passages are shown first</h4>
+        <div class="text-secondary small">Recently used reading sets stay on cooldown for the last {{ rotation.cooldown_count }} completed sessions whenever fresher options exist.</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="reading-chip">Fresh now {{ rotation.fresh_count }}</span>
+        <span class="reading-chip">Cooling down {{ rotation.recent_count }}</span>
+        <span class="reading-chip">Reuse protection on</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-3">
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Sessions</div><div class="h4 mb-0">{{ analytics.sessions }}</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Avg accuracy</div><div class="h4 mb-0">{{ analytics.avg_accuracy }}%</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Reading speed</div><div class="h4 mb-0">{{ analytics.avg_speed_wpm }}</div><div class="small text-secondary">WPM</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Errors</div><div class="h4 mb-0">{{ analytics.total_errors }}</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Time spent</div><div class="h4 mb-0">{{ '%02d:%02d'|format((analytics.total_time_seconds // 60), (analytics.total_time_seconds % 60)) }}</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Best accuracy</div><div class="h4 mb-0">{{ analytics.best_accuracy }}%</div></div></div>
+  </section>
+
+  {% if analytics.recent_logs %}
+    <section class="reading-topic-card track-panel p-4">
+      <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+        <div>
+          <div class="small text-secondary text-uppercase mb-1">Recent reading logs</div>
+          <h4 class="mb-0">Tracked reading analytics</h4>
+        </div>
+      </div>
+      <div class="row g-3">
+        {% for log in analytics.recent_logs %}
+          <div class="col-lg-6">
+            <div class="border rounded-4 p-3 h-100" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08)!important;">
+              <div class="fw-semibold mb-1">{{ log.passage_title }}</div>
+              <div class="small text-secondary mb-2">{{ log.submitted_at.strftime('%d %b %Y %I:%M %p') if log.submitted_at else 'Recent' }}</div>
+              <div class="d-flex gap-2 flex-wrap">
+                <span class="reading-chip">Accuracy {{ log.accuracy }}%</span>
+                <span class="reading-chip">Speed {{ log.reading_speed_wpm }} WPM</span>
+                <span class="reading-chip">Errors {{ log.errors_count }}</span>
+                <span class="reading-chip">Time {{ '%02d:%02d'|format((log.elapsed_seconds // 60), (log.elapsed_seconds % 60)) }}</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if rows %}
+    <div class="row g-4">
+      {% for row in rows %}
+        <div class="col-lg-6">
+          <div class="reading-topic-card p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+              <div>
+                <div class="small text-secondary text-uppercase mb-1">{{ row.passage.topic.category_label if row.passage.topic else 'General' }}</div>
+                <h4 class="mb-1">{{ row.passage.title }}</h4>
+                <div class="small text-secondary">{{ row.passage.topic_title_snapshot }} • {{ row.passage.level_label }} • {{ row.passage.length_label }} • {{ row.passage.word_count }} words</div>
+              </div>
+              {% if row.is_recently_used %}
+                <span class="badge text-bg-warning text-dark">Cooldown</span>
+              {% else %}
+                <span class="badge text-bg-success">Fresh</span>
+              {% endif %}
+            </div>
+            <p class="text-secondary small mb-3">{{ (row.passage.content[:200] ~ ('...' if row.passage.content|length > 200 else '')) }}</p>
+            <div class="d-flex gap-2 flex-wrap mb-3">
+              <span class="reading-chip">{{ row.question_count }} questions</span>
+              <span class="reading-chip">MCQ {{ row.mcq_count }}</span>
+              <span class="reading-chip">Fill {{ row.fill_blank_count }}</span>
+              <span class="reading-chip">T/F {{ row.true_false_count }}</span>
+              {% if row.is_recently_used %}
+                <span class="reading-chip">Recently used</span>
+              {% else %}
+                <span class="reading-chip">Best next pick</span>
+              {% endif %}
+            </div>
+            {% if row.is_recently_used and rotation.fresh_count > 0 %}
+              <div class="small text-secondary mb-3">This set was used recently. It stays visible for review, but fresher content is prioritized above it.</div>
+            {% endif %}
+            <a class="btn btn-primary" href="{{ url_for('student.course_reading_session', course_id=course.id, passage_id=row.passage.id) }}">Start Reading Session</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-5 text-center">
+        <h3 class="fw-bold mb-2">No live reading set yet</h3>
+        <div class="text-secondary">This page becomes active after SuperAdmin approves and publishes at least one passage with approved questions.</div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "layout/base.html" %}
+{% block title %}Platform Recovery • Fluencify{% endblock %}
+{% block content %}
+<section class="container py-5">
+  <div class="card border-0 shadow-sm p-4 p-lg-5 text-center mx-auto" style="max-width: 760px;">
+    <div class="text-uppercase small text-muted fw-semibold mb-2">Phase 18 Stability</div>
+    <h1 class="display-6 mb-3">Something went wrong on this page.</h1>
+    <p class="text-muted mb-4">The platform is still available. Please return to the previous page or open your main dashboard again.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+      <button class="btn btn-primary" type="button" onclick="window.history.back()">Go Back</button>
+      <a class="btn btn-outline-primary" href="{{ url_for('main.home') }}">Open Home</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('student.dashboard') }}">Open Student Dashboard</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+.interview-shell{display:flex;flex-direction:column;gap:1.5rem;color:var(--text)}
+.card-surface{background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 98%,transparent),color-mix(in srgb,var(--surface-2) 96%,transparent));border:1px solid var(--border);border-radius:24px;padding:1.5rem;box-shadow:var(--shadow);color:var(--text)}
+.interview-hero,.result-top,.interview-grid,.result-grid,.live-header{display:grid;gap:1rem}
+.interview-hero{grid-template-columns:2fr 1fr}
+.hero-stats,.metrics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.stat-box,.status-box,.setup-box>div,.question-card,.turn-card,.spoken-note{background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--border);border-radius:18px;padding:1rem;color:var(--text)}
+.stat-box span,.status-box span,.setup-box span,.eyebrow{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem}
+.stat-box strong,.status-box strong,.score-badge{font-size:1.55rem;color:var(--heading-text,var(--text))}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.75rem}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem}
+.flow-list{margin:0;padding-left:1.25rem;display:grid;gap:.65rem}
+.setup-form label{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;color:var(--text)}
+.setup-form input,.setup-form select,.setup-form textarea,#answer_text,.interview-form .form-control,.interview-form .form-select{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:16px;padding:.9rem 1rem;color:var(--text);-webkit-text-fill-color:var(--text)}
+.setup-form input::placeholder,.setup-form textarea::placeholder,#answer_text::placeholder,.interview-form .form-control::placeholder{color:var(--muted);opacity:1}
+.setup-form select option,.interview-form .form-select option{color:#111827;background:#fff}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.question-card{margin-bottom:1rem}
+.live-status-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}
+.nudge-box{margin-top:1rem;padding:1rem;border-radius:16px;background:color-mix(in srgb,var(--primary) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--primary) 26%,var(--border));color:var(--text)}
+.result-grid{grid-template-columns:1.2fr .8fr}
+.score-badge{display:flex;align-items:center;justify-content:center;min-width:160px;border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 24%,transparent),color-mix(in srgb,var(--surface-2) 82%,var(--primary)));padding:1rem 1.25rem}
+.clean-list{margin:0;padding-left:1.2rem;display:grid;gap:.55rem}
+.turn-list{display:grid;gap:1rem}
+.interview-shell .text-secondary,.interview-shell .text-muted{color:var(--muted)!important}
+.interview-shell .table,.interview-shell .table th,.interview-shell .table td{color:var(--text)!important;border-color:var(--border)!important;background:transparent!important}
+@media (max-width: 992px){.interview-hero,.interview-grid,.result-grid{grid-template-columns:1fr}.form-grid,.live-status-row,.hero-stats,.metrics-grid{grid-template-columns:1fr 1fr}}
+@media (max-width: 640px){.form-grid,.live-status-row,.hero-stats,.metrics-grid{grid-template-columns:1fr}}

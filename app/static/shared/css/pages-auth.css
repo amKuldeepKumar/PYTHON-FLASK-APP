@@ -1,0 +1,258 @@
+/* Phase 1: Static topbar for auth pages */
+.auth-topbar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 50;
+  background: rgba(0,0,0,.22);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+/* Give space below fixed header */
+.auth-with-topbar{
+  padding-top: 84px;
+}
+
+/* Make form card centered like the screenshot */
+.auth-right{
+  align-items: flex-start; /* so it starts below header */
+}
+
+/* Card style closer to screenshot */
+.auth-card{
+  margin-top: 24px;
+}
+
+/* Icons inside inputs */
+.input-icon-group{
+  position: relative;
+}
+.input-icon-left{
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .75;
+}
+.input-icon-right{
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .75;
+  cursor: pointer;
+}
+.auth-input{
+  padding-left: 44px;
+  padding-right: 44px;
+}
+
+/* Role chips like screenshot */
+.role-row{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 12px 0 18px;
+}
+.role-btn{
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: #fff;
+  min-width: 110px;
+}
+.role-btn.admin{ background: #0c7a1f; }
+.role-btn.teacher{ background: #ff8a00; }
+.role-btn.student{ background: #1677ff; }
+.role-btn.outline{
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* Social circle buttons */
+.social-row{
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.social-btn{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+}
+.social-btn.g{ background: #db4437; }
+.social-btn.f{ background: #4267B2; }
+.social-btn.t{ background: #1DA1F2; }
+.social-btn.i{ background: #0A66C2; }
+
+/* OR divider */
+.or-divider{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  justify-content: center;
+}
+.or-divider::before,
+.or-divider::after{
+  content: "";
+  height: 1px;
+  background: var(--border);
+  flex: 1;
+  max-width: 120px;
+}
+
+
+
+.auth-body {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.auth-body main{
+  width: min(1380px, calc(100vw - clamp(28px, 5vw, 88px)));
+  margin: 0 auto;
+  padding: 0 0 clamp(28px, 4vw, 48px);
+}
+
+.auth-wrap {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  min-height: calc(100vh - 108px);
+  gap: clamp(26px, 3.5vw, 52px);
+  padding: clamp(18px, 2.4vw, 30px);
+  border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
+  border-radius: 32px;
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--surface) 97%, transparent),
+    color-mix(in srgb, var(--surface-2) 95%, transparent));
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--shadow) 20%, transparent);
+  overflow: hidden;
+}
+
+.auth-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 1.8vw, 24px);
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+  border-right: 1px solid var(--border);
+  border-radius: 24px;
+}
+
+.auth-illustration {
+  width: min(720px, 100%);
+  min-height: clamp(420px, 62vh, 720px);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--surface) 52%, transparent);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 40%, transparent);
+}
+
+.auth-illu-box {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(13,110,253,.25), transparent 55%),
+              radial-gradient(circle at 30% 70%, rgba(130,87,229,.18), transparent 55%);
+}
+
+.auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: clamp(16px, 2vw, 28px);
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 94%, transparent);
+  border-radius: 28px;
+  padding: clamp(26px, 2.5vw, 36px);
+  box-shadow: 0 22px 54px color-mix(in srgb, var(--shadow) 18%, transparent);
+}
+
+/* mobile */
+@media (max-width: 991px) {
+  .auth-body main{
+    width: min(100vw - 20px, 100%);
+    padding-bottom: 22px;
+  }
+
+  .auth-wrap {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    gap: 18px;
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .auth-left { display: none; }
+
+  .auth-right {
+    padding: 0;
+  }
+}
+
+/* Phase 1: because we added a navbar above auth layout */
+.auth-wrap {
+  min-height: calc(100vh - 62px);
+}
+
+.password-field-wrap{
+  position: relative;
+}
+
+.password-field-wrap .auth-input,
+.password-field-wrap .form-control{
+  padding-right: 52px !important;
+}
+
+.input-toggle-btn{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  border:0;
+  background:transparent;
+  color:rgba(255,255,255,.78);
+  z-index:6;
+  padding:6px 8px;
+  cursor:pointer;
+  border-radius:10px;
+  transition:background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.input-toggle-btn:hover{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+}
+
+.input-toggle-btn:focus-visible{
+  outline:2px solid rgba(77,171,247,.45);
+  outline-offset:2px;
+  background:rgba(255,255,255,.08);
+}
+
+.input-toggle-btn.is-visible{
+  color:#7dd3fc;
+}

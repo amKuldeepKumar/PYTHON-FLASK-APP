@@ -1,0 +1,107 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}WhatsApp Leads • SuperAdmin{% endblock %}
+{% block page_title %}WhatsApp Leads{% endblock %}
+
+{% block content %}
+<form method="POST" class="row g-4">
+  {{ form.hidden_tag() }}
+  <div class="col-xl-5">
+    <div class="card card-dark h-100">
+      <div class="card-body">
+        <div class="text-secondary text-uppercase small fw-bold mb-2">Phase D1</div>
+        <h3 class="h4 mb-2">Public WhatsApp Button</h3>
+        <p class="text-secondary small mb-4">Visible only before login. Logged-in students will use the internal student chat instead.</p>
+
+        <div class="form-check form-switch mb-3">
+          {{ form.whatsapp_enabled(class='form-check-input') }}
+          <label class="form-check-label">Enable WhatsApp button</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+          {{ form.whatsapp_show_on_public(class='form-check-input') }}
+          <label class="form-check-label">Show only for public visitors</label>
+        </div>
+        <div class="form-check form-switch mb-4">
+          {{ form.whatsapp_click_tracking_enabled(class='form-check-input') }}
+          <label class="form-check-label">Track button clicks</label>
+        </div>
+
+        <label class="form-label">{{ form.whatsapp_number.label }}</label>
+        {{ form.whatsapp_number(class='form-control mb-3', placeholder='Example: 919876543210') }}
+        <div class="small text-secondary mb-3">Use country code without +, spaces, or dashes.</div>
+
+        <label class="form-label">{{ form.whatsapp_button_text.label }}</label>
+        {{ form.whatsapp_button_text(class='form-control mb-3', placeholder='Need Help? WhatsApp') }}
+
+        <label class="form-label">{{ form.whatsapp_help_text.label }}</label>
+        {{ form.whatsapp_help_text(class='form-control mb-3', placeholder='Ask us about courses, fees, or placement test help.') }}
+
+        <label class="form-label">{{ form.whatsapp_default_category.label }}</label>
+        {{ form.whatsapp_default_category(class='form-control mb-3', placeholder='Course inquiry') }}
+
+        <label class="form-label">{{ form.whatsapp_message.label }}</label>
+        {{ form.whatsapp_message(class='form-control mb-3', rows='5', placeholder='Hi! I need help with Fluencify courses.') }}
+
+        <button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i> Save WhatsApp Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-7">
+    <div class="card card-dark mb-4">
+      <div class="card-body">
+        <div class="text-secondary text-uppercase small fw-bold mb-2">Preview</div>
+        <h3 class="h5 mb-3">Visitor experience</h3>
+        <div class="p-4 rounded-4 border" style="background:linear-gradient(135deg, rgba(37,211,102,.12), rgba(255,255,255,.04));">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="wa-icon" style="background:#25d366;color:white;"><i class="fa-brands fa-whatsapp"></i></span>
+            <div>
+              <div class="fw-bold">{{ settings.whatsapp_button_text or 'Need Help? WhatsApp' }}</div>
+              <div class="text-secondary small">{{ settings.whatsapp_help_text or 'Ask us about courses, fees, or placement test help.' }}</div>
+            </div>
+          </div>
+          <hr>
+          <div class="small text-secondary mb-1">Auto message preview</div>
+          <pre class="mb-0 small text-wrap" style="white-space:pre-wrap;">{{ settings.whatsapp_message or 'Hi! I need help with Fluencify courses.' }}
+Category: {{ settings.whatsapp_default_category or 'Course inquiry' }}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-dark">
+      <div class="card-body">
+        <div class="d-flex justify-content-between gap-3 flex-wrap align-items-center mb-3">
+          <div>
+            <div class="text-secondary text-uppercase small fw-bold mb-1">Lead activity</div>
+            <h3 class="h5 mb-0">Recent WhatsApp clicks</h3>
+          </div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle">{{ logs|length }} recent</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle table-dark table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Category</th>
+                <th>Source</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in logs %}
+                <tr>
+                  <td class="small text-secondary">{{ row.created_at.strftime('%d %b %Y %I:%M %p') if row.created_at else '-' }}</td>
+                  <td>{{ row.category or 'Course inquiry' }}</td>
+                  <td class="small text-truncate" style="max-width:260px;">{{ row.source_path or row.referer or '-' }}</td>
+                  <td class="small text-secondary">{{ row.ip_address or '-' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="text-center text-secondary py-4">No WhatsApp clicks yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

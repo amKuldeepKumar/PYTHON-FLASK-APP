@@ -1,0 +1,413 @@
+{% extends "layout/dashboard_base.html" %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-learn-lesson.css') }}">{% endblock %}
+
+{% block title %}{{ lesson.title }} • Fluencify{% endblock %}
+{% block page_title %}Learning Screen{% endblock %}
+
+{% block content %}
+{% set is_nursery_course = (course.slug or '') == 'nursery-image-practice' %}
+
+<div class="container-fluid py-4 student-learning-page lesson-shell {% if is_nursery_course %}is-nursery-course{% endif %}">
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4 track-card">
+        <div class="card-body p-4">
+          <div class="lesson-meta-label">Course</div>
+          <h3 class="fw-bold mb-1">{{ course.title }}</h3>
+          <div class="badge bg-primary-subtle mb-3">{{ lesson.lesson_type|title }}</div>
+
+          <div class="lesson-meta-label">Lesson explanation</div>
+          <p class="lesson-readable mt-2 mb-3">
+            {{ lesson.explanation_text or 'Read the prompt carefully and answer in your own words.' }}
+          </p>
+
+          {% set pct = progress.completion_percent if progress else 0 %}
+          {% set done = progress.completed_questions if progress else 0 %}
+          {% set total = progress.total_questions if progress and progress.total_questions else lesson.question_count %}
+
+          <div class="progress" role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar js-progress-width" data-width="{{ pct|int }}">{{ pct }}%</div>
+          </div>
+
+          <div class="lesson-stat-line mt-2">{{ done }} of {{ total }} questions completed</div>
+          <div class="lesson-stat-line">Skipped for later: {{ skipped_count }}</div>
+          <div class="lesson-stat-line">Active queue: {{ queue_pending_count }}</div>
+          <div class="lesson-stat-line">Deferred return queue: {{ deferred_pending_count }}</div>
+          {% if progress %}
+            <div class="lesson-stat-line">Retry questions tracked: {{ progress.retry_questions or 0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4 track-card">
+        <div class="card-body p-4"
+             id="voicePracticeCard"
+             data-auto-play-question="{{ '1' if (voice_autoplay_enabled or is_nursery_course) else '0' }}"
+             data-auto-start-listening="{{ '1' if voice_auto_listen_enabled else '0' }}"
+             data-beep-enabled="{{ '1' if voice_beep_enabled else '0' }}"
+             data-voice-lang="{{ voice_accent }}"
+             data-playback-rate="{{ voice_playback_speed }}"
+             data-voice-pitch="{{ voice_pitch }}"
+             data-voice-gender="{{ voice_gender }}"
+             data-voice-name="{{ current_user.preferences.voice_name if current_user.preferences and current_user.preferences.voice_name else '' }}">
+          <h5 class="fw-bold">Voice Practice</h5>
+
+          <div class="lesson-help-text mb-2">
+            Use browser voice playback and speech-to-text to keep the student workflow interactive.
+          </div>
+
+          <div class="lesson-help-text mb-3">
+            Mode:
+            <strong>{{ 'Automatic question play' if (voice_autoplay_enabled or is_nursery_course) else 'Manual question play' }}</strong>
+            · Accent: <strong>{{ voice_accent }}</strong>
+            · Gender: <strong>{{ voice_gender|title }}</strong>
+            · Pitch: <strong>{{ '%.1f'|format(voice_pitch) }}</strong>
+            · Listening:
+            <strong>{{ 'Auto start after question' if voice_auto_listen_enabled else 'Manual start' }}</strong>
+            · Beep:
+            <strong>{{ 'On' if voice_beep_enabled else 'Off' }}</strong>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="speakQuestionBtn">Play Question</button>
+            <button class="btn btn-outline-warning btn-sm" type="button" id="recordAnswerBtn">Start Speaking</button>
+          </div>
+
+          <div class="lesson-help-text" id="voicePracticeStatus">
+            {% if is_nursery_course %}
+              Nursery mode is active. The question will try to play automatically so students can look, listen, and answer with less setup.
+            {% else %}
+              Question can be played manually, or automatically if enabled in Preferences.
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% if question %}
+      <div class="card border-0 shadow-sm mb-4 track-card">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">Lesson Tracking Summary</h5>
+          {% set lesson_stats = lesson_breakdown if lesson_breakdown is defined else None %}
+          <div class="row g-2 small">
+            <div class="col-6">
+              <div class="tracking-tile">
+                <div class="lesson-soft-text">Completed</div>
+                <div class="fw-semibold">{{ lesson_stats.completed_questions if lesson_stats else done }}/{{ lesson_stats.total_questions if lesson_stats else total }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="tracking-tile">
+                <div class="lesson-soft-text">Pending</div>
+                <div class="fw-semibold">{{ lesson_stats.pending_questions if lesson_stats else (total - done) }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="tracking-tile">
+                <div class="lesson-soft-text">Skipped</div>
+                <div class="fw-semibold">{{ lesson_stats.skipped_questions if lesson_stats else skipped_count }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="tracking-tile">
+                <div class="lesson-soft-text">Retried</div>
+                <div class="fw-semibold">{{ lesson_stats.retry_questions if lesson_stats else (progress.retry_questions if progress else 0) }}</div>
+              </div>
+            </div>
+          </div>
+
+          {% if lesson_stats and lesson_stats.chapters %}
+            <div class="mt-3">
+              {% for chapter in lesson_stats.chapters %}
+                <div class="mb-2">
+                  <div class="d-flex justify-content-between small lesson-soft-text">
+                    <span>{{ chapter.title }}</span>
+                    <span>{{ chapter.completed_questions }}/{{ chapter.total_questions }}</span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar js-progress-width" data-width="{{ chapter.completion_percent|int }}"></div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">Support Tools</h5>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button class="btn btn-outline-info btn-sm support-tool-btn" type="button" id="toggleHintBtn" data-tool="hint" {% if support_tool_status.reached and not support_tool_state.hint_used %}disabled{% endif %}>
+              Show Hint
+            </button>
+            <button class="btn btn-outline-primary btn-sm support-tool-btn" type="button" id="toggleSynonymBtn" data-tool="synonym" {% if support_tool_status.reached and not support_tool_state.synonym_used %}disabled{% endif %}>
+              Synonym Help
+            </button>
+            <button class="btn btn-outline-secondary btn-sm support-tool-btn" type="button" id="toggleTranslationBtn" data-tool="translation" {% if support_tool_status.reached and not support_tool_state.translation_used %}disabled{% endif %}>
+              Enable Translation Support
+            </button>
+          </div>
+          <div class="lesson-help-text">
+            Quota: {{ support_tool_status.used }}/{{ support_tool_status.quota }} used. Show Hint uses your saved hint_text and hint_seed and reduces scoring when used.
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          {% if question %}
+            <div class="lesson-section-head">
+              <div class="lesson-meta-label mb-0">Current Question</div>
+              {% if translation_support_enabled %}
+                <div class="translate-toggle-group">
+                  <span class="translate-toggle-label">Translate</span>
+                  <button
+                    class="translate-switch"
+                    type="button"
+                    id="questionTranslateToggle"
+                    data-active="false"
+                    aria-pressed="false"
+                    aria-controls="questionTranslatePanel"
+                    aria-label="Toggle translated question"
+                  ></button>
+                  <span class="translate-state-text" id="questionTranslateState">OFF</span>
+                </div>
+              {% endif %}
+            </div>
+
+            {% if is_nursery_course %}
+              <div class="nursery-lesson-intro mb-3">
+                <div class="nursery-lesson-chip">Nursery Picture Practice</div>
+                <div class="nursery-lesson-copy">Look at the picture, listen to the question, and answer with one very short sentence.</div>
+              </div>
+            {% endif %}
+
+            {% if question.image_url %}
+              <div class="lesson-image-card mb-3">
+                <img
+                  src="{{ question.image_url }}"
+                  alt="{{ question_image_meta.alt }}"
+                  title="{{ question_image_meta.title }}"
+                  class="lesson-question-image"
+                  loading="lazy"
+                  onerror="this.onerror=null;this.src='{{ url_for('static', filename='uploads/questions/nursery/placeholder.svg') }}';"
+                >
+              </div>
+            {% endif %}
+
+            <div class="p-4 rounded-4 border fs-5 fw-semibold mb-3 lesson-question-box" id="questionText">
+              {{ question.prompt }}
+            </div>
+
+            {% if translation_support_enabled %}
+              <div class="translate-inline-panel d-none" id="questionTranslatePanel">
+                <div class="translate-panel-title">Question support in {{ translation_language_name }}</div>
+                <div class="translate-panel-meta">English stays visible first. Use this only when needed.</div>
+                <div class="translate-panel-body">
+                  {{ question_translations.question_prompt or question.prompt }}
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="alert {{ 'alert-warning' if support_tool_status.reached else 'alert-secondary' }} py-2" id="supportToolStatusBox">
+              <div class="fw-semibold">Support tool usage</div>
+              <div class="small">
+                <span id="supportToolCounter">{{ support_tool_status.used }}</span>/{{ support_tool_status.quota }} used
+                out of {{ support_tool_status.total_questions }} lesson questions.
+                {% if support_tool_status.reached %}
+                  Limit reached. Support tools are now locked for this lesson.
+                {% else %}
+                  Remaining uses: <span id="supportToolRemaining">{{ support_tool_status.remaining }}</span>.
+                {% endif %}
+              </div>
+              <div class="small">
+                Current penalty total:
+                <span id="supportToolPenalty">{{ '%.0f'|format(support_tool_status.penalty_points or 0) }}</span>
+                points.
+              </div>
+            </div>
+
+            <div class="alert alert-warning d-none" id="supportToolNotice"></div>
+
+            <div class="alert alert-info d-none" id="hintPanel">
+              <div class="d-flex align-items-center justify-content-between gap-2"><strong>AI Hint</strong><span class="badge text-bg-info">Quick Support</span></div>
+              {% set answer_patterns = question.answer_patterns_list %}
+              {% if answer_patterns %}
+                <ul class="mb-0 mt-2 ps-3">
+                  {% for item in answer_patterns %}
+                    <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="mt-2">{{ resolved_hint_text }}</div>
+                {% if hint_seed_text and hint_seed_text != resolved_hint_text %}
+                  <div class="small text-muted mt-2">Hint seed: {{ hint_seed_text }}</div>
+                {% endif %}
+              {% endif %}
+            </div>
+
+            <div class="alert alert-primary d-none" id="synonymPanel">
+              <strong>Synonym help:</strong>
+              <div class="mt-2">{{ question.synonym_help_text or 'good → nice / useful ; big → large ; small → little ; like → enjoy ; important → necessary' }}</div>
+            </div>
+
+            <div class="alert alert-secondary d-none" id="translationPanel">
+              <strong>Translation support activated:</strong>
+              <div class="mt-2">You can now open the question and answer translation toggles on this page.</div>
+            </div>
+
+            {% if evaluation_preview %}
+              {% set verdict = evaluation_preview.evaluation_verdict if evaluation_preview.evaluation_verdict is defined else ('acceptable' if evaluation_preview.is_correctish else 'needs_improvement') %}
+              <div class="alert {% if verdict == 'correct' %}alert-success{% elif verdict in ['acceptable', 'partially_correct'] %}alert-info{% else %}alert-warning{% endif %}">
+                <div class="fw-semibold mb-2">Preview feedback</div>
+                <div class="small mb-2">
+                  Result:
+                  <strong>
+                    {% if verdict == 'correct' %}
+                      Correct
+                    {% elif verdict == 'acceptable' %}
+                      Acceptable
+                    {% elif verdict == 'partially_correct' %}
+                      Partially Correct
+                    {% else %}
+                      Needs Improvement
+                    {% endif %}
+                  </strong>
+                </div>
+                <div class="small mb-1">Accuracy: <strong>{{ evaluation_preview.accuracy_score|round|int }}%</strong></div>
+                <div class="small mb-1">Grammar: <strong>{{ evaluation_preview.grammar_score|round|int }}%</strong></div>
+                <div class="small mb-1">Clarity: <strong>{{ evaluation_preview.clarity_score|round|int }}%</strong></div>
+                <div class="small mb-1">Confidence: <strong>{{ evaluation_preview.confidence_score|round|int }}%</strong></div>
+                {% if evaluation_preview.matched_pattern %}
+                  <div class="small mb-2">Best matched pattern: <strong>{{ evaluation_preview.matched_pattern }}</strong></div>
+                {% endif %}
+                <div>{{ evaluation_preview.ai_feedback }}</div>
+                {% if question.model_answer or question.hint_text or lesson.explanation_text %}
+                  <div class="mt-3 pt-3 border-top">
+                    <div class="fw-semibold mb-2">Explanation / expected answer</div>
+                    <div class="small mb-2">{{ question.model_answer or lesson.explanation_text or 'Use a direct answer, then support it with one clear reason.' }}</div>
+                    {% if question.hint_text %}<div class="small text-muted">Hint: {{ question.hint_text }}</div>{% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('student.submit_question', question_id=question.id) }}" id="answerForm">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="response_mode" id="responseMode" value="typed">
+              <input type="hidden" name="duration_seconds" id="durationSeconds" value="0">
+              <input type="hidden" name="hint_used" id="hintUsed" value="{{ 1 if support_tool_state.hint_used else 0 }}">
+              <input type="hidden" name="synonym_used" id="synonymUsed" value="{{ 1 if support_tool_state.synonym_used else 0 }}">
+              <input type="hidden" name="translation_used" id="translationUsed" value="{{ 1 if support_tool_state.translation_used else 0 }}">
+
+              <div class="mb-3">
+                <div class="lesson-section-head">
+                  <label class="form-label fw-semibold mb-0" for="responseText">Your Answer</label>
+                  {% if translation_support_enabled %}
+                    <div class="translate-toggle-group">
+                      <span class="translate-toggle-label">Translate</span>
+                      <button
+                        class="translate-switch"
+                        type="button"
+                        id="answerTranslateToggle"
+                        data-active="false"
+                        aria-pressed="false"
+                        aria-controls="answerTranslatePanel"
+                        aria-label="Toggle translated answer support"
+                      ></button>
+                      <span class="translate-state-text" id="answerTranslateState">OFF</span>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <textarea class="form-control {% if is_nursery_course %}nursery-answer-box{% endif %}" rows="{{ 6 if is_nursery_course else 8 }}" name="response_text" id="responseText" placeholder="{% if is_nursery_course %}Say or type one short answer...{% else %}Type your answer or use the voice button to speak...{% endif %}" required>{{ previous_response or '' }}</textarea>
+
+                {% if translation_support_enabled %}
+                  <div class="translate-inline-panel d-none" id="answerTranslatePanel">
+                    <div class="translate-panel-title">Answer support in {{ translation_language_name }}</div>
+                    <div class="translate-panel-meta">Understand the idea in your support language, then write the final answer in simple English.</div>
+                    <div class="translate-panel-body">
+                      {{ question_translations.answer_support or question.hint_text or 'Say your answer in your own language first. Then convert it into one short, clear English sentence.' }}
+                    </div>
+                    <div class="translate-panel-title">Example in {{ translation_language_name }}</div>
+                    <div class="translate-panel-body">
+                      {{ question_translations.translated_answer_pattern or question_translations.question_prompt or question.prompt }}
+                    </div>
+                    <div class="translate-panel-title">English answer pattern</div>
+                    <div class="translate-panel-body">
+                      {{ question_translations.english_answer_pattern or question.model_answer or (question.answer_patterns_list[0] if question.answer_patterns_list else 'Use one direct sentence that answers the question clearly.') }}
+                    </div>
+                  </div>
+                {% endif %}
+
+                <div class="form-text">
+                  You can check, improve, then submit the final answer. Support tools are limited to 20% of the lesson and reduce the score.
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-primary {% if is_nursery_course %}nursery-action-btn{% endif %}" type="submit">Submit Final Answer</button>
+                <button class="btn btn-outline-success {% if is_nursery_course %}nursery-action-btn{% endif %}" type="button" id="checkAnswerBtn">Check Answer</button>
+                <button class="btn btn-outline-secondary {% if is_nursery_course %}nursery-action-btn{% endif %}" type="button" id="skipQuestionBtn">Skip for Now</button>
+                <a class="btn btn-outline-dark" href="{{ url_for('student.course_detail', course_id=course.id) }}">Back to Course</a>
+              </div>
+            </form>
+
+            <form method="post" action="{{ url_for('student.check_question', question_id=question.id) }}" id="checkForm" class="d-none">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="response_text" id="checkResponseText">
+              <input type="hidden" name="response_mode" id="checkResponseMode" value="typed">
+              <input type="hidden" name="duration_seconds" id="checkDurationSeconds" value="0">
+              <input type="hidden" name="hint_used" id="checkHintUsed" value="{{ 1 if support_tool_state.hint_used else 0 }}">
+              <input type="hidden" name="synonym_used" id="checkSynonymUsed" value="{{ 1 if support_tool_state.synonym_used else 0 }}">
+              <input type="hidden" name="translation_used" id="checkTranslationUsed" value="{{ 1 if support_tool_state.translation_used else 0 }}">
+            </form>
+
+            <form method="post" action="{{ url_for('student.skip_question', question_id=question.id) }}" id="skipForm" class="d-none">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="response_text" id="skipResponseText">
+              <input type="hidden" name="response_mode" id="skipResponseMode" value="typed">
+              <input type="hidden" name="duration_seconds" id="skipDurationSeconds" value="0">
+              <input type="hidden" name="hint_used" id="skipHintUsed" value="{{ 1 if support_tool_state.hint_used else 0 }}">
+              <input type="hidden" name="synonym_used" id="skipSynonymUsed" value="{{ 1 if support_tool_state.synonym_used else 0 }}">
+              <input type="hidden" name="translation_used" id="skipTranslationUsed" value="{{ 1 if support_tool_state.translation_used else 0 }}">
+            </form>
+
+            <div class="mt-4 p-3 rounded-4 border lesson-info-box">
+              <div class="lesson-meta-label">Stored valid answer pattern</div>
+              <div class="lesson-readable mt-2">
+                {{ question.model_answer or (question.answer_patterns_list[0] if question.answer_patterns_list else 'A strong answer should be clear, relevant, and supported by one example.') }}
+              </div>
+
+              <div class="lesson-meta-label mt-3">Grammar formula</div>
+              <div class="lesson-readable mt-1">
+                {{ question.subsection.grammar_formula if question.subsection else 'Auto-detected during evaluation' }}
+              </div>
+            </div>
+          {% else %}
+            <div class="text-center py-5">
+              <h3 class="fw-bold">Lesson completed</h3>
+              <div class="lesson-soft-text">
+                There is no pending question right now. You can review the course or return later for repeated practice.
+              </div>
+              <div class="d-flex gap-2 justify-content-center mt-3">
+                <a class="btn btn-primary" href="{{ url_for('student.course_detail', course_id=course.id) }}">Back to Course</a>
+                <a class="btn btn-outline-secondary" href="{{ url_for('student.my_courses') }}">My Courses</a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='shared/js/student-learn-lesson.js') }}"></script>
+<script src="{{ url_for('static', filename='shared/js/voice-practice.js') }}"></script>
+{% endblock %}

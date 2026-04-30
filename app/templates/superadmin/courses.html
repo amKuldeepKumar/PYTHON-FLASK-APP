@@ -1,0 +1,213 @@
+{% extends "layout/dashboard_base.html" %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-courses.css') }}">{% endblock %}
+
+{% block title %}Course Hub • Fluencify{% endblock %}
+{% block page_title %}Course Hub{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="section-head mb-4">
+  <div>
+    <div class="text-uppercase small text-secondary mb-1">Academy Workspace</div>
+    <h1 class="mb-2">Courses</h1>
+    <p class="text-secondary mb-0">Create paid or free courses, manage pricing, coupon eligibility, and open each course into a full structure tree.</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('superadmin.coupons') }}" class="btn btn-outline-light"><i class="bi bi-ticket-perforated"></i> Coupons</a>
+    <a href="{{ url_for('superadmin.bulk_upload_index') }}" class="btn btn-outline-light"><i class="bi bi-cloud-arrow-up"></i> Bulk Upload</a>
+    <a href="{{ url_for('superadmin.courses') }}" class="btn btn-outline-light">Refresh</a>
+  </div>
+</div>
+
+<div class="hero-grid mb-4">
+  <div class="admin-studio-card p-4">
+    <h4 class="mb-1">Create New Course</h4>
+    <p class="text-secondary mb-4">Starter level and first lesson will be created automatically. Use free mode for zero-cost open-access courses.</p>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="row g-3">
+        <div class="col-md-6">{{ form.title.label(class='form-label') }}{{ form.title(class='form-control', placeholder='Basic Spoken English') }}</div>
+        <div class="col-md-6">{{ form.slug.label(class='form-label') }}{{ form.slug(class='form-control', placeholder='basic-speaking-english') }}</div>
+        <div class="col-12">{{ form.description.label(class='form-label') }}{{ form.description(class='form-control', rows='3', placeholder='Course overview and learning promise') }}</div>
+        <div class="col-md-3">{{ form.language_code.label(class='form-label') }}{{ form.language_code(class='form-select') }}</div>
+        <div class="col-md-3">{{ form.track_type.label(class='form-label') }}{{ form.track_type(class='form-select') }}</div>
+        <div class="col-md-3">{{ form.difficulty.label(class='form-label') }}{{ form.difficulty(class='form-select') }}</div>
+        <div class="col-md-3">{{ form.currency_code.label(class='form-label') }}{{ form.currency_code(class='form-select') }}</div>
+        <div class="col-md-3">{{ form.max_level.label(class='form-label') }}{{ form.max_level(class='form-control', min='1') }}</div>
+        <div class="col-md-3">{{ form.access_type.label(class='form-label') }}{{ form.access_type(class='form-select', id='courseAccessType') }}</div>
+        <div class="col-md-3">{{ form.base_price.label(class='form-label') }}{{ form.base_price(class='form-control price-input', step='0.01') }}</div>
+        <div class="col-md-3">{{ form.sale_price.label(class='form-label') }}{{ form.sale_price(class='form-control price-input', step='0.01') }}</div>
+        <div class="col-md-3 d-flex align-items-end"><div class="form-check form-switch">{{ form.allow_level_purchase(class='form-check-input', id='allowLevelPurchase') }}{{ form.allow_level_purchase.label(class='form-check-label ms-2') }}</div></div>
+        <div class="col-md-3">{{ form.level_access_type.label(class='form-label') }}{{ form.level_access_type(class='form-select', id='levelAccessType') }}</div>
+        <div class="col-md-3">{{ form.level_price.label(class='form-label') }}{{ form.level_price(class='form-control level-price-input', step='0.01') }}</div>
+        <div class="col-md-3">{{ form.level_sale_price.label(class='form-label') }}{{ form.level_sale_price(class='form-control level-price-input', step='0.01') }}</div>
+        <div class="col-md-3">{{ form.level_title.label(class='form-label') }}{{ form.level_title(class='form-control') }}</div>
+        <div class="col-md-3">{{ form.lesson_title.label(class='form-label') }}{{ form.lesson_title(class='form-control') }}</div>
+        <div class="col-md-3">{{ form.lesson_type.label(class='form-label') }}{{ form.lesson_type(class='form-select') }}</div>
+        <div class="col-md-3">{{ form.grammar_formula.label(class='form-label') }}{{ form.grammar_formula(class='form-control', placeholder='Optional starter formula') }}</div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-check form-switch me-4">
+            <input class="form-check-input" type="checkbox" id="freeCourseToggle">
+            <label class="form-check-label" for="freeCourseToggle">Free course</label>
+          </div>
+          <div class="form-check form-switch">{{ form.is_premium(class='form-check-input', id='premiumCourseToggle') }}{{ form.is_premium.label(class='form-check-label ms-2') }}</div>
+        </div>
+        <div class="col-md-6">{{ form.explanation_text.label(class='form-label') }}{{ form.explanation_text(class='form-control', rows='3') }}</div>
+        <div class="col-md-3">{{ form.badge_title.label(class='form-label') }}{{ form.badge_title(class='form-control', placeholder='Launch Offer') }}</div>
+        <div class="col-md-3">{{ form.badge_subtitle.label(class='form-label') }}{{ form.badge_subtitle(class='form-control', placeholder='Coupon eligible') }}</div>
+        <div class="col-md-3">{{ form.badge_template.label(class='form-label') }}{{ form.badge_template(class='form-select') }}</div>
+        <div class="col-md-3">{{ form.badge_animation.label(class='form-label') }}{{ form.badge_animation(class='form-select') }}</div>
+        <div class="col-md-3 d-flex align-items-end"><div class="form-check form-switch">{{ form.is_published(class='form-check-input') }}{{ form.is_published.label(class='form-check-label ms-2') }}</div></div>
+        <div class="col-12 d-flex gap-2 flex-wrap">
+          <button class="btn btn-success" type="submit">{{ form.submit.label.text }}</button>
+          <a href="{{ url_for('superadmin.coupons') }}" class="btn btn-outline-light">Manage Coupons</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="admin-studio-card p-4">
+    <h4 class="mb-3">Course Control Shortcuts</h4>
+    <div class="d-grid gap-2 mb-3">
+      <form method="post" class="d-grid">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="create_nursery_starter">
+        <button type="submit" class="btn btn-outline-warning text-start"><i class="bi bi-stars me-2"></i> Create Nursery Image Starter</button>
+      </form>
+      <a href="{{ url_for('superadmin.lessons_index') }}" class="btn btn-outline-light text-start"><i class="bi bi-collection-play me-2"></i> Lessons</a>
+      <a href="{{ url_for('superadmin.chapters_index') }}" class="btn btn-outline-light text-start"><i class="bi bi-folder2-open me-2"></i> Chapters</a>
+      <a href="{{ url_for('superadmin.questions_index') }}" class="btn btn-outline-light text-start"><i class="bi bi-patch-question me-2"></i> Questions</a>
+      <a href="{{ url_for('superadmin.listening_review_queue') }}" class="btn btn-outline-light text-start"><i class="bi bi-headphones me-2"></i> Listening Review</a>
+      <a href="{{ url_for('superadmin.bulk_upload_index') }}" class="btn btn-outline-light text-start"><i class="bi bi-upload me-2"></i> Bulk Upload</a>
+      <a href="{{ url_for('superadmin.coupons') }}" class="btn btn-outline-light text-start"><i class="bi bi-ticket-perforated me-2"></i> Coupons</a>
+      <a href="{{ url_for('superadmin.course_pathways') }}" class="btn btn-outline-light text-start"><i class="bi bi-stars me-2"></i> Special English Pathways</a>
+      <a href="{{ url_for('superadmin.review_dashboard') }}" class="btn btn-outline-light text-start"><i class="bi bi-clipboard-check me-2"></i> Unified Review Dashboard</a>
+    </div>
+
+    <div class="rounded-3 border border-secondary-subtle p-3 mb-3 text-start">
+      <div class="fw-semibold mb-2">Track content rule</div>
+      <div class="small text-secondary">Create the course here first, then open that course to manage speaking, reading, writing, or listening content from the course manager.</div>
+    </div>
+
+    <div class="rounded-3 border border-warning-subtle p-3 mb-3 text-start">
+      <div class="fw-semibold mb-2">Nursery image starter</div>
+      <div class="small text-secondary">This creates one safe starter course with image-based questions using the same course, lesson, chapter, and subsection hierarchy you already use everywhere else.</div>
+    </div>
+
+    <h5 class="mb-3">Track Managers</h5>
+    <div class="d-grid gap-2">
+      <div class="rounded-3 border border-secondary-subtle p-3">
+        <div class="fw-semibold mb-1"><i class="bi bi-mic me-2"></i>Speaking</div>
+        <div class="small text-secondary">Open a speaking course to manage topics and prompts from its course manager.</div>
+      </div>
+      <div class="rounded-3 border border-secondary-subtle p-3">
+        <div class="fw-semibold mb-1"><i class="bi bi-book me-2"></i>Reading</div>
+        <div class="small text-secondary">Open a reading course to manage topics, passages, and question generation.</div>
+      </div>
+      <div class="rounded-3 border border-secondary-subtle p-3">
+        <div class="fw-semibold mb-1"><i class="bi bi-pencil-square me-2"></i>Writing</div>
+        <div class="small text-secondary">Open a writing course to manage topics, tasks, scoring rules, and review readiness.</div>
+      </div>
+      <div class="rounded-3 border border-secondary-subtle p-3">
+        <div class="fw-semibold mb-1"><i class="bi bi-headphones me-2"></i>Listening</div>
+        <div class="small text-secondary">Open a listening course to manage topics, questions, audio flow, and review status.</div>
+      </div>
+    </div>
+
+    <hr class="border-secondary-subtle my-4">
+    <div class="d-grid gap-3">
+      <div><div class="small text-secondary mb-1">Free course rule</div><div class="metric-chip">Base price 0 + Premium off</div></div>
+      <div><div class="small text-secondary mb-1">Coupon validity</div><div class="metric-chip">Manage per-course or global coupons</div></div>
+      <div><div class="small text-secondary mb-1">Structure target</div><div class="metric-chip">Course → Track Content → Review → Publish</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-studio-card p-4">
+  <div class="section-head">
+    <div>
+      <h4 class="mb-1">All Courses</h4>
+      <p class="text-secondary mb-0">Open any course to manage its full hierarchy tree and content.</p>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-dark table-hover course-table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Levels</th>
+          <th>Lessons</th>
+          <th>Questions</th>
+          <th>Students</th>
+          <th>Track</th>
+          <th>Pricing</th>
+          <th>Coupons</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in course_cards %}
+        <tr>
+          <td>
+            <div class="course-title">{{ c.title or 'Untitled Course' }}</div>
+            <div class="course-sub">/{{ c.slug or '' }}</div>
+            <div class="mt-2 d-flex gap-2 flex-wrap">
+              <span class="tree-pill">{{ (c.difficulty or 'basic')|title }}</span>
+              <span class="tree-pill">Level 1–{{ c.max_level or 1 }}</span>
+              <span class="tree-pill">Full: {{ (c.access_type or ('paid' if c.is_premium else 'free'))|title }}</span>
+              {% if c.allow_level_purchase %}<span class="tree-pill">Single Level: {{ (c.level_access_type or 'free')|title }}</span>{% endif %}
+              <span class="tree-pill">{{ 'Published' if c.is_published else 'Draft' }}</span>
+            </div>
+          </td>
+          <td>{{ c.levels }}</td>
+          <td>{{ c.lessons }}</td>
+          <td>{{ c.questions }}</td>
+          <td>{{ c.students }}</td>
+          <td><span class="badge text-bg-info">{{ (c.track_type or "general")|replace("_", " ")|title }}</span></td>
+          <td>
+            {% if c.is_free %}
+              <span class="badge text-bg-success">Free</span>
+            {% else %}
+              <div class="fw-semibold">{{ c.current_price }} {{ form.currency_code.data or 'INR' }}</div>
+              {% if c.sale_price %}<div class="small text-secondary">Base {{ c.base_price }}</div>{% endif %}
+              {% if c.allow_level_purchase %}<div class="small text-info mt-1">Level plan: {{ c.level_price }}{% if c.level_sale_price %} • Sale {{ c.level_sale_price }}{% endif %}</div>{% endif %}
+            {% endif %}
+          </td>
+          <td>{{ c.coupons }}</td>
+          <td class="text-end">
+            <div class="d-flex justify-content-end gap-2 flex-wrap">
+              <a href="{{ url_for('superadmin.course_detail', course_id=c.id) }}" class="btn btn-sm btn-primary">Open Course</a>
+              {% if c.track_type == "reading" %}
+              <a href="{{ url_for('superadmin.reading_topics', course_id=c.id) }}" class="btn btn-sm btn-outline-info">Reading Content</a>
+              {% elif c.track_type in ["speaking", "topic", "spoken"] %}
+              <a href="{{ url_for('superadmin.speaking_topics', course_id=c.id) }}" class="btn btn-sm btn-outline-info">Speaking Content</a>
+              {% elif c.track_type == "writing" %}
+              <a href="{{ url_for('superadmin.course_detail', course_id=c.id, tab='writing') }}" class="btn btn-sm btn-outline-info">Writing Content</a>
+              {% elif c.track_type == "listening" %}
+              <a href="{{ url_for('superadmin.listening_topics', course_id=c.id) }}" class="btn btn-sm btn-outline-info">Listening Content</a>
+              <a href="{{ url_for('superadmin.listening_questions', course_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Listening Questions</a>
+              {% endif %}
+              <a href="{{ url_for('superadmin.course_detail', course_id=c.id, tab='settings', _anchor='course-settings') }}" class="btn btn-sm btn-outline-light">Edit</a>
+              <form method="post" action="{{ url_for('superadmin.course_detail', course_id=c.id) }}" onsubmit="return confirm('Delete this course and all linked content?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="delete_course">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="text-secondary">No courses found yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/superadmin-courses.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Reading Question • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Edit Reading Question{% endblock %}
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h4 class="mb-1">Edit Question</h4>
+        <div class="small text-secondary">Saving will send this question back to pending review.</div>
+      </div>
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_questions', passage_id=question.passage_id, course_id=(question.passage.course_id if question.passage else None)) }}">Back to Review Queue</a>
+    </div>
+    <form method="post" class="row g-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-12">
+        <label class="form-label">Question text</label>
+        <textarea class="form-control" rows="5" name="question_text" required>{{ question.question_text }}</textarea>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Correct answer</label>
+        <input type="text" class="form-control" name="correct_answer" value="{{ question.correct_answer or '' }}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Options JSON / text</label>
+        <input type="text" class="form-control" name="options_json" value="{{ question.options_json or '' }}">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Explanation</label>
+        <textarea class="form-control" rows="4" name="explanation">{{ question.explanation or '' }}</textarea>
+      </div>
+      <div class="col-12 d-flex gap-2 justify-content-end">
+        <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.reading_questions', passage_id=question.passage_id, course_id=(question.passage.course_id if question.passage else None)) }}">Cancel</a>
+        <button class="btn btn-primary" type="submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

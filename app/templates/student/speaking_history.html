@@ -1,0 +1,53 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ 'Interview History' if is_interview_mode else 'Speaking History' }} • Fluencify{% endblock %}
+{% block page_title %}{{ 'Interview History' if is_interview_mode else 'Speaking History' }}{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h3 class="mb-1">Past {{ "interview" if is_interview_mode else "speaking" }} sessions</h3>
+        <div class="text-secondary small">Track score trends, retries, relevance, and next-step guidance.</div>
+      </div>
+      <a class="btn btn-primary" href="{{ url_for('student.course_interview_home', course_id=course.id) if course and is_interview_mode else (url_for('student.course_speaking_home', course_id=course.id) if course else url_for('student.speaking_home')) }}">{{ 'New Interview Session' if is_interview_mode else 'New Speaking Session' }}</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Topic</th>
+            <th>Prompt</th>
+            <th>Score</th>
+            <th>Relevance</th>
+            <th>Attempts</th>
+            <th>Next step</th>
+            <th class="text-end">Open</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in sessions %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ session.topic.title }}</div>
+                <div class="small text-secondary">{{ session.created_at.strftime('%d %b %Y %I:%M %p') }}</div>
+              </td>
+              <td>{{ session.prompt.title }}</td>
+              <td>{{ '%.0f'|format(session.evaluation_score or 0) }}/10</td>
+              <td>{% if session.is_relevant %}Relevant{% else %}Weak{% endif %} ({{ '%.0f'|format(session.relevance_score or 0) }}%)</td>
+              <td>{{ session.submit_count }}</td>
+              <td class="text-capitalize">{{ (session.recommended_next_step or 'practice_more').replace('_', ' ') }}</td>
+              <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.course_interview_result', course_id=course.id, session_id=session.id) if course and is_interview_mode else (url_for('student.course_speaking_result', course_id=course.id, session_id=session.id) if course else url_for('student.speaking_result', session_id=session.id)) }}">View</a></td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-secondary py-5">No speaking history yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

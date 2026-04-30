@@ -1,0 +1,370 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Student Dashboard • Fluencify{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-dashboard.css') }}">{% endblock %}
+
+{% block content %}
+{% set today_row = calendar_context.today if calendar_context is defined else None %}
+<div class="student-shell">
+  <section class="neo-card hero-card">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Student workspace</div>
+        <h1 class="hero-title">Welcome back, {{ current_user.full_name.split()[0] if current_user.full_name else current_user.username }}</h1>
+        <p class="hero-sub">{{ learning_summary }}</p>
+        <div class="chip-row">
+          <span class="chip"><i class="bi bi-bullseye me-1"></i>{{ current_user.target_exam or 'Spoken English' }}</span>
+          <span class="chip"><i class="bi bi-mortarboard me-1"></i>{{ current_user.current_level or 'Beginner' }}</span>
+          <span class="chip"><i class="bi bi-translate me-1"></i>{{ translation_language_name }}</span>
+          <span class="chip"><i class="bi bi-diagram-3 me-1"></i>{{ 'Independent Learner' if learning_support.is_independent else 'Organization Learner' }}</span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="{{ continue_url }}"><i class="bi bi-play-fill me-1"></i>{{ continue_cta_label }}</a>
+          <a class="btn btn-outline-light" href="{{ url_for('main.home') }}"><i class="bi bi-house-door me-1"></i>Home Website</a>
+          <a class="btn btn-outline-light" href="{{ url_for('account.profile') }}"><i class="bi bi-person me-1"></i>Update Profile</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.my_courses') }}"><i class="bi bi-book-half me-1"></i>Course Learning</a>
+          <a class="btn btn-outline-light" href="{{ url_for('student.progress_analytics') }}"><i class="bi bi-graph-up-arrow me-1"></i>Progress & Analytics</a>
+        </div>
+
+        <div class="voice-card mb-3">
+          <div>
+            <div class="fw-semibold">Recommended Learning Path</div>
+            <div class="muted-note small">{% if placement_result %}{{ placement_path.current_level }} level • {{ placement_path.goal_label }}{% if placement_result.fit_summary %} · {{ placement_result.fit_summary }}{% endif %}{% else %}Take the smart placement test and get your best course path instantly.{% endif %}</div>
+            {% if placement_path.next_steps %}
+              <div class="muted-note small mt-1">Next: {{ placement_path.next_steps[0] }}</div>
+            {% endif %}
+          </div>
+          <div class="voice-actions">
+            <a class="btn btn-sm btn-primary" href="{{ url_for('student.placement_test') }}"><i class="bi bi-clipboard-data"></i> {% if placement_result %}Retake Test{% else %}Take Test{% endif %}</a>
+            <a class="btn btn-sm btn-outline-light" href="{{ url_for('student.learning_path') }}"><i class="bi bi-signpost-split"></i> My Path</a>
+            <a class="btn btn-sm btn-outline-light" href="{{ url_for('student.course_library') }}"><i class="bi bi-stars"></i> View Recommendations</a>
+          </div>
+        </div>
+
+        <div class="voice-card">
+          <div>
+            <div class="fw-semibold">AI Welcome Voice</div>
+            <div class="muted-note small" id="voiceStatusText">{% if welcome_voice_mode == 'muted' %}Welcome voice is muted for future logins.{% else %}Welcome voice plays once after login. Replay it any time.{% endif %}</div>
+          </div>
+          <div class="voice-actions">
+            <button class="btn btn-sm btn-primary" type="button" id="replayWelcomeBtn"><i class="bi bi-play-fill"></i> Replay</button>
+            <button class="btn btn-sm btn-outline-light" type="button" id="listenOnceBtn"><i class="bi bi-arrow-repeat"></i> Once</button>
+            <button class="btn btn-sm btn-outline-danger" type="button" id="muteForeverBtn"><i class="bi bi-volume-mute"></i> Mute</button>
+          </div>
+        </div>
+
+        <div
+          id="aiVoicePanel"
+          data-message="{{ (ai_voice_payload.text if ai_voice_payload is defined and ai_voice_payload else '')|e }}"
+          data-accent="{{ (ai_voice_payload.lang if ai_voice_payload is defined and ai_voice_payload and ai_voice_payload.lang is defined else 'en-IN')|e }}"
+          data-voice-name="{{ (ai_voice_payload.voice_name if ai_voice_payload is defined and ai_voice_payload and ai_voice_payload.voice_name is defined else '')|e }}"
+          data-voice-gender="{{ current_user.preferences.voice_gender if current_user.preferences and current_user.preferences.voice_gender else 'female' }}"
+          data-voice-pitch="{{ current_user.preferences.voice_pitch if current_user.preferences and current_user.preferences.voice_pitch is not none else 1.0 }}"
+          data-playback-rate="{{ current_user.preferences.playback_speed if current_user.preferences and current_user.preferences.playback_speed is not none else 1.0 }}"
+          data-voice-mode="{{ welcome_voice_mode if welcome_voice_mode is defined else 'once' }}"
+          data-save-url="{{ welcome_voice_save_url if welcome_voice_save_url is defined else '#' }}"
+        ></div>
+      </div>
+
+      <aside class="hero-side">
+        <div class="focus-box">
+          <div class="label">Today's questions</div>
+          <div class="value">{{ today_row.questions_attempted if today_row else 0 }}</div>
+          <div class="sub">Solved today</div>
+        </div>
+        <div class="split-metrics">
+          <div class="focus-box">
+            <div class="label">Accuracy</div>
+            <div class="value">{{ today_row.accuracy_percent if today_row else 0 }}%</div>
+            <div class="sub">Today's average</div>
+          </div>
+          <div class="focus-box">
+            <div class="label">Streak</div>
+            <div class="value">{{ calendar_context.streak if calendar_context is defined else 0 }}</div>
+            <div class="sub">Active days</div>
+          </div>
+        </div>
+        <div class="split-metrics">
+          <div class="focus-box">
+            <div class="label">Profile</div>
+            <div class="value">{{ profile_completion }}%</div>
+            <div class="sub">Completed</div>
+          </div>
+          <div class="focus-box">
+            <div class="label">Speaking</div>
+            <div class="value">{{ today_row.speaking_attempts if today_row else 0 }}</div>
+            <div class="sub">Attempts today</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="focus-grid">
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Practice Calendar</h3>
+          <p class="section-sub">Dark days mean you logged in. Light caution days mean no attendance was recorded.</p>
+        </div>
+        <div class="calendar-summary">
+          <span class="calendar-pill">{{ calendar_context.month_label }}</span>
+          <span class="calendar-pill">{{ calendar_context.active_days }} active days</span>
+          <span class="calendar-pill">{{ calendar_context.month_attempts }} questions</span>
+        </div>
+      </div>
+      <div class="calendar-weekdays">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      {% for week in calendar_context.weeks %}
+        <div class="calendar-row mb-2">
+          {% for cell in week %}
+            <div
+              class="day-cell {% if cell.is_future %}is-future out{% elif not cell.in_month %}out{% elif cell.was_present %}is-present{% else %}is-absent{% endif %} {% if cell.intensity %}i{{ cell.intensity }}{% endif %}"
+              {% if cell.is_future %}
+                aria-hidden="true"
+                tabindex="-1"
+              {% else %}
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-container="body"
+                data-bs-title="{{ cell.tooltip }}"
+                data-tooltip="{{ cell.tooltip }}"
+                data-date-label="{{ cell.display_label }}"
+                tabindex="0"
+                role="button"
+                aria-pressed="false"
+              {% endif %}
+            >
+              {% if cell.is_future %}
+                <div class="day-cell-blank"></div>
+              {% else %}
+              <div class="day-cell-top">
+                <div class="day-num">{{ cell.day }}</div>
+                {% if cell.in_month and not cell.was_present %}
+                  <i class="bi bi-exclamation-triangle-fill day-caution" aria-hidden="true"></i>
+                  <span class="visually-hidden">Not present</span>
+                {% elif cell.was_present %}
+                  <i class="bi bi-check-circle-fill day-present-icon" aria-hidden="true"></i>
+                  <span class="visually-hidden">Present</span>
+                {% endif %}
+              </div>
+              {% if cell.was_present %}
+                <div class="day-meta">{{ cell.questions }}Q · {{ cell.accuracy }}%</div>
+                <div class="day-improvement">{{ cell.improvement_label }}</div>
+              {% elif cell.in_month %}
+                <div class="day-meta day-meta-absent">Not present</div>
+              {% else %}
+                <div class="day-meta day-meta-absent">Outside month</div>
+              {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <div class="calendar-detail-panel" id="calendarDetailPanel">
+        <div class="calendar-detail-label">Selected day</div>
+        <div class="calendar-detail-title">{{ calendar_context.month_label }}</div>
+        <div class="calendar-detail-copy">Click any date card to inspect that day's progress, activity count, and accuracy summary.</div>
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Current Course Progress</h3>
+          <p class="section-sub">Your most important learning metrics in one focused view.</p>
+        </div>
+      </div>
+      <div class="progress-lines">
+        <div class="progress-line">
+          <div class="head"><span>Course completion</span><strong>{{ summary.completion_percent or 0 }}%</strong></div>
+          <div class="progress"><div class="progress-bar" style="width: {{ summary.completion_percent or 0 }}%"></div></div>
+        </div>
+        <div class="progress-line">
+          <div class="head"><span>Accuracy</span><strong>{{ skills.accuracy or 0 }}%</strong></div>
+          <div class="progress"><div class="progress-bar" style="width: {{ skills.accuracy or 0 }}%"></div></div>
+        </div>
+        <div class="progress-line">
+          <div class="head"><span>Grammar</span><strong>{{ skills.grammar or 0 }}%</strong></div>
+          <div class="progress"><div class="progress-bar" style="width: {{ skills.grammar or 0 }}%"></div></div>
+        </div>
+        <div class="progress-line">
+          <div class="head"><span>Confidence</span><strong>{{ skills.confidence or 0 }}%</strong></div>
+          <div class="progress"><div class="progress-bar" style="width: {{ skills.confidence or 0 }}%"></div></div>
+        </div>
+      </div>
+      <div class="metric-strip">
+        <div class="metric-panel">
+          <div class="mini-label">Completed lessons</div>
+          <div class="fw-semibold fs-5">{{ summary.completed_lessons or 0 }}</div>
+          <div class="muted-note small">Lessons fully finished in your active path.</div>
+        </div>
+        <div class="metric-panel">
+          <div class="mini-label">Pending lessons</div>
+          <div class="fw-semibold fs-5">{{ summary.pending_lessons or 0 }}</div>
+          <div class="muted-note small">Lessons waiting in your current sequence.</div>
+        </div>
+      </div>
+      <div class="course-cta">
+        <div>
+          <div class="fw-semibold">{{ current_course.title if current_course else 'No active course selected' }}</div>
+          <div class="muted-note small">{% if continue_lesson %}Next lesson: {{ continue_lesson.title }}{% else %}Enroll in a course to start guided learning.{% endif %}</div>
+        </div>
+        <a class="btn btn-outline-light btn-sm" href="{{ continue_url }}">{{ continue_cta_label }}</a>
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Your Learning Support</h3>
+          <p class="section-sub">See exactly which institute, admin, and teacher your learner profile is linked to.</p>
+        </div>
+      </div>
+      <div class="support-list">
+        <div class="support-item"><div class="label">Learning type</div><div class="value">{{ 'Independent Learner' if learning_support.is_independent else 'Organization Learner' }}</div><div class="hint">This is based on your current institute assignment.</div></div>
+        <div class="support-item"><div class="label">Institute</div><div class="value">{{ learning_support.organization_name or 'Independent Learner' }}</div><div class="hint">The institute linked to your profile, reporting, and certificate records.</div></div>
+        <div class="support-item"><div class="label">Principal / Admin</div><div class="value">{{ learning_support.principal_name }}</div><div class="hint">This is the admin visibility chain for your learner account.</div></div>
+        <div class="support-item"><div class="label">Teacher</div><div class="value">{{ learning_support.teacher_name }}</div><div class="hint">Assigned teacher appears here when linked from profile or admin panel.</div></div>
+        <div class="support-item"><div class="label">Support language</div><div class="value">{{ translation_language_name }}</div><div class="hint">Your translation support and language assistance setting.</div></div>
+      </div>
+    </article>
+  </section>
+
+
+
+  <section class="insight-grid">
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">AI Confidence & Next Steps</h3>
+          <p class="section-sub">Clear confidence score and the next actions chosen by the intelligence layer.</p>
+        </div>
+      </div>
+      <div class="metric-strip mb-3">
+        <div class="metric-panel">
+          <div class="mini-label">AI confidence score</div>
+          <div class="fw-semibold fs-5">{{ ai_intelligence_payload.summary.confidence_score if ai_intelligence_payload is defined and ai_intelligence_payload.summary is defined else 38 }}%</div>
+          <div class="muted-note small">Built from scores, completion consistency, and weak-area repetition.</div>
+        </div>
+        <div class="metric-panel">
+          <div class="mini-label">Readiness</div>
+          <div class="fw-semibold fs-5">{{ '%.1f'|format(ai_intelligence_payload.summary.readiness_score or 0) if ai_intelligence_payload is defined and ai_intelligence_payload.summary is defined else '0.0' }}%</div>
+          <div class="muted-note small">Overall average used for dynamic difficulty guidance.</div>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for step in ai_intelligence_payload.next_steps if ai_intelligence_payload is defined and ai_intelligence_payload.next_steps is defined %}
+          <div class="list-item">
+            <div>
+              <div class="fw-semibold">{{ step }}</div>
+            </div>
+            <span class="badge-soft">Next</span>
+          </div>
+        {% else %}
+          <div class="list-item"><div><div class="fw-semibold">No next step yet</div><div class="muted-note small">Complete one task to unlock the guided next-step plan.</div></div><span class="badge-soft">AI</span></div>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Structured Learning Path</h3>
+          <p class="section-sub">A simple module journey instead of random recommendations.</p>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for row in ai_intelligence_payload.learning_path if ai_intelligence_payload is defined and ai_intelligence_payload.learning_path is defined %}
+          <div class="list-item">
+            <div>
+              <div class="fw-semibold">Step {{ row.step }} · {{ row.track }}</div>
+              <div class="muted-note small">{{ row.goal }}</div>
+            </div>
+            <span class="badge-soft">{{ row.status }} · {{ row.band }}</span>
+          </div>
+        {% else %}
+          <div class="list-item"><div><div class="fw-semibold">Learning path unavailable</div><div class="muted-note small">The path will appear after the first tracked activity.</div></div><span class="badge-soft">Path</span></div>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+
+  <section class="neo-card section-card">
+    <div class="section-head">
+      <div>
+        <h3 class="section-title">Cross-Module Intelligence</h3>
+        <p class="section-sub">How one module now supports the next one.</p>
+      </div>
+    </div>
+    <div class="stack-list">
+      {% for row in ai_intelligence_payload.cross_module if ai_intelligence_payload is defined and ai_intelligence_payload.cross_module is defined %}
+        <div class="list-item">
+          <div>
+            <div class="fw-semibold">{{ row.from_track }} → {{ row.to_track }}</div>
+            <div class="muted-note small">{{ row.reason }}</div>
+          </div>
+          <span class="badge-soft">Linked</span>
+        </div>
+      {% else %}
+        <div class="list-item"><div><div class="fw-semibold">No cross-module links yet</div><div class="muted-note small">Finish more activity to reveal how modules should support each other.</div></div><span class="badge-soft">Map</span></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="insight-grid">
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">Weak Areas</h3>
+          <p class="section-sub">Focus on the lowest-scoring areas first.</p>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% if weak_areas %}
+          {% for item in weak_areas %}
+            <div class="list-item">
+              <div>
+                <div class="fw-semibold">{{ item.label }}</div>
+                <div class="muted-note small">{{ item.note }}</div>
+              </div>
+              <div class="score-tag">{{ item.score }}%</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="list-item"><div><div class="fw-semibold">No weak areas yet</div><div class="muted-note small">Complete more practice to unlock personalized insights.</div></div><span class="badge-soft">--</span></div>
+        {% endif %}
+      </div>
+    </article>
+
+    <article class="neo-card section-card">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">AI Recommendations</h3>
+          <p class="section-sub">Your next best actions based on activity and scores.</p>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for rec in recommendations %}
+          <div class="list-item">
+            <div>
+              <div class="fw-semibold">{{ rec.title }}</div>
+              <div class="muted-note small">{{ rec.text }}</div>
+            </div>
+            <span class="badge-soft">{{ rec.badge }}</span>
+          </div>
+        {% else %}
+          <div class="list-item"><div><div class="fw-semibold">Keep going</div><div class="muted-note small">Your recommendations will appear as soon as more learning data is available.</div></div><span class="badge-soft">AI</span></div>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/student-dashboard.js') }}"></script>
+{% endblock %}

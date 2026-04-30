@@ -1,0 +1,9 @@
+.analytics-hero,.analytics-card{border:1px solid rgba(255,255,255,.08);border-radius:24px;background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(12,18,31,.94));box-shadow:0 20px 60px rgba(0,0,0,.22)}
+  .analytics-card{padding:1.15rem}
+  .metric-card{padding:1rem 1.1rem;border-radius:20px;background:rgba(255,255,255,.04);height:100%}
+  .metric-label{font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+  .metric-value{font-size:1.85rem;font-weight:800;line-height:1.05;margin-top:.45rem}
+  .chart-wrap{position:relative;height:300px}
+  .weak-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .7rem;border-radius:999px;background:rgba(255,255,255,.06)}
+  .topic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+  .topic-card{padding:1rem;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}

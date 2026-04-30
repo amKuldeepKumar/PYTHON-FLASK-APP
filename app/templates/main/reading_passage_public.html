@@ -1,0 +1,81 @@
+{% extends "layout/base.html" %}
+{% block title %}{{ meta_title }}{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/reading-passage-public.css') }}">{% endblock %}
+
+{% block content %}
+<div class="container py-5 public-reading-shell">
+  <nav class="small text-muted">
+    <a href="{{ url_for('main.public_reading_index') }}" class="text-decoration-none">Public Reading</a>
+    <span class="mx-2">/</span>
+    <a href="{{ url_for('main.public_reading_topic', topic_id=topic.id, slug=(topic.title|lower|replace(' ', '-'))) }}" class="text-decoration-none">{{ topic.title }}</a>
+    <span class="mx-2">/</span>
+    <span>{{ passage.title }}</span>
+  </nav>
+
+  <section>
+    <span class="badge bg-primary-subtle text-primary-emphasis mb-3">Public Reading Page</span>
+    <h1 class="fw-bold mb-2">{{ passage.title }}</h1>
+    <p class="text-muted mb-3">Free public reading passage on {{ topic.title }} for {{ passage.level_label }} learners.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="badge text-bg-light">{{ topic.category_label }}</span>
+      <span class="badge text-bg-light">{{ passage.level_label }}</span>
+      <span class="badge text-bg-light">{{ passage.length_label }}</span>
+      <span class="badge text-bg-light">{{ passage.word_count }} words</span>
+      <span class="badge text-bg-light">{{ question_count }} questions</span>
+    </div>
+  </section>
+
+  <div class="public-reading-layout">
+    <article class="public-reading-card">
+      <div class="public-reading-body">
+        <h2 class="h5 mb-3">Passage</h2>
+        <div class="public-reading-content">{{ passage.content }}</div>
+      </div>
+    </article>
+
+    <aside class="d-grid gap-3 align-self-start">
+      <section class="public-reading-card">
+        <div class="public-reading-body">
+          <h2 class="h5 mb-3">Question preview</h2>
+          {% for question in approved_questions[:5] %}
+            <div class="border rounded p-3 mb-2">
+              <div class="fw-semibold mb-1">Q{{ loop.index }} • {{ question.type_label }}</div>
+              <div class="small text-muted">{{ question.question_text }}</div>
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No public question preview yet.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="public-reading-card">
+        <div class="public-reading-body">
+          <h2 class="h5 mb-3">Want full practice?</h2>
+          <p class="text-muted small">Join the student flow for timers, answer checking, analytics, vocabulary support, and personalized reading progression.</p>
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('main.courses', track='reading') }}" class="btn btn-primary">Explore Reading Courses</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary">Login to Practice</a>
+          </div>
+        </div>
+      </section>
+
+      {% if related_passages %}
+      <section class="public-reading-card">
+        <div class="public-reading-body">
+          <h2 class="h5 mb-3">More on {{ topic.title }}</h2>
+          <div class="d-grid gap-2">
+            {% for item in related_passages %}
+              <a class="text-decoration-none border rounded p-3" href="{{ url_for('main.public_reading_passage', passage_id=item.id, slug=(item.title|lower|replace(' ', '-'))) }}">
+                <div class="fw-semibold text-body">{{ item.title }}</div>
+                <div class="small text-muted">{{ item.level_label }} • {{ item.word_count }} words</div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

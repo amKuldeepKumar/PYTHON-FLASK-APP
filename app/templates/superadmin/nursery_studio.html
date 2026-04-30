@@ -1,0 +1,396 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Nursery Studio • Fluencify{% endblock %}
+{% block page_title %}Nursery Studio{% endblock %}
+{% block extra_css %}
+  <style>
+    .nursery-hero,
+    .nursery-panel {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(106, 151, 255, 0.16);
+      border-radius: 28px;
+      box-shadow: 0 18px 45px rgba(94, 129, 201, 0.12);
+    }
+    .nursery-stat {
+      background: rgba(236, 244, 255, 0.92);
+      border: 1px solid rgba(106, 151, 255, 0.16);
+      border-radius: 22px;
+      padding: 1rem 1.2rem;
+    }
+    .nursery-stat-label {
+      color: #6b7894;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .nursery-stat-value {
+      color: #1d2b4f;
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .nursery-upload-path {
+      background: rgba(237, 244, 255, 0.95);
+      border: 1px dashed rgba(72, 110, 215, 0.24);
+      border-radius: 18px;
+      color: #51607e;
+      font-size: 0.92rem;
+      padding: 0.9rem 1rem;
+      word-break: break-word;
+    }
+    .nursery-thumb {
+      width: 78px;
+      height: 78px;
+      background: linear-gradient(145deg, rgba(245, 249, 255, 1), rgba(223, 234, 255, 1));
+      border: 1px solid rgba(106, 151, 255, 0.18);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex: 0 0 78px;
+      padding: 0.45rem;
+    }
+    .nursery-thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .nursery-chip {
+      background: rgba(63, 113, 255, 0.1);
+      border: 1px solid rgba(63, 113, 255, 0.16);
+      border-radius: 999px;
+      color: #2950b6;
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      gap: 0.35rem;
+      padding: 0.38rem 0.82rem;
+    }
+    .nursery-question-table td {
+      vertical-align: top;
+    }
+    .nursery-question-table .question-prompt {
+      color: #4f5f80;
+      font-size: 0.94rem;
+    }
+    .nursery-asset-row {
+      align-items: center;
+      display: flex;
+      gap: 0.9rem;
+    }
+    .nursery-asset-meta {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .nursery-asset-url {
+      background: rgba(246, 249, 255, 0.95);
+      border: 1px solid rgba(106, 151, 255, 0.16);
+      border-radius: 14px;
+      color: #485878;
+      font-size: 0.86rem;
+      padding: 0.55rem 0.75rem;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<div class="nursery-hero p-4 p-xl-5 mb-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <div class="text-uppercase small text-secondary mb-2">Image Course Channel</div>
+      <h1 class="mb-2">{{ course.title }}</h1>
+      <p class="text-secondary mb-0">One clean place to add, edit, upload, and review nursery questions, linked images, and lesson-ready content without disturbing your existing LMS flow.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{{ url_for('superadmin.courses') }}" class="btn btn-outline-light">Back to Courses</a>
+      <a href="{{ url_for('superadmin.course_detail', course_id=course.id, tab='questions-prompts') }}" class="btn btn-outline-light">Open Course Manager</a>
+      <a href="{{ url_for('superadmin.course_image_qa', course_id=course.id) }}" class="btn btn-outline-light">Image QA Review</a>
+      {% if lessons %}
+        <a href="{{ url_for('superadmin.lesson_detail', lesson_id=lessons[0].id) }}" class="btn btn-outline-light">Open Lesson Builder</a>
+      {% endif %}
+      <a href="{{ url_for('superadmin.question_upload_template') }}" class="btn btn-outline-primary">CSV Template</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-3 col-6">
+      <div class="nursery-stat">
+        <div class="nursery-stat-label">Lessons</div>
+        <div class="nursery-stat-value">{{ lessons|length }}</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="nursery-stat">
+        <div class="nursery-stat-label">Subsections</div>
+        <div class="nursery-stat-value">{{ subsections|length }}</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="nursery-stat">
+        <div class="nursery-stat-label">Questions</div>
+        <div class="nursery-stat-value">{{ question_rows|length }}</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="nursery-stat">
+        <div class="nursery-stat-label">Image Assets</div>
+        <div class="nursery-stat-value">{{ image_assets|length }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="nursery-panel p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+          <div class="text-uppercase small text-secondary mb-2">Proper Channel</div>
+          <h4 class="mb-2">Where nursery content should be managed</h4>
+          <p class="text-secondary mb-0">Use this studio for the full nursery workflow: upload images, add one question manually, bulk import hundreds of rows by CSV, then open any question for editing.</p>
+        </div>
+        <span class="nursery-chip"><i class="bi bi-stars"></i> Nursery-safe workflow</span>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-4">
+          <div class="border rounded-4 p-3 h-100">
+            <div class="fw-semibold mb-2">1. Upload Images</div>
+            <div class="text-secondary small">Send all nursery images to the local static folder first, then copy their saved paths into manual questions or CSV rows.</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border rounded-4 p-3 h-100">
+            <div class="fw-semibold mb-2">2. Add or Import Questions</div>
+            <div class="text-secondary small">Use the form below for single questions, or use the CSV importer for bulk lesson setup with `image_url` support.</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border rounded-4 p-3 h-100">
+            <div class="fw-semibold mb-2">3. Edit and Review</div>
+            <div class="text-secondary small">Use the question list at the bottom to open the full edit screen and make small corrections after upload.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nursery-panel p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+          <div class="text-uppercase small text-secondary mb-2">Manual Authoring</div>
+          <h4 class="mb-1">Add a nursery question</h4>
+          <div class="text-secondary">Best for single updates, small fixes, and testing image-question layouts.</div>
+        </div>
+        <span class="nursery-chip"><i class="bi bi-pencil-square"></i> Add one by one</span>
+      </div>
+      <form method="post">
+        {{ question_form.hidden_tag() }}
+        <input type="hidden" name="action" value="add_question">
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <label class="form-label">{{ question_form.subsection_id.label.text }}</label>
+            {{ question_form.subsection_id(class="form-select") }}
+          </div>
+          <div class="col-lg-5">
+            <label class="form-label">{{ question_form.prompt_type.label.text }}</label>
+            {{ question_form.prompt_type(class="form-select") }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">{{ question_form.title.label.text }}</label>
+            {{ question_form.title(class="form-control", placeholder="Apple yes/no, Fruit naming, Daily object check...") }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">{{ question_form.image_url.label.text }}</label>
+            {{ question_form.image_url(class="form-control", placeholder="/static/uploads/questions/nursery/apple.webp") }}
+            <div class="form-text">Use saved local paths from the image library below.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">{{ question_form.prompt.label.text }}</label>
+            {{ question_form.prompt(class="form-control", rows="4", placeholder="Is this an apple?") }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ question_form.model_answer.label.text }}</label>
+            {{ question_form.model_answer(class="form-control", rows="3", placeholder="Yes, this is an apple.") }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ question_form.hint_text.label.text }}</label>
+            {{ question_form.hint_text(class="form-control", rows="3", placeholder="Start with: Yes, this is...") }}
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">{{ question_form.expected_keywords.label.text }}</label>
+            {{ question_form.expected_keywords(class="form-control", placeholder="apple, red, fruit") }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">{{ question_form.language_code.label.text }}</label>
+            {{ question_form.language_code(class="form-select") }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">{{ question_form.evaluation_rubric.label.text }}</label>
+            {{ question_form.evaluation_rubric(class="form-control", rows="2", placeholder="Reward correct noun, simple sentence attempt, and picture relevance.") }}
+          </div>
+          <div class="col-12 form-check ms-2 mt-2">
+            {{ question_form.is_active(class="form-check-input") }}
+            <label class="form-check-label" for="{{ question_form.is_active.id }}">{{ question_form.is_active.label.text }}</label>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mt-4">
+          <button type="submit" class="btn btn-outline-primary">Save Nursery Question</button>
+          {% if question_rows %}
+            <a href="{{ url_for('superadmin.question_detail', question_id=question_rows[0].id) }}" class="btn btn-outline-light">Open Example Edit Screen</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+    <div class="nursery-panel p-4">
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <div class="text-uppercase small text-secondary mb-2">Bulk Questions</div>
+              <h4 class="mb-1">Upload nursery CSV</h4>
+              <div class="text-secondary">Fastest way to add 50 to 500 image questions into the lesson flow.</div>
+            </div>
+            <span class="nursery-chip"><i class="bi bi-file-earmark-spreadsheet"></i> Bulk import</span>
+          </div>
+          <form method="post" enctype="multipart/form-data">
+            {{ upload_form.hidden_tag() }}
+            <input type="hidden" name="action" value="upload_questions">
+            <div class="mb-3">
+              <label class="form-label">{{ upload_form.lesson_id.label.text }}</label>
+              {{ upload_form.lesson_id(class="form-select") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ upload_form.auto_split_size.label.text }}</label>
+              {{ upload_form.auto_split_size(class="form-control") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ upload_form.upload.label.text }}</label>
+              {{ upload_form.upload(class="form-control") }}
+            </div>
+            <div class="form-text mb-3">CSV supports `title`, `prompt`, `image_url`, `answer`, `hint`, `expected_keywords`, and `prompt_type`. Validation blocks duplicate prompts and broken local image paths before import.</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-outline-primary">Import Nursery Questions</button>
+              <a href="{{ url_for('superadmin.question_upload_template') }}" class="btn btn-outline-light">Download CSV Template</a>
+            </div>
+          </form>
+        </div>
+        <div class="col-lg-6">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <div class="text-uppercase small text-secondary mb-2">Bulk Images</div>
+              <h4 class="mb-1">Upload nursery image assets</h4>
+              <div class="text-secondary">Use WEBP or optimized PNG/JPG, then reuse the saved static paths in the question form or CSV.</div>
+            </div>
+            <span class="nursery-chip"><i class="bi bi-image"></i> Static library</span>
+          </div>
+          <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="upload_images">
+            <div class="mb-3">
+              <label class="form-label">Select image files</label>
+              <input class="form-control" type="file" name="images" multiple accept=".png,.jpg,.jpeg,.webp,.svg">
+            </div>
+            <div class="nursery-upload-path mb-3">
+              <strong>Local image folder</strong><br>
+              {{ nursery_static_path }}
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Upload Images</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="nursery-panel p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+          <div class="text-uppercase small text-secondary mb-2">Image Library</div>
+          <h4 class="mb-1">Saved nursery assets</h4>
+          <div class="text-secondary">Copy the database path from any image card and paste it into a manual question or CSV row.</div>
+        </div>
+        <span class="nursery-chip"><i class="bi bi-collection"></i> {{ image_assets|length }} files</span>
+      </div>
+
+      <div class="row g-3">
+        {% for asset in image_assets %}
+          <div class="col-md-6 col-xl-12">
+            <div class="border rounded-4 p-3 h-100">
+              <div class="nursery-asset-row">
+                <div class="nursery-thumb">
+                  <img src="{{ asset.url }}" alt="{{ asset.seo_alt }}" title="{{ asset.seo_title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ url_for('static', filename='uploads/questions/nursery/placeholder.svg') }}';">
+                </div>
+                <div class="nursery-asset-meta">
+                  <div class="fw-semibold text-break">{{ asset.name }}</div>
+                  <div class="text-secondary small mb-2">{{ asset.size_kb }} KB</div>
+                  <div class="text-secondary small mb-2">ALT: {{ asset.seo_alt }}</div>
+                  <div class="text-secondary small mb-2">TITLE: {{ asset.seo_title }}</div>
+                  <label class="form-label small text-secondary mb-1">URL / DB path</label>
+                  <input type="text" class="form-control form-control-sm nursery-asset-url" value="{{ asset.db_path }}" readonly onclick="this.select();">
+                </div>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="col-12">
+            <div class="border rounded-4 p-4 text-secondary">No uploaded nursery images yet. Use the uploader on the left to build the static library.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="nursery-panel p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+          <div class="text-uppercase small text-secondary mb-2">Question Bank</div>
+          <h4 class="mb-1">Current nursery questions</h4>
+          <div class="text-secondary">Open any row to edit wording, hints, answers, or image paths in the full question editor.</div>
+        </div>
+        <span class="nursery-chip"><i class="bi bi-list-check"></i> Edit-ready</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle nursery-question-table mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Section</th>
+              <th>Question</th>
+              <th>Image</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for question in question_rows %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                  <div class="fw-semibold">{{ question.subsection.title }}</div>
+                  <div class="text-secondary small">{{ question.subsection.chapter.lesson.title }}</div>
+                </td>
+                <td>
+                  <div class="fw-semibold">{{ question.title or 'Untitled question' }}</div>
+                  <div class="question-prompt">{{ question.prompt[:90] }}{% if question.prompt|length > 90 %}…{% endif %}</div>
+                </td>
+                <td>
+                  {% if question.image_url %}
+                    <span class="badge text-bg-success">Image linked</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Text only</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('superadmin.question_detail', question_id=question.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-secondary">No nursery questions exist yet. Add one manually or import them by CSV.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

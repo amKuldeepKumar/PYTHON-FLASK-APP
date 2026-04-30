@@ -1,0 +1,70 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Chapters • Fluencify{% endblock %}
+{% block page_title %}Chapters{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h1 class="mb-2">Chapters</h1>
+    <p class="text-secondary mb-0">Review chapter placement, category, lesson mapping, and manage each chapter directly.</p>
+  </div>
+  <a class="btn btn-outline-primary" href="{{ url_for('superadmin.lessons_index') }}">Open Lessons</a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+  <div class="card-body p-4">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Course</th>
+            <th>Lesson</th>
+            <th>Chapter</th>
+            <th>Subsections</th>
+            <th>Review</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for chapter in chapters %}
+          {% set course = chapter.lesson.course %}
+          <tr>
+            <td>
+              <span class="badge rounded-pill text-bg-light border text-uppercase">{{ (course.track_type or 'speaking')|replace('_', ' ') }}</span>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ course.title }}</div>
+              <div class="small text-secondary">{{ course.language_code|upper if course.language_code else 'EN' }}</div>
+            </td>
+            <td>{{ chapter.lesson.title }}</td>
+            <td>
+              <div class="fw-semibold">{{ chapter.title }}</div>
+              <div class="small text-secondary">Sort: {{ chapter.sort_order }}</div>
+            </td>
+            <td>{{ chapter.subsections|length }}</td>
+            <td>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('superadmin.lesson_detail', lesson_id=chapter.lesson.id) }}">Review lesson</a>
+            </td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                <a class="btn btn-sm btn-primary" href="{{ url_for('superadmin.chapter_edit', chapter_id=chapter.id) }}">Edit</a>
+                <form method="post" action="{{ url_for('superadmin.chapters_index') }}" onsubmit="return confirm('Delete this chapter? This will also delete all its subsections and questions.');">
+                  {{ delete_form.hidden_tag() }}
+                  <input type="hidden" name="action" value="delete_chapter">
+                  <input type="hidden" name="chapter_id" value="{{ chapter.id }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-secondary py-4">No chapters found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

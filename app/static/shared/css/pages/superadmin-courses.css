@@ -1,0 +1,11 @@
+.admin-studio-card{background:linear-gradient(180deg,rgba(7,16,32,.96),rgba(4,10,22,.98));border:1px solid rgba(120,156,255,.14);border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.24)}
+  .admin-studio-card .form-control,.admin-studio-card .form-select{background:#060c18;border-color:rgba(255,255,255,.09);color:#ecf3ff}
+  .admin-studio-card .form-control:focus,.admin-studio-card .form-select:focus{background:#091224;color:#fff;border-color:rgba(88,130,255,.5);box-shadow:0 0 0 .2rem rgba(88,130,255,.15)}
+  .hero-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:1rem}
+  .metric-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;background:rgba(88,130,255,.12);color:#cfe0ff;border:1px solid rgba(88,130,255,.18);font-size:.78rem;font-weight:700}
+  .course-table td,.course-table th{vertical-align:middle}
+  .course-title{font-weight:800;color:#fff}
+  .course-sub{font-size:.82rem;color:#91a8cf}
+  .tree-pill{display:inline-block;padding:.3rem .55rem;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:#b7c9ea;font-size:.72rem;font-weight:700}
+  .section-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem}
+  @media (max-width: 992px){.hero-grid{grid-template-columns:1fr}}

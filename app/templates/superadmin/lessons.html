@@ -1,0 +1,44 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Lessons • Fluencify{% endblock %}
+{% block page_title %}Lessons{% endblock %}
+{% block content %}
+<h1 class="mb-2">Lessons</h1>
+<p class="text-secondary mb-4">Central list of lessons across all courses. Edit, upload questions, or delete directly from here.</p>
+<div class="card bg-dark border-secondary rounded-4">
+  <div class="card-body p-4">
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Level</th>
+            <th>Lesson</th>
+            <th>Type</th>
+            <th>Minutes</th>
+            <th>Questions</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lesson in lessons %}
+          <tr>
+            <td>{{ lesson.course.title }}</td>
+            <td>{{ lesson.level.title }}</td>
+            <td>{{ lesson.title }}</td>
+            <td>{{ lesson.lesson_type|title }}</td>
+            <td>{{ lesson.estimated_minutes }}</td>
+            <td>{{ lesson.question_count }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-info" href="{{ url_for('superadmin.lesson_detail', lesson_id=lesson.id) }}">Manage</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('superadmin.course_detail', course_id=lesson.course.id) }}">Course Builder</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="text-secondary">No lessons found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

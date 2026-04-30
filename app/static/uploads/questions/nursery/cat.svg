@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-labelledby="title desc">
+  <title id="title">Cat</title>
+  <desc id="desc">A simple cat illustration for nursery practice.</desc>
+  <rect width="320" height="240" rx="28" fill="#fff7ed"/>
+  <path d="M118 85 98 45l44 22z" fill="#f59e0b"/>
+  <path d="M202 85l20-40-44 22z" fill="#f59e0b"/>
+  <circle cx="160" cy="122" r="58" fill="#fbbf24"/>
+  <circle cx="138" cy="116" r="6" fill="#1f2937"/>
+  <circle cx="182" cy="116" r="6" fill="#1f2937"/>
+  <path d="M160 126l-8 12h16z" fill="#fb7185"/>
+  <path d="M150 145c8 8 12 8 20 0" fill="none" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/>
+  <g stroke="#92400e" stroke-width="4" stroke-linecap="round">
+    <path d="M96 126h34"/>
+    <path d="M94 138h32"/>
+    <path d="M224 126h-34"/>
+    <path d="M226 138h-32"/>
+  </g>
+</svg>

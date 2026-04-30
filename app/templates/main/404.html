@@ -1,0 +1,16 @@
+{% extends "layout/base.html" %}
+{% block title %}Page Not Found • Fluencify{% endblock %}
+{% block content %}
+<section class="container py-5">
+  <div class="card border-0 shadow-sm p-4 p-lg-5 text-center mx-auto" style="max-width: 760px;">
+    <div class="text-uppercase small text-muted fw-semibold mb-2">Phase 18 Stability</div>
+    <h1 class="display-6 mb-3">This page could not be found.</h1>
+    <p class="text-muted mb-4">The link may be outdated, incomplete, or moved after the latest course and track updates.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+      <a class="btn btn-primary" href="{{ url_for('main.home') }}">Go Home</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('student.course_library') }}">Student Course Library</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.courses') }}">Superadmin Courses</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

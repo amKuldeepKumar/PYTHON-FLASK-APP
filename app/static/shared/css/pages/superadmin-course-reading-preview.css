@@ -1,0 +1,4 @@
+.reading-hero{border:1px solid rgba(255,255,255,.08);border-radius:26px;background:linear-gradient(180deg, rgba(12,18,32,.96), rgba(10,15,26,.94));box-shadow:0 22px 70px rgba(0,0,0,.24)}
+  .reading-topic-card{border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(255,255,255,.04);height:100%}
+  .reading-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.38rem .72rem;border-radius:999px;background:rgba(255,255,255,.08);font-size:.84rem}
+  .reading-metric{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.04);padding:1rem;height:100%}

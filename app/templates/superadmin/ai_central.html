@@ -1,0 +1,249 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}AI Central • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}AI Central{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-ai-central.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 ai-central-page sa-studio">
+  <section class="card shadow-sm border-0 mb-4 ai-central-hero">
+    <div class="card-body p-4 p-xl-5">
+      <div class="row g-4 align-items-start">
+        <div class="col-xl-8">
+          <div class="ai-kicker">Phase 8 • Centralized AI Setup</div>
+          <h1 class="ai-title mb-3">One clean AI area</h1>
+          <p class="ai-subtitle mb-0">Use one understandable AI control area instead of separate repeated registry pages everywhere. Text AI can handle multiple tasks. Speech and Translation stay separate because they solve different jobs.</p>
+          <div class="sa-action-row mt-4">
+            <a class="btn btn-primary" href="{{ url_for('superadmin.api_workbench') }}">API Workbench</a>
+            <a class="btn btn-primary" href="{{ url_for('superadmin.api_logs') }}">Open API Logs</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.ai_ml_export') }}">ML Export CSV</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.ai_rule_panel') }}">AI Rule Panel</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('main.home') }}">Open Website</a>
+          </div>
+        </div>
+        <div class="col-xl-4">
+          <div class="row g-3">
+            <div class="col-6"><div class="metric-card h-100"><div class="metric-label">Providers</div><div class="metric-value">{{ health.total_providers }}</div></div></div>
+            <div class="col-6"><div class="metric-card h-100"><div class="metric-label">Enabled</div><div class="metric-value">{{ health.enabled_providers }}</div></div></div>
+            <div class="col-6"><div class="metric-card h-100"><div class="metric-label">Task Groups</div><div class="metric-value">{{ health.task_groups }}</div></div></div>
+            <div class="col-6"><div class="metric-card h-100"><div class="metric-label">Ready Tasks</div><div class="metric-value">{{ health.ready_tasks }}</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+          <h2 class="h4 mb-1">Provider Categories</h2>
+          <p class="text-secondary mb-0">Keep only three understandable sections in the superadmin UI.</p>
+        </div>
+      </div>
+      <div class="row g-3">
+        {% for section in category_sections %}
+        <div class="col-12 col-lg-4">
+          <div class="prompt-card h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div>
+                <div class="fw-semibold">{{ section.label }}</div>
+                <div class="small text-secondary">{{ section.provider_count }} providers • {{ section.enabled_count }} enabled</div>
+              </div>
+              <span class="badge text-bg-light">{{ section.tasks|length }} task{{ 's' if section.tasks|length != 1 else '' }}</span>
+            </div>
+            <p class="small text-secondary mb-3">{{ section.description }}</p>
+            <div class="d-flex flex-column gap-2 mb-3">
+              {% for task in section.tasks %}
+                <div class="d-flex justify-content-between align-items-center gap-2 border rounded-3 px-3 py-2">
+                  <div>
+                    <div class="fw-semibold small">{{ task.task_label }}</div>
+                    <div class="small text-secondary">Default: {{ task.default_name }}</div>
+                  </div>
+                  <a class="btn btn-sm btn-outline-light" href="{{ task.manage_href }}">Manage</a>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for link in section.editor_links %}
+                <a class="btn btn-sm btn-outline-light" href="{{ link.href }}">{{ link.label }}</a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+          <h2 class="h4 mb-1">Capability Coverage</h2>
+          <p class="text-secondary mb-0">This is the real answer to where new APIs should be added next across translation, speech, grammar, plagiarism, TTS, and multilingual support.</p>
+        </div>
+        <div class="small text-secondary">Logs tracked: {{ ai_usage.total_logs }} • Tokens tracked: {{ ai_usage.tracked_tokens }} • Cache hits: {{ ai_usage.cache_hits }} • Fallbacks: {{ ai_usage.fallback_runs }}</div>
+      </div>
+      <div class="row g-3">
+        {% for item in ai_capabilities %}
+        {% set badge_class = 'text-bg-success' if item.status == 'ready' else ('text-bg-warning text-dark' if item.status == 'partial' else 'text-bg-danger') %}
+        <div class="col-md-6 col-xl-4">
+          <div class="prompt-card h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div class="fw-semibold">{{ item.label }}</div>
+              <span class="badge {{ badge_class }}">{{ item.status|title }}</span>
+            </div>
+            <div class="small text-secondary mb-3">{{ item.detail }}</div>
+            <a class="btn btn-sm btn-outline-light" href="{{ item.href }}">{{ item.action }}</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-xl-7">
+      <section class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+              <h2 class="h4 mb-1">Task Mapping</h2>
+              <p class="text-secondary mb-0">One provider family can serve multiple tasks. Use this table to keep the mapping clear.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Category</th>
+                  <th>Default Provider</th>
+                  <th>Enabled</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in task_mapping_rows %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ row.task_label }}</div>
+                    <div class="small text-secondary">{{ row.task_key }}</div>
+                  </td>
+                  <td>{{ row.category_label }}</td>
+                  <td>
+                    <div>{{ row.default_name }}</div>
+                    <div class="small text-secondary">{{ row.default_type }}</div>
+                  </td>
+                  <td>
+                    {% if row.enabled_count > 0 %}
+                      <span class="badge text-bg-success">{{ row.enabled_count }} enabled</span>
+                    {% else %}
+                      <span class="badge text-bg-secondary">0 enabled</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-light" href="{{ row.manage_href }}">Open</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">Recent AI Logs</h2>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Provider</th>
+                  <th>Status</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in recent_logs %}
+                <tr>
+                  <td>{{ row.task_key }}</td>
+                  <td>{{ row.provider_name or row.provider_source or 'System' }}</td>
+                  <td>{% if row.status == 'success' %}<span class="badge text-bg-success">OK</span>{% else %}<span class="badge text-bg-warning text-dark">{{ row.status|title }}</span>{% endif %}</td>
+                  <td class="small">{{ row.error_message or row.redacted_response or '' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-secondary">No AI logs yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-xl-5">
+      <section class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">Prompt Builder Catalog</h2>
+          <div class="d-grid gap-3">
+            {% for preview in prompt_previews %}
+              <div class="prompt-card">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                  <div class="fw-semibold">{{ preview.task_key.replace('_', ' ').title() }}</div>
+                  <span class="badge text-bg-light">Template</span>
+                </div>
+                <pre class="prompt-preview">{{ preview.prompt }}</pre>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">Tutor AI Guarded Preview</h2>
+          <div class="small text-secondary mb-2">Lesson-grounded help only. Off-topic requests are rejected by the guardrail layer.</div>
+          <div class="prompt-card">
+            <div class="fw-semibold mb-2">{{ tutor_preview.message }}</div>
+            <div class="small text-secondary mb-2">{{ tutor_preview.guidance }}</div>
+            <div class="small">{% for row in tutor_preview.citations %}<div>{{ row }}</div>{% endfor %}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">AI Service Layer Preview</h2>
+          <div class="small text-secondary mb-3">Preview one task through the central service layer.</div>
+          <form method="get" class="row g-3 mb-3">
+            <div class="col-md-7">
+              <label class="form-label">Task</label>
+              <select class="form-select" name="task">
+                {% for option in task_options %}
+                  <option value="{{ option }}" {% if option == selected_task %}selected{% endif %}>{{ option.replace('_', ' ').title() }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-5 d-flex align-items-end">
+              <button class="btn btn-primary w-100" type="submit">Preview Task</button>
+            </div>
+          </form>
+          <div class="mb-3">
+            <div class="small text-secondary mb-1">Prompt</div>
+            <pre class="prompt-preview">{{ ai_preview.prompt }}</pre>
+          </div>
+          <div>
+            <div class="small text-secondary mb-1">Output</div>
+            <pre class="prompt-preview">{{ ai_preview.output|tojson(indent=2) }}</pre>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

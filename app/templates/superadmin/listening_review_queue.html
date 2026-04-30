@@ -1,0 +1,54 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Listening Review Queue • Fluencify{% endblock %}
+{% block page_title %}Listening Review Queue{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+      <div class="small text-uppercase text-muted">Phase 10B</div>
+      <h2 class="mb-1">Listening Admin Review</h2>
+      <div class="text-muted">Approve or reject listening lessons before students see them.</div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      {% for key, label in [('pending','Pending'),('approved','Approved'),('rejected','Rejected'),('draft','Draft')] %}
+        <a class="btn {% if status == key %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{{ url_for('superadmin.listening_review_queue', status=key) }}">{{ label }} {{ counts.get(key, 0) }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    {% for lesson in lessons %}
+      <div class="col-12">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+              <div>
+                <div class="small text-uppercase text-muted mb-1">{{ lesson.course.title if lesson.course else 'Listening Course' }}</div>
+                <h3 class="h5 mb-1">{{ lesson.title }}</h3>
+                <div class="text-muted small">Status: {{ (lesson.workflow_status or 'draft').title() }} • Questions: {{ lesson.question_count }} • Published: {{ 'Yes' if lesson.is_published else 'No' }}</div>
+                <p class="mb-0 mt-2">{{ (lesson.explanation_tts_text or lesson.explanation_text or 'No listening script yet.')[:260] }}{% if (lesson.explanation_tts_text or lesson.explanation_text or '')|length > 260 %}…{% endif %}</p>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <form method="post" action="{{ url_for('superadmin.listening_review_action', lesson_id=lesson.id, action='approve') }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-success" type="submit">Approve</button>
+                </form>
+                <form method="post" action="{{ url_for('superadmin.listening_review_action', lesson_id=lesson.id, action='reject') }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-danger" type="submit">Reject</button>
+                </form>
+                <form method="post" action="{{ url_for('superadmin.listening_review_action', lesson_id=lesson.id, action='reset') }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-secondary" type="submit">Move to Pending</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12"><div class="card border-0 shadow-sm"><div class="card-body text-muted">No listening lessons in this review state.</div></div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

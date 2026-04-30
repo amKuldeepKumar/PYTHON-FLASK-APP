@@ -1,0 +1,186 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Access Activity • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Access Activity{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-access-activity.css') }}">{% endblock %}
+
+{% block content %}
+<div class="access-activity-page">
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div>
+          <div class="activity-kicker">SuperAdmin Security View</div>
+          <h1 class="activity-title mb-2">Track where every role is operating from</h1>
+          <p class="text-muted mb-0">This page is visible only to SuperAdmin and combines login history with current device sessions for sub-admins, admins, teachers, students, and the rest of the platform.</p>
+        </div>
+      </div>
+
+      <form class="row g-3 align-items-end" method="get">
+        <div class="col-lg-4">
+          <label class="form-label">Search user, email, IP, city, or country</label>
+          <input class="form-control" type="text" name="q" value="{{ current_query }}" placeholder="Search access records">
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label">Role</label>
+          <select class="form-select" name="role">
+            {% for value, label in role_choices %}
+            <option value="{{ value }}" {% if value == current_role %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label">Status</label>
+          <select class="form-select" name="status">
+            <option value="all" {% if current_status == 'all' %}selected{% endif %}>All</option>
+            <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active Sessions</option>
+            <option value="revoked" {% if current_status == 'revoked' %}selected{% endif %}>Revoked Sessions</option>
+            <option value="success" {% if current_status == 'success' %}selected{% endif %}>Successful Logins</option>
+            <option value="failed" {% if current_status == 'failed' %}selected{% endif %}>Failed Logins</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label">From</label>
+          <input class="form-control" type="date" name="date_from" value="{{ current_date_from }}">
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label">To</label>
+          <input class="form-control" type="date" name="date_to" value="{{ current_date_to }}">
+        </div>
+        <div class="col-lg-12 d-flex gap-2">
+          <button class="btn btn-primary">Apply Filter</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.access_activity') }}">Reset</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="activity-summary-card">
+        <div class="activity-summary-label">Visible logins</div>
+        <div class="activity-summary-value">{{ summary.total_login_rows }}</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="activity-summary-card">
+        <div class="activity-summary-label">Successful</div>
+        <div class="activity-summary-value">{{ summary.successful_logins }}</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="activity-summary-card">
+        <div class="activity-summary-label">Failed</div>
+        <div class="activity-summary-value">{{ summary.failed_logins }}</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="activity-summary-card">
+        <div class="activity-summary-label">Active sessions</div>
+        <div class="activity-summary-value">{{ summary.active_sessions }}</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="activity-summary-card">
+        <div class="activity-summary-label">Live now</div>
+        <div class="activity-summary-value">{{ summary.live_now }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-xl-7">
+      <section class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <h2 class="h4 mb-1">Login history</h2>
+              <div class="small text-muted">See who logged in, from which IP, device, and location.</div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 activity-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Location</th>
+                  <th>Device</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in login_rows %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ row.user.full_name }}</div>
+                    <div class="small text-muted">{{ row.user.email }}</div>
+                    <div class="small text-muted">{{ row.ip_address or 'IP unavailable' }}</div>
+                  </td>
+                  <td><span class="badge text-bg-light">{{ row.user.role.replace('_', ' ') }}</span></td>
+                  <td>
+                    <div>{{ row.location_display }}</div>
+                    <div class="small text-muted">{{ row.ip_address or 'IP unavailable' }}</div>
+                  </td>
+                  <td>
+                    <div>{{ row.browser_display }}</div>
+                    <div class="small text-muted">{{ row.device_type or 'Unknown device' }}</div>
+                  </td>
+                  <td>
+                    {% if row.success %}
+                    <span class="badge text-bg-success">Success</span>
+                    {% else %}
+                    <span class="badge text-bg-danger">Failed</span>
+                    {% endif %}
+                  </td>
+                  <td class="small">{{ row.created_at.strftime('%Y-%m-%d %H:%M') if row.created_at else '' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="text-muted">No login events found for this filter.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-12 col-xl-5">
+      <section class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <h2 class="h4 mb-1">Current and recent sessions</h2>
+              <div class="small text-muted">Device-level session view for active and revoked access.</div>
+            </div>
+          </div>
+          <div class="activity-session-stack">
+            {% for row in session_rows %}
+            <article class="activity-session-card">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                  <div class="fw-semibold">{{ row.user.full_name }}</div>
+                  <div class="small text-muted">{{ row.user.role.replace('_', ' ') }} • {{ row.user.email }}</div>
+                </div>
+                <span class="badge {% if row.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if row.is_active else 'Revoked' }}</span>
+              </div>
+              <div class="small"><strong>IP:</strong> {{ row.ip_address or 'Unknown' }}</div>
+              <div class="small"><strong>Location:</strong> {{ row.location_display }}</div>
+              <div class="small"><strong>Device:</strong> {{ row.browser or 'Unknown browser' }} • {{ row.os_name or 'Unknown OS' }}</div>
+              <div class="small"><strong>Type:</strong> {{ row.device_type or 'Unknown' }}</div>
+              <div class="small"><strong>Started:</strong> {{ row.created_at.strftime('%Y-%m-%d %H:%M') if row.created_at else '' }}</div>
+              <div class="small"><strong>Last seen:</strong> {{ row.last_seen_at.strftime('%Y-%m-%d %H:%M') if row.last_seen_at else '' }}</div>
+              {% if row.revoked_at %}
+              <div class="small"><strong>Revoked:</strong> {{ row.revoked_at.strftime('%Y-%m-%d %H:%M') }}</div>
+              {% endif %}
+            </article>
+            {% else %}
+            <div class="text-muted">No session records found for this filter.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

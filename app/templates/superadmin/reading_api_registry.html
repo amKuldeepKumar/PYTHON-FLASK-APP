@@ -1,0 +1,236 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Reading API Registry • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Reading API Registry{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/speaking_api_registry.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="alert alert-info border-0 rounded-4 mb-4" role="alert">
+  <strong>AI Central Notice:</strong> This page is now treated as a focused editor. For the clean overall structure, use <a href="{{ url_for('superadmin.ai_central') }}" class="alert-link">AI Central</a> to view Text AI, Speech Services, and Translation together.
+</div>
+<div class="container-fluid py-4 speaking-registry-page">
+  <section class="card shadow-sm border-0 registry-hero mb-4">
+    <div class="card-body p-4 p-xl-5">
+      <div class="row g-4 align-items-start">
+        <div class="col-xl-8">
+          <div class="registry-kicker">Phase 7A Dynamic Foundation</div>
+          <h1 class="registry-title mb-3">Reading Provider Registry</h1>
+          <p class="registry-subtitle mb-0">Superadmin controls every reading API here: passage generation, question generation, translation / synonym, and answer evaluation.</p>
+        </div>
+        <div class="col-xl-4">
+          <div class="row g-3">
+            <div class="col-6"><div class="metric-card h-100"><div class="metric-label">Providers</div><div class="metric-value">{{ provider_count }}</div></div></div>
+            <div class="col-6"><div class="metric-card h-100"><div class="metric-label">Enabled</div><div class="metric-value">{{ enabled_count }}</div></div></div>
+          </div>
+        </div>
+      </div>
+      <ul class="nav nav-pills registry-tabs mt-4">
+        {% for section in registry_sections %}
+          <li class="nav-item me-2 mb-2">
+            <a class="nav-link {% if current_kind == section.key %}active{% endif %}" href="{{ url_for('superadmin.reading_api_registry', kind=section.key) }}">{{ section.label }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-xl-8">
+      <section class="card shadow-sm border-0 registry-panel mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2 d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <h2 class="registry-section-title mb-1">{{ current_section.label }}</h2>
+            <p class="registry-section-subtitle mb-0">{{ current_section.description }}</p>
+          </div>
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="provider_kind" value="{{ current_kind }}">
+            <button type="submit" class="btn registry-btn-primary">Add Provider</button>
+          </form>
+        </div>
+        <div class="card-body p-4 pt-3">
+          {% if current_section.rows %}
+            <div class="d-flex flex-column gap-3">
+              {% for row in current_section.rows %}
+              <article class="provider-card">
+                <div class="row g-3 align-items-start">
+                  <div class="col-lg-7">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                      <h3 class="provider-title mb-0">{{ row.name }}</h3>
+                      <span class="registry-badge registry-badge-type">{{ row.provider_label }}</span>
+                      {% if row.is_default %}<span class="registry-badge registry-badge-info">Default</span>{% endif %}
+                      {% if row.is_enabled %}<span class="registry-badge registry-badge-success">Enabled</span>{% else %}<span class="registry-badge registry-badge-muted">Disabled</span>{% endif %}
+                    </div>
+                    <div class="provider-url mb-3">{{ row.api_base_url or 'No base URL configured yet' }}</div>
+                    <div class="row g-3">
+                      <div class="col-md-4"><div class="meta-card"><div class="meta-label">Model</div><div class="meta-value">{{ row.model_name or 'Not set' }}</div></div></div>
+                      <div class="col-md-4"><div class="meta-card"><div class="meta-label">Fallback</div><div class="meta-value">{{ row.fallback_provider.name if row.fallback_provider else 'No fallback' }}</div></div></div>
+                      <div class="col-md-4"><div class="meta-card"><div class="meta-label">Last Test</div><div class="meta-value">{{ row.last_test_message or 'Ready for reading API configuration.' }}</div></div></div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                      <button type="button" class="btn registry-btn-outline-primary js-load-provider"
+                        data-provider-id="{{ row.id }}"
+                        data-provider-kind="{{ row.provider_kind }}"
+                        data-name="{{ row.name }}"
+                        data-provider-type="{{ row.provider_type }}"
+                        data-official-website="{{ row.official_website or '' }}"
+                        data-api-base-url="{{ row.api_base_url or '' }}"
+                        data-model-name="{{ row.model_name or '' }}"
+                        data-usage-scope="{{ row.usage_scope or '' }}"
+                        data-pricing-note="{{ row.pricing_note or '' }}"
+                        data-notes="{{ row.notes or '' }}"
+                        data-fallback-provider-id="{{ row.fallback_provider_id or 0 }}"
+                        data-config-json="{{ row.config_json or '' }}"
+                        data-is-enabled="{{ 1 if row.is_enabled else 0 }}"
+                        data-supports-test="{{ 1 if row.supports_test else 0 }}">Edit</button>
+                      <form method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="test">
+                        <input type="hidden" name="provider_id" value="{{ row.id }}">
+                        <button type="submit" class="btn registry-btn-outline-warning" {% if not row.supports_test %}disabled{% endif %}>Test</button>
+                      </form>
+                      <form method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="toggle">
+                        <input type="hidden" name="provider_id" value="{{ row.id }}">
+                        <button type="submit" class="btn {% if row.is_enabled %}registry-btn-outline-muted{% else %}registry-btn-outline-success{% endif %}">{% if row.is_enabled %}Disable{% else %}Enable{% endif %}</button>
+                      </form>
+                      <form method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="make_default">
+                        <input type="hidden" name="provider_id" value="{{ row.id }}">
+                        <button type="submit" class="btn registry-btn-outline-info" {% if row.is_default %}disabled{% endif %}>Set Default</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="registry-empty-state">No providers registered yet for this category.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0 registry-panel mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+          <h2 class="registry-section-title mb-1">Provider Editor</h2>
+          <p class="registry-section-subtitle mb-0">Same registry pattern as speaking, but dedicated to reading foundation only.</p>
+        </div>
+        <div class="card-body p-4 pt-3">
+          <form method="post" id="provider-editor-form" class="row g-3">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="action" value="save_provider">
+            <div class="col-md-3"><label class="form-label registry-form-label">Provider ID</label>{{ form.provider_id(class="form-control registry-input") }}</div>
+            <div class="col-md-3"><label class="form-label registry-form-label">Registry</label>{{ form.provider_kind(class="form-select registry-input") }}</div>
+            <div class="col-md-3"><label class="form-label registry-form-label">Provider Name</label>{{ form.name(class="form-control registry-input") }}</div>
+            <div class="col-md-3"><label class="form-label registry-form-label">Provider Type</label>{{ form.provider_type(class="form-select registry-input") }}</div>
+            <div class="col-md-6"><label class="form-label registry-form-label">Official Website</label>{{ form.official_website(class="form-control registry-input", placeholder="https://provider.com") }}</div>
+            <div class="col-md-6"><label class="form-label registry-form-label">API Base URL</label>{{ form.api_base_url(class="form-control registry-input", placeholder="https://api.provider.com/v1") }}</div>
+            <div class="col-md-6"><label class="form-label registry-form-label">API Key</label>{{ form.api_key(class="form-control registry-input", placeholder="Leave blank to keep existing key") }}</div>
+            <div class="col-md-6"><label class="form-label registry-form-label">Model / Service Name</label>{{ form.model_name(class="form-control registry-input") }}</div>
+            <div class="col-md-4"><label class="form-label registry-form-label">Used In Project</label>{{ form.usage_scope(class="form-select registry-input") }}</div>
+            <div class="col-md-4"><label class="form-label registry-form-label">Fallback Provider</label>{{ form.fallback_provider_id(class="form-select registry-input") }}</div>
+            <div class="col-md-4"><label class="form-label registry-form-label">Pricing Note</label>{{ form.pricing_note(class="form-control registry-input") }}</div>
+            <div class="col-md-6"><label class="form-label registry-form-label">Internal Notes</label>{{ form.notes(class="form-control registry-input registry-textarea", rows="4") }}</div>
+            <div class="col-md-6"><label class="form-label registry-form-label">Advanced Config JSON</label>{{ form.config_json(class="form-control registry-input registry-textarea", rows="4", placeholder='{"timeout":30,"headers":{"X-App":"Fluencify"}}') }}</div>
+            <div class="col-12">
+              <div class="d-flex flex-wrap gap-4">
+                <div class="form-check form-switch">{{ form.is_enabled(class="form-check-input") }}<label class="form-check-label registry-form-label" for="{{ form.is_enabled.id }}">Enabled</label></div>
+                <div class="form-check form-switch">{{ form.supports_test(class="form-check-input") }}<label class="form-check-label registry-form-label" for="{{ form.supports_test.id }}">Enable test button</label></div>
+              </div>
+            </div>
+            <div class="col-12 text-end">{{ form.submit(class="btn registry-btn-primary px-4") }}</div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0 registry-panel mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+          <h2 class="registry-section-title mb-1">Prompt Configuration</h2>
+          <p class="registry-section-subtitle mb-0">Superadmin controls the prompt backbone for passage, question, translation, and evaluation tasks.</p>
+        </div>
+        <div class="card-body p-4 pt-3">
+          <form method="post" class="row g-3">
+            {{ prompt_form.hidden_tag() }}
+            <input type="hidden" name="action" value="save_prompt">
+            <div class="col-md-4"><label class="form-label registry-form-label">Prompt Task</label>{{ prompt_form.task_type(class="form-select registry-input") }}</div>
+            <div class="col-md-8"><label class="form-label registry-form-label">Prompt Title</label>{{ prompt_form.title(class="form-control registry-input") }}</div>
+            <div class="col-12"><label class="form-label registry-form-label">Prompt Text</label>{{ prompt_form.prompt_text(class="form-control registry-input registry-textarea", rows="6") }}</div>
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <div class="form-check form-switch">{{ prompt_form.is_active(class="form-check-input") }}<label class="form-check-label registry-form-label" for="{{ prompt_form.is_active.id }}">Active</label></div>
+              <button type="submit" class="btn registry-btn-primary">Save Prompt Config</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0 registry-panel">
+        <div class="card-header bg-transparent border-0 p-4 pb-2 d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <h2 class="registry-section-title mb-1">Recent Reading API Logs</h2>
+            <p class="registry-section-subtitle mb-0">Provider tests and reading API events will appear here.</p>
+          </div>
+          <a href="{{ url_for('superadmin.api_logs') }}" class="btn registry-btn-outline-light">Open Full Logs</a>
+        </div>
+        <div class="card-body p-4 pt-3">
+          <div class="table-responsive">
+            <table class="table registry-log-table align-middle mb-0">
+              <thead><tr><th>Time</th><th>System</th><th>Status</th><th>Message</th></tr></thead>
+              <tbody>
+                {% for r in recent_logs %}
+                  <tr>
+                    <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '' }}</td>
+                    <td>{{ r.system }}</td>
+                    <td>{% if r.ok %}<span class="registry-badge registry-badge-success">{{ r.status_code or 'OK' }}</span>{% else %}<span class="registry-badge registry-badge-danger">{{ r.status_code or 'ERR' }}</span>{% endif %}</td>
+                    <td>{{ r.message or '' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="text-center py-4">No reading API activity logged yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-xl-4">
+      <section class="card shadow-sm border-0 registry-panel registry-sticky-panel">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+          <h2 class="registry-section-title mb-1">Recommended APIs</h2>
+          <p class="registry-section-subtitle mb-0">Manual market references for {{ current_section.label }}.</p>
+        </div>
+        <div class="card-body p-4 pt-3">
+          <div class="d-flex flex-column gap-3">
+            {% for api in recommended_apis %}
+              <article class="recommended-card">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                  <h3 class="recommended-title mb-0">{{ api.name }}</h3>
+                  <span class="registry-badge registry-badge-type">Suggested</span>
+                </div>
+                <div class="recommended-subtitle mb-2">{{ api.best_for }}</div>
+                <div class="recommended-meta mb-1"><strong>Plan:</strong> {{ api.plan }}</div>
+                <div class="recommended-meta mb-3"><strong>Use in project:</strong> {{ api.placement }}</div>
+                <a href="{{ api.link }}" target="_blank" rel="noopener noreferrer" class="btn registry-btn-outline-light btn-sm">Visit Official Website</a>
+              </article>
+            {% else %}
+              <div class="registry-empty-state">No recommendations added for this category yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='shared/js/speaking_api_registry.js') }}"></script>
+{% endblock %}

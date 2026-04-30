@@ -1,0 +1,414 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Course Detail • Fluencify{% endblock %}
+{% block page_title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">{{ course.title }}</h2>
+      <p class="text-muted mb-0">{{ course.slug }} • {{ course.language_code|upper }} • {{ course.track_type|title }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if panel_role == 'superadmin' %}
+        <a href="{{ url_for('superadmin.courses') }}" class="btn btn-outline-light">Back to Courses</a>
+      {% else %}
+        <a href="{{ url_for('admin.courses') }}" class="btn btn-outline-light">Back to Courses</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted">Status</div>
+          <div class="fw-bold fs-5">{{ course.status|title }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted">Lessons</div>
+          <div class="fw-bold fs-5">{{ metrics.lesson_count }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted">Questions</div>
+          <div class="fw-bold fs-5">{{ metrics.question_count }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted">Enrollments</div>
+          <div class="fw-bold fs-5">{{ metrics.enrollments }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent">
+      <h5 class="mb-0">Course Actions</h5>
+    </div>
+    <div class="card-body d-flex flex-wrap gap-2">
+      {% set route_name = 'superadmin.course_detail' if panel_role == 'superadmin' else 'admin.course_detail' %}
+      {% for action in ['submit_review', 'publish', 'unpublish', 'disable', 'archive', 'restore'] %}
+        <form method="post" action="{{ url_for(route_name, course_id=course.id) }}" class="d-inline">
+          {{ delete_form.hidden_tag() }}
+          <input type="hidden" name="action" value="{{ action }}">
+          <button type="submit" class="btn btn-outline-light">{{ action|title }}</button>
+        </form>
+      {% endfor %}
+
+      <form method="post" action="{{ url_for(route_name, course_id=course.id) }}" class="d-inline ms-auto" onsubmit="return confirm('Delete this course?');">
+        {{ delete_form.hidden_tag() }}
+        <input type="hidden" name="action" value="delete_course">
+        <button type="submit" class="btn btn-danger">Delete Course</button>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="row g-4 mt-1">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Course Batches</h5></div>
+        <div class="card-body">
+          {% for batch in batches %}<div class="d-flex justify-content-between border rounded p-2 mb-2"><span>{{ batch.title }}</span><span class="text-muted small">{{ batch.code }}</span></div>{% else %}<div class="text-muted">No batches yet.</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Version History</h5></div>
+        <div class="card-body">
+          {% for row in version_rows %}<div class="border rounded p-2 mb-2"><div class="fw-semibold">v{{ row.version_number }} · {{ row.change_summary or 'Updated' }}</div><div class="small text-muted">{{ row.created_at.strftime('%d %b %Y %I:%M %p') if row.created_at else '' }}</div></div>{% else %}<div class="text-muted">No versions recorded yet.</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Add Module</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {{ module_form.hidden_tag() }}
+            <input type="hidden" name="action" value="add_module">
+
+            <div class="mb-3">
+              <label class="form-label">{{ module_form.level_id.label.text }}</label>
+              {{ module_form.level_id(class="form-select") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ module_form.title.label.text }}</label>
+              {{ module_form.title(class="form-control") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ module_form.description.label.text }}</label>
+              {{ module_form.description(class="form-control", rows="2") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ module_form.sort_order.label.text }}</label>
+              {{ module_form.sort_order(class="form-control") }}
+            </div>
+            <div class="d-grid">
+              {{ module_form.submit(class="btn btn-outline-light") }}
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Modules in this Course</h5>
+        </div>
+        <div class="card-body">
+          {% for module in modules %}
+            <div class="border rounded p-2 mb-2">
+              <div class="fw-semibold">{{ module.level.title }} / {{ module.title }}</div>
+              <div class="small text-muted">Sort order: {{ module.sort_order }}</div>
+            </div>
+          {% else %}
+            <div class="text-muted">No modules added yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Add Lesson</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {{ lesson_form.hidden_tag() }}
+            <input type="hidden" name="action" value="add_lesson">
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ lesson_form.level_id.label.text }}</label>
+                {{ lesson_form.level_id(class="form-select") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ lesson_form.module_id.label.text }}</label>
+                {{ lesson_form.module_id(class="form-select") }}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ lesson_form.title.label.text }}</label>
+              {{ lesson_form.title(class="form-control") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ lesson_form.slug.label.text }}</label>
+              {{ lesson_form.slug(class="form-control") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ lesson_form.lesson_type.label.text }}</label>
+              {{ lesson_form.lesson_type(class="form-select") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ lesson_form.explanation_text.label.text }}</label>
+              {{ lesson_form.explanation_text(class="form-control", rows="3") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ lesson_form.explanation_tts_text.label.text }}</label>
+              {{ lesson_form.explanation_tts_text(class="form-control", rows="2") }}
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ lesson_form.estimated_minutes.label.text }}</label>
+                {{ lesson_form.estimated_minutes(class="form-control") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Grammar Formula</label>
+                <input type="text" name="lesson-grammar_formula" class="form-control">
+              </div>
+            </div>
+            <div class="form-check mt-3">
+              {{ lesson_form.is_published(class="form-check-input") }}
+              <label class="form-check-label">{{ lesson_form.is_published.label.text }}</label>
+            </div>
+            <div class="mt-3 d-grid">
+              {{ lesson_form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Bulk Upload Questions</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {{ upload_form.hidden_tag() }}
+            <input type="hidden" name="action" value="upload_questions">
+
+            <div class="mb-3">
+              <label class="form-label">{{ upload_form.lesson_id.label.text }}</label>
+              {{ upload_form.lesson_id(class="form-select") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ upload_form.auto_split_size.label.text }}</label>
+              {{ upload_form.auto_split_size(class="form-control") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ upload_form.upload.label.text }}</label>
+              {{ upload_form.upload(class="form-control") }}
+            </div>
+            <div class="small text-muted mb-3">CSV upload supports an optional `image_url` column for image-based nursery or picture questions.</div>
+            <div class="small text-muted mb-3">Validation now blocks duplicate prompts and broken local image paths before import.</div>
+            <div class="d-flex gap-2 flex-wrap">
+              {{ upload_form.submit(class="btn btn-outline-light") }}
+              <a class="btn btn-outline-secondary" href="{{ url_for('admin.question_upload_template') }}">Download CSV Template</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Add Single Question</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {{ question_form.hidden_tag() }}
+            <input type="hidden" name="action" value="add_question">
+
+            <div class="mb-3">
+              <label class="form-label">Lesson</label>
+              <select name="lesson_id" class="form-select">
+                {% for lesson in lessons %}
+                  <option value="{{ lesson.id }}">{{ lesson.level.title }} / {{ lesson.title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">{{ question_form.title.label.text }}</label>
+              {{ question_form.title(class="form-control") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ question_form.prompt.label.text }}</label>
+              {{ question_form.prompt(class="form-control", rows="4") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ question_form.image_url.label.text }}</label>
+              {{ question_form.image_url(class="form-control", placeholder="/static/uploads/questions/nursery/apple.webp") }}
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ question_form.prompt_type.label.text }}</label>
+                {{ question_form.prompt_type(class="form-select") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ question_form.language_code.label.text }}</label>
+                {{ question_form.language_code(class="form-select") }}
+              </div>
+            </div>
+            <div class="mb-3 mt-3">
+              <label class="form-label">{{ question_form.hint_text.label.text }}</label>
+              {{ question_form.hint_text(class="form-control", rows="2") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ question_form.model_answer.label.text }}</label>
+              {{ question_form.model_answer(class="form-control", rows="3") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ question_form.evaluation_rubric.label.text }}</label>
+              {{ question_form.evaluation_rubric(class="form-control", rows="2") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ question_form.expected_keywords.label.text }}</label>
+              {{ question_form.expected_keywords(class="form-control") }}
+            </div>
+            <div class="form-check">
+              {{ question_form.is_active(class="form-check-input") }}
+              <label class="form-check-label">{{ question_form.is_active.label.text }}</label>
+            </div>
+            <div class="mt-3 d-grid">
+              {{ question_form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Lessons</h5>
+        </div>
+        <div class="card-body">
+          {% for lesson in lessons %}
+            <div class="border rounded p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="fw-bold">{{ lesson.title }}</div>
+                  <div class="small text-muted">{{ lesson.lesson_type|title }} • {{ lesson.estimated_minutes }} min</div>
+                </div>
+                <form method="post" onsubmit="return confirm('Delete this lesson?');">
+                  {{ delete_form.hidden_tag() }}
+                  <input type="hidden" name="action" value="delete_lesson">
+                  <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+              {% if lesson.explanation_text %}
+                <div class="small mt-2">{{ lesson.explanation_text }}</div>
+              {% endif %}
+              <div class="small text-muted mt-2">Questions: {{ lesson.question_count }}</div>
+            </div>
+          {% else %}
+            <div class="text-muted">No lessons yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Questions</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Prompt</th>
+                  <th>Type</th>
+                  <th>Language</th>
+                  <th>Lesson</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for q in question_rows %}
+                  <tr>
+                    <td style="max-width: 320px;">
+                      <div class="fw-semibold">{{ q.title or 'Question' }}</div>
+                      <div class="small text-muted">{{ q.prompt[:120] }}{% if q.prompt|length > 120 %}...{% endif %}</div>
+                    </td>
+                    <td>{{ q.prompt_type|title }}</td>
+                    <td>{{ q.language_code|upper }}</td>
+                    <td>{{ (q.subsection.chapter.lesson.module.title ~ " / ") if q.subsection.chapter.lesson.module else "" }}{{ q.subsection.chapter.lesson.title }}</td>
+                    <td class="text-end">
+                      <form method="post" class="d-inline" onsubmit="return confirm('Delete this question?');">
+                        {{ delete_form.hidden_tag() }}
+                        <input type="hidden" name="action" value="delete_question">
+                        <input type="hidden" name="question_id" value="{{ q.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="5" class="text-muted">No questions yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Enrollments</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Status</th>
+                  <th>Enrolled At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in enrollments %}
+                  <tr>
+                    <td>{{ row.student.full_name }}</td>
+                    <td>{{ row.status|title }}</td>
+                    <td>{{ row.enrolled_at.strftime('%d %b %Y %I:%M %p') if row.enrolled_at else '' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="text-muted">No enrollments yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Audit Logs • SuperAdmin • Fluencify{% endblock %}
+
+{% block page_title %}Audit Logs{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="surface rounded-4 p-4">
+    <h2 class="fw-bold mb-3">Audit Logs</h2>
+
+    {% if logs %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Actor</th>
+              <th>Action</th>
+              <th>Success</th>
+              <th>IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in logs %}
+            <tr>
+              <td class="text-muted">{{ l.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+              <td class="text-muted">#{{ l.actor_user_id or "-" }} ({{ l.actor_role or "-" }})</td>
+              <td>{{ l.action }}</td>
+              <td>
+                {% if l.success %}
+                  <span class="badge text-bg-success">Yes</span>
+                {% else %}
+                  <span class="badge text-bg-danger">No</span>
+                {% endif %}
+              </td>
+              <td class="text-muted">{{ l.ip or "-" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">No audit events yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

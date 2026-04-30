@@ -1,0 +1,409 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Image Course QA • Fluencify{% endblock %}
+{% block page_title %}Image Course QA{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <div class="small text-uppercase text-secondary mb-1">Phase 11 Review Suite</div>
+      <h1 class="mb-2">{{ course.title }}</h1>
+      <p class="text-secondary mb-0">Functional testing, data validation, UI review, performance review, and safety checks for image-based course content without disturbing the existing LMS flow.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('superadmin.course_detail', course_id=course.id, tab='questions-prompts') }}" class="btn btn-outline-light">Back to Course</a>
+      {% if course.slug == 'nursery-image-practice' or 'nursery' in (course.title or '')|lower %}
+        <a href="{{ url_for('superadmin.nursery_studio') }}" class="btn btn-outline-light">Open Nursery Studio</a>
+      {% endif %}
+      <a href="{{ url_for('superadmin.course_image_qa_report_csv', course_id=course.id) }}" class="btn btn-outline-light">Download QA CSV</a>
+      <a href="{{ url_for('superadmin.course_image_qa', course_id=course.id) }}" class="btn btn-primary">Refresh QA</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Questions</div><div class="display-6 fw-bold">{{ report.summary.question_count }}</div></div></div></div>
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Image Questions</div><div class="display-6 fw-bold">{{ report.summary.image_question_count }}</div></div></div></div>
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Broken Images</div><div class="display-6 fw-bold">{{ report.summary.broken_image_count }}</div></div></div></div>
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Total Issues</div><div class="display-6 fw-bold">{{ report.summary.issue_count }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Bulk Upload Validation</h3>
+          <p class="small text-muted">Validate 200 to 500 image-question rows before importing them into the course. This checks broken image paths, duplicate prompts, and conflicts with the current course bank.</p>
+          <form method="post" enctype="multipart/form-data" class="mb-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="validate_bulk_upload">
+            <div class="mb-3">
+              <label class="form-label">CSV / TXT File</label>
+              <input class="form-control" type="file" name="validation_upload" accept=".csv,.txt" required>
+            </div>
+            <button class="btn btn-outline-primary">Validate Upload File</button>
+          </form>
+
+          {% if bulk_validation %}
+            <div class="border rounded-4 p-3 mb-3">
+              <div class="fw-semibold">Validation Summary</div>
+              <div class="small text-muted mt-1">{{ bulk_validation.row_count }} rows checked • {{ bulk_validation.issue_count }} issue(s) found</div>
+              <div class="small text-muted">Projected chapter buckets at {{ report.scalability.auto_split_size }} rows per subsection group: {{ bulk_validation.projected_chapters }}</div>
+              <div class="small text-muted">Designed large-bank range: {{ bulk_validation.target_range }} questions</div>
+              <div class="small mt-2 {% if bulk_validation.is_valid %}text-success{% else %}text-warning{% endif %}">
+                {{ 'The file is ready for import.' if bulk_validation.is_valid else 'Fix the listed issues before importing.' }}
+              </div>
+            </div>
+            {% if bulk_validation.issues %}
+              <div class="small fw-semibold mb-2">Validation Issues</div>
+              <ul class="small text-muted ps-3 mb-3">
+                {% for item in bulk_validation.issues %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if bulk_validation.missing_images %}
+              <div class="small fw-semibold mb-2">Broken Image Repair Suggestions</div>
+              <div class="d-grid gap-2">
+                {% for item in bulk_validation.missing_images %}
+                  <div class="border rounded-4 p-3">
+                    <div class="small"><strong>Row {{ item.row }}</strong> — {{ item.image_url }}</div>
+                    {% set suggestions = bulk_validation.repair_suggestions.get(item.image_url, []) %}
+                    <div class="small text-muted mt-1">
+                      {% if suggestions %}
+                        Suggested replacements: {{ suggestions|join(' | ') }}
+                      {% else %}
+                        No close replacement suggestion was found in the current static asset library.
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.1 to 11.5 System Checks</h3>
+          <div class="d-grid gap-3">
+            {% for check in report.checks %}
+              <div class="border rounded-4 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                  <div>
+                    <div class="fw-semibold">{{ check.title }}</div>
+                    <div class="small text-muted mt-1">{{ check.detail }}</div>
+                  </div>
+                  <span class="badge {% if check.status == 'pass' %}text-bg-success{% elif check.status == 'warn' %}text-bg-warning{% else %}text-bg-danger{% endif %}">{{ check.status|upper }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.7 and 11.8 Readiness</h3>
+          <div class="border rounded-4 p-3 mb-3">
+            <div class="fw-semibold">Progress tracking compatibility</div>
+            <div class="small text-muted mt-1">Image questions continue to use the same attempts, lesson progress, course progress, and analytics pipeline as normal questions.</div>
+          </div>
+          <div class="border rounded-4 p-3 mb-3">
+            <div class="fw-semibold">Optimized image ratio</div>
+            <div class="small text-muted mt-1">{{ report.summary.optimized_image_ratio }}% of local image assets already use WEBP or SVG-friendly formats.</div>
+          </div>
+          <div class="border rounded-4 p-3">
+            <div class="fw-semibold">Scalability note</div>
+            <div class="small text-muted mt-1">The current lesson/chapter/subsection structure is ready to expand to larger image banks without introducing a new module type.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.3 UI / UX Review</h3>
+          <div class="d-grid gap-3">
+            {% for item in report.ui_review %}
+              <div class="border rounded-4 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                  <div>
+                    <div class="fw-semibold">{{ item.title }}</div>
+                    <div class="small text-muted mt-1">{{ item.detail }}</div>
+                  </div>
+                  <span class="badge {% if item.status == 'pass' %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ item.status|upper }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.4 Performance Snapshot</h3>
+          <div class="d-grid gap-3">
+            <div class="border rounded-4 p-3">
+              <div class="fw-semibold">Local image weight</div>
+              <div class="small text-muted mt-1">{{ report.performance.total_local_image_kb }} KB total • {{ report.performance.average_local_image_kb }} KB average</div>
+            </div>
+            <div class="border rounded-4 p-3">
+              <div class="fw-semibold">Oversized files</div>
+              <div class="small text-muted mt-1">{{ report.performance.oversized_count }} image(s) are above the {{ report.performance.recommended_max_kb }} KB recommendation.</div>
+            </div>
+            <div class="border rounded-4 p-3">
+              <div class="fw-semibold">Frontend loading behavior</div>
+              <div class="small text-muted mt-1">{% if report.performance.lazy_loading_enabled %}Lesson images use lazy loading so image-heavy lessons stay smoother on slower devices.{% else %}Lazy loading is not active yet.{% endif %}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.6 Admin Controls</h3>
+          <div class="d-grid gap-3">
+            {% for item in report.admin_controls %}
+              <div class="border rounded-4 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                  <div>
+                    <div class="fw-semibold">{{ item.title }}</div>
+                    <div class="small text-muted mt-1">{{ item.detail }}</div>
+                  </div>
+                  <span class="badge {% if item.status == 'pass' %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ item.status|upper }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.7 Analytics Validation</h3>
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Enrolled students</div><div class="fs-3 fw-bold">{{ report.analytics.enrollment_count }}</div></div></div>
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Students with attempts</div><div class="fs-3 fw-bold">{{ report.analytics.students_with_attempts }}</div></div></div>
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Lesson progress rows</div><div class="fs-3 fw-bold">{{ report.analytics.lesson_progress_rows }}</div></div></div>
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Course progress rows</div><div class="fs-3 fw-bold">{{ report.analytics.course_progress_rows }}</div></div></div>
+          </div>
+          <div class="small text-muted mb-3">Average recorded accuracy: {{ report.analytics.average_accuracy }}%</div>
+          <div class="d-grid gap-3">
+            {% for item in report.analytics.checks %}
+              <div class="border rounded-4 p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                  <div>
+                    <div class="fw-semibold">{{ item.title }}</div>
+                    <div class="small text-muted mt-1">{{ item.detail }}</div>
+                  </div>
+                  <span class="badge {% if item.status == 'pass' %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ item.status|upper }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Lesson Breakdown</h3>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Lesson</th>
+                  <th>Questions</th>
+                  <th>Images</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in report.lessons %}
+                  <tr>
+                    <td>{{ row.lesson_title }}</td>
+                    <td>{{ row.question_count }}</td>
+                    <td>{{ row.image_count }}</td>
+                    <td>{{ row.issue_count }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="text-secondary">No lesson rows available yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-1 d-none d-xl-block"></div>
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.8 Scalability Readiness</h3>
+          <div class="row g-3">
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Current question bank</div><div class="fs-3 fw-bold">{{ report.scalability.current_question_count }}</div></div></div>
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Largest lesson density</div><div class="fs-3 fw-bold">{{ report.scalability.largest_lesson_question_count }}</div></div></div>
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Projected chapter buckets for 200</div><div class="fs-3 fw-bold">{{ report.scalability.projected_chapters_for_200 }}</div></div></div>
+            <div class="col-sm-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Projected chapter buckets for 500</div><div class="fs-3 fw-bold">{{ report.scalability.projected_chapters_for_500 }}</div></div></div>
+          </div>
+          <div class="border rounded-4 p-3 mt-3">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <div class="fw-semibold">Growth readiness</div>
+                <div class="small text-muted mt-1">{{ report.scalability.detail }}</div>
+              </div>
+              <span class="badge {% if report.scalability.status == 'pass' %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ report.scalability.status|upper }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-12">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Phase 11.9 Future Expansion Notes</h3>
+          <div class="d-grid gap-3">
+            {% for note in report.future_notes %}
+              <div class="border rounded-4 p-3 small text-muted">{{ note }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <h3 class="h5 mb-1">Question-Level Issues</h3>
+          <div class="small text-muted">Phase 11.2 and 11.6 content review actions for image-led course questions.</div>
+        </div>
+        <span class="badge text-bg-light border">{{ issue_total }} issue(s) after filters</span>
+      </div>
+
+      <form method="get" class="row g-2 mb-3">
+        <div class="col-md-5">
+          <input type="text" name="q" value="{{ q or '' }}" class="form-control" placeholder="Search question, issue, lesson, or image path">
+        </div>
+        <div class="col-md-2">
+          <select name="severity" class="form-select">
+            {% for value,label in [('all','All severities'),('critical','Critical'),('high','High'),('medium','Medium'),('low','Low')] %}
+              <option value="{{ value }}" {% if severity == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="status" class="form-select">
+            {% for value,label in [('all','All status'),('active','Active'),('inactive','Inactive')] %}
+              <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-outline-light flex-fill">Apply</button>
+          <a href="{{ url_for('superadmin.course_image_qa', course_id=course.id) }}" class="btn btn-outline-secondary">Reset</a>
+        </div>
+      </form>
+
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="q" value="{{ q or '' }}">
+        <input type="hidden" name="severity" value="{{ severity }}">
+        <input type="hidden" name="status" value="{{ status }}">
+        <input type="hidden" name="page" value="{{ issue_page }}">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <div class="small text-muted">Bulk actions help finish Phase 11 review faster on larger question banks.</div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm btn-outline-success" name="action" value="bulk_activate_questions">Activate Selected</button>
+            <button class="btn btn-sm btn-outline-warning" name="action" value="bulk_deactivate_questions">Deactivate Selected</button>
+            <button class="btn btn-sm btn-outline-danger" name="action" value="bulk_delete_questions" onclick="return confirm('Delete selected questions permanently?');">Delete Selected</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox" class="form-check-input" onclick="document.querySelectorAll('.issue-check').forEach(cb => cb.checked = this.checked)"></th>
+                <th>Severity</th>
+                <th>Issue</th>
+                <th>Question</th>
+                <th>Location</th>
+                <th>Image Path</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for issue in filtered_issues %}
+                <tr>
+                  <td><input type="checkbox" class="form-check-input issue-check" name="question_ids" value="{{ issue.question_id }}"></td>
+                  <td><span class="badge {% if issue.severity == 'critical' %}text-bg-danger{% elif issue.severity == 'high' %}text-bg-warning{% elif issue.severity == 'medium' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{{ issue.severity|upper }}</span></td>
+                  <td>
+                    <div class="fw-semibold">{{ issue.title }}</div>
+                    <div class="small text-muted">{{ issue.detail }}</div>
+                  </td>
+                  <td>
+                    <div class="fw-semibold">{{ issue.question_title }}</div>
+                    <div class="small text-muted">#{{ issue.question_id }}</div>
+                  </td>
+                  <td class="small text-muted">{{ issue.lesson_title }} / {{ issue.chapter_title }} / {{ issue.subsection_title }}</td>
+                  <td class="small text-break" style="max-width: 220px;">{{ issue.image_url or '—' }}</td>
+                  <td class="text-end" style="min-width: 210px;">
+                    {% if issue.repair_suggestions %}
+                      <div class="small text-muted text-start mb-2">Try: {{ issue.repair_suggestions|join(' | ') }}</div>
+                    {% endif %}
+                    <div class="d-flex justify-content-end gap-2 flex-wrap">
+                      <a href="{{ url_for('superadmin.question_detail', question_id=issue.question_id, from_course_id=course.id, return_to='image_qa') }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                      <form method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="q" value="{{ q or '' }}">
+                        <input type="hidden" name="severity" value="{{ severity }}">
+                        <input type="hidden" name="status" value="{{ status }}">
+                        <input type="hidden" name="page" value="{{ issue_page }}">
+                        <input type="hidden" name="question_id" value="{{ issue.question_id }}">
+                        <input type="hidden" name="action" value="{{ 'deactivate_question' if issue.is_active else 'activate_question' }}">
+                        <button class="btn btn-sm btn-outline-{% if issue.is_active %}danger{% else %}success{% endif %}">{{ 'Deactivate' if issue.is_active else 'Activate' }}</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="7" class="text-secondary">No image-course issues matched the current filters.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+      {% if issue_total_pages > 1 %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+          <div class="small text-muted">Page {{ issue_page }} of {{ issue_total_pages }}</div>
+          <div class="d-flex gap-2">
+            {% if issue_page > 1 %}
+              <a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.course_image_qa', course_id=course.id, q=q, severity=severity, status=status, page=issue_page-1) }}">Previous</a>
+            {% endif %}
+            {% if issue_page < issue_total_pages %}
+              <a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.course_image_qa', course_id=course.id, q=q, severity=severity, status=status, page=issue_page+1) }}">Next</a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

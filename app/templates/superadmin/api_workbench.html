@@ -1,0 +1,312 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}API Workbench • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}API Workbench{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-api-workbench.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 sa-studio api-workbench-page">
+  <section class="sa-hero-panel">
+    <div class="sa-hero-grid">
+      <div>
+        <div class="sa-kicker">SuperAdmin API Marketplace</div>
+        <h1 class="sa-title">Manually register every API you want to evaluate before wiring it into Fluencify</h1>
+        <p class="sa-copy mb-0">This workspace is for strategy and selection. Choose the tab, map the exact service, add provider options, mark free or paid, note whether the provider is new or established, and decide which one is the best fit for the platform.</p>
+        <div class="sa-action-row mt-4">
+          <a class="btn btn-primary" href="{{ url_for('superadmin.ai_central') }}">Open AI Central</a>
+          <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.api_logs') }}">Open API Logs</a>
+          <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.dashboard') }}">Back to Dashboard</a>
+        </div>
+      </div>
+      <div class="sa-stat-grid">
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Services In Tab</div>
+          <div class="sa-stat-value">{{ summary.services_in_tab }}</div>
+          <div class="sa-stat-note">{{ active_group.label }} capabilities currently visible.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Tracked Entries</div>
+          <div class="sa-stat-value">{{ summary.tracked_entries }}</div>
+          <div class="sa-stat-note">Manual provider options stored in this tab.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Selected</div>
+          <div class="sa-stat-value">{{ summary.selected_entries }}</div>
+          <div class="sa-stat-note">Services that already have a selected provider candidate.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Best Fit</div>
+          <div class="sa-stat-value">{{ summary.best_fit_entries }}</div>
+          <div class="sa-stat-note">Providers marked as the strongest fit for Fluencify.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Free</div>
+          <div class="sa-stat-value">{{ summary.free_entries }}</div>
+          <div class="sa-stat-note">Providers tracked as fully free tools or APIs.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Freemium</div>
+          <div class="sa-stat-value">{{ summary.freemium_entries }}</div>
+          <div class="sa-stat-note">Providers with free tiers and paid scale-up paths.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sa-panel">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+      <div>
+        <div class="sa-kicker">API Tabs</div>
+        <h2 class="h4 mb-1">Choose the capability area you want to plan</h2>
+        <div class="sa-muted">These tabs follow the full Fluencify service map you listed, so you can plan core language APIs, LLMs, writing tools, interviews, rewards, platform ops, and admin controls in one place.</div>
+      </div>
+    </div>
+    <div class="workbench-tab-grid">
+      {% for tab in tab_cards %}
+      <a class="workbench-tab-card {% if tab.key == active_tab %}active{% endif %}" href="{{ url_for('superadmin.api_workbench', tab=tab.key) }}">
+        <div class="workbench-tab-title">{{ tab.label }}</div>
+        <div class="small text-muted mb-2">{{ tab.description }}</div>
+        <div class="workbench-tab-meta">{{ tab.service_count }} services • {{ tab.entry_count }} entries • {{ tab.selected_count }} selected</div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-12 col-xxl-7">
+      <section class="sa-table-panel h-100">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+          <div>
+            <div class="sa-kicker">{{ active_group.label }} Coverage</div>
+            <h2 class="h4 mb-1">Service readiness and selected provider view</h2>
+            <div class="sa-muted">This table answers which APIs are still missing, which services have candidates, and which registry page already exists for that service family.</div>
+          </div>
+        </div>
+        <div class="sa-table-wrap">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 workbench-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Tracked Providers</th>
+                  <th>Selected</th>
+                  <th>Best Fit</th>
+                  <th>Pricing Mix</th>
+                  <th>Registry</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in service_rows %}
+                <tr>
+                  <td class="fw-semibold">{{ row.service_name }}</td>
+                  <td>{{ row.entry_count }}</td>
+                  <td>{{ row.selected_provider }}</td>
+                  <td>{{ row.recommended_provider }}</td>
+                  <td>{{ row.pricing_mix }}</td>
+                  <td><a class="btn btn-sm btn-outline-secondary" href="{{ row.registry_href }}">Open Registry</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6"><div class="sa-empty">No service rows are available in this tab.</div></td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-12 col-xxl-5">
+      <section class="sa-panel h-100">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+          <div>
+            <div class="sa-kicker">Manual Entry</div>
+            <h2 class="h4 mb-1">{{ 'Edit provider candidate' if edit_entry else 'Add a new provider candidate' }}</h2>
+            <div class="sa-muted">Use this form to record market options before you wire them into the production registries.</div>
+          </div>
+          {% if edit_entry %}
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.api_workbench', tab=active_tab) }}">Cancel Edit</a>
+          {% endif %}
+        </div>
+
+        <form method="post" class="row g-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="save_entry">
+          <input type="hidden" name="tab" value="{{ active_tab }}">
+          <input type="hidden" name="entry_id" value="{{ edit_entry.id if edit_entry else 0 }}">
+
+          <div class="col-12">
+            <label class="form-label">Current tab</label>
+            <input class="form-control" type="text" value="{{ active_group.label }}" disabled>
+          </div>
+          <div class="col-12">
+            <label class="form-label">API service</label>
+            <select class="form-select" name="service_key">
+              {% for value, label in service_options %}
+              <option value="{{ value }}" {% if value == edit_service_key %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Custom service name</label>
+            <input class="form-control" type="text" name="custom_service_name" value="{% if edit_entry and edit_service_key == '__custom__' %}{{ edit_entry.service_name }}{% endif %}" placeholder="Use this when the API service is not in the preset list">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Provider name</label>
+            <input class="form-control" type="text" name="provider_name" value="{{ edit_entry.provider_name if edit_entry else '' }}" placeholder="OpenAI, Google Cloud, Deepgram, ElevenLabs">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Provider family</label>
+            <input class="form-control" type="text" name="provider_family" value="{{ edit_entry.provider_family if edit_entry else '' }}" placeholder="Speech, LLM, Grammar, Payments">
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Pricing tier</label>
+            <select class="form-select" name="pricing_tier">
+              {% for value, label in pricing_choices %}
+              <option value="{{ value }}" {% if (edit_entry.pricing_tier if edit_entry else 'paid') == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Market status</label>
+            <select class="form-select" name="market_status">
+              {% for value, label in market_choices %}
+              <option value="{{ value }}" {% if (edit_entry.market_status if edit_entry else 'established') == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">System recommendation</label>
+            <select class="form-select" name="recommendation_level">
+              {% for value, label in recommendation_choices %}
+              <option value="{{ value }}" {% if (edit_entry.recommendation_level if edit_entry else 'research') == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Official website</label>
+            <input class="form-control" type="url" name="official_url" value="{{ edit_entry.official_url if edit_entry else '' }}" placeholder="https://...">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">API base URL</label>
+            <input class="form-control" type="text" name="api_base_url" value="{{ edit_entry.api_base_url if edit_entry else '' }}" placeholder="https://api.provider.com/v1">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Advantages</label>
+            <textarea class="form-control" rows="3" name="advantage_summary" placeholder="What makes this provider strong for Fluencify?">{{ edit_entry.advantage_summary if edit_entry else '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Best for</label>
+            <textarea class="form-control" rows="2" name="best_for" placeholder="Best for interview voice, cheap translation, premium TTS, plagiarism, etc.">{{ edit_entry.best_for if edit_entry else '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" rows="3" name="notes" placeholder="Extra notes, limits, trial rules, token concerns, region support, or integration remarks">{{ edit_entry.notes if edit_entry else '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="is_selected" name="is_selected" {% if edit_entry and edit_entry.is_selected %}checked{% endif %}>
+              <label class="form-check-label" for="is_selected">Mark this as the currently selected option for the chosen API service</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_active_candidate" name="is_active_candidate" {% if not edit_entry or edit_entry.is_active_candidate %}checked{% endif %}>
+              <label class="form-check-label" for="is_active_candidate">Keep this provider active in the planning shortlist</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-primary" type="submit">{{ 'Update Entry' if edit_entry else 'Add Provider Candidate' }}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <section class="sa-table-panel">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+      <div>
+        <div class="sa-kicker">{{ active_group.label }} Providers</div>
+        <h2 class="h4 mb-1">Tracked provider options in the selected tab</h2>
+        <div class="sa-muted">Use these actions to set the chosen provider for a service, pause a candidate, or remove a row you no longer want.</div>
+      </div>
+      <span class="sa-pill">{{ entries|length }} provider candidate{{ 's' if entries|length != 1 else '' }}</span>
+    </div>
+    <div class="sa-table-wrap">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 workbench-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Provider</th>
+              <th>Pricing</th>
+              <th>Market</th>
+              <th>Recommendation</th>
+              <th>Advantages</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in entries %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ row.service_name }}</div>
+                <div class="small text-muted">{{ row.provider_family or 'Provider family not set' }}</div>
+                {% if row.is_selected %}
+                <div class="small mt-1"><span class="badge text-bg-success">Selected</span></div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="fw-semibold">{{ row.provider_name }}</div>
+                <div class="small text-muted">{{ row.official_url or row.api_base_url or 'No URL saved' }}</div>
+              </td>
+              <td><span class="badge text-bg-light">{{ row.pricing_label }}</span></td>
+              <td><span class="badge text-bg-light">{{ row.market_label }}</span></td>
+              <td>
+                <span class="badge {% if row.recommendation_level == 'best_fit' %}text-bg-success{% elif row.recommendation_level == 'recommended' %}text-bg-primary{% elif row.recommendation_level == 'watchlist' %}text-bg-warning text-dark{% else %}text-bg-secondary{% endif %}">
+                  {{ row.recommendation_label }}
+                </span>
+              </td>
+              <td>
+                <div>{{ row.advantage_summary or 'No advantage note added yet.' }}</div>
+                <div class="small text-muted mt-1">{{ row.best_for or 'Best-for note not added.' }}</div>
+              </td>
+              <td>
+                <div class="workbench-action-stack">
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('superadmin.api_workbench', tab=row.category_key, edit_id=row.id) }}">Edit</a>
+                  <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="select_entry">
+                    <input type="hidden" name="tab" value="{{ row.category_key }}">
+                    <input type="hidden" name="entry_id" value="{{ row.id }}">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">Select</button>
+                  </form>
+                  <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle_active">
+                    <input type="hidden" name="tab" value="{{ row.category_key }}">
+                    <input type="hidden" name="entry_id" value="{{ row.id }}">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">{{ 'Pause' if row.is_active_candidate else 'Resume' }}</button>
+                  </form>
+                  <form method="post" onsubmit="return confirm('Delete this provider candidate?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="delete_entry">
+                    <input type="hidden" name="tab" value="{{ row.category_key }}">
+                    <input type="hidden" name="entry_id" value="{{ row.id }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7"><div class="sa-empty">No provider candidates are saved in this tab yet. Use the form above to add your first API option manually.</div></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

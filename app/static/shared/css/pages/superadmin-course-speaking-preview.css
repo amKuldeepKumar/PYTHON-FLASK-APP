@@ -1,0 +1,6 @@
+.s-hero{display:grid;gap:1.25rem}
+  .glass-card{border:1px solid rgba(255,255,255,.08);border-radius:24px;background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(12,18,31,.94));box-shadow:0 20px 60px rgba(0,0,0,.22)}
+  .metric-box{padding:1rem 1.1rem;border-radius:20px;background:rgba(255,255,255,.05);height:100%}
+  .metric-value{font-size:1.8rem;font-weight:800;line-height:1}
+  .topic-card{border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(255,255,255,.03);height:100%}
+  .pill{display:inline-flex;gap:.4rem;align-items:center;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.08)}

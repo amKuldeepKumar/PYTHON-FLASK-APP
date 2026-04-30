@@ -1,0 +1,614 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Economy - SuperAdmin - Fluencify{% endblock %}
+{% block page_title %}Economy{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-primary btn-sm" href="#course-economy-settings">Course Settings</a>
+      <a class="btn btn-outline-primary btn-sm" href="#leaderboard-reward-control">Leaderboard Rewards</a>
+      <a class="btn btn-outline-primary btn-sm" href="#reward-policy-control">Band Policies</a>
+      <a class="btn btn-outline-primary btn-sm" href="#course-reward-overrides">Course Overrides</a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Active wallets</div><div class="display-6 fw-bold">{{ metrics.active_wallets }}</div></div></div>
+    </div>
+    <div class="col-md-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Total issued</div><div class="display-6 fw-bold">{{ metrics.total_issued }}</div></div></div>
+    </div>
+    <div class="col-md-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Total spent</div><div class="display-6 fw-bold">{{ metrics.total_spent }}</div></div></div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Course redemptions</div><div class="display-6 fw-bold">{{ metrics.redemptions }}</div></div></div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="small text-muted">Community messages</div><div class="display-6 fw-bold">{{ metrics.messages }}</div></div></div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm" id="course-economy-settings">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Course Economy Settings</h5>
+          <div class="small text-muted mt-1">Set the course reward band here. For exact per-course coin numbers, use the Course Reward Overrides section below.</div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>Course</th><th>Reward band</th><th>Coin redemption</th><th>Coin price</th><th>Chat</th><th>Preview</th><th></th></tr></thead>
+              <tbody>
+                {% for course in courses %}
+                  {% set reward = course_reward_map.get(course.id) %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">{{ course.title }}</div>
+                      <div class="small text-muted">{{ course.track_type|title }}</div>
+                    </td>
+                    <td colspan="6">
+                      <form class="row g-2 align-items-center" method="post" action="{{ url_for('superadmin.economy_update_course', course_id=course.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="col-md-2">
+                          <select class="form-select form-select-sm" name="difficulty">
+                            <option value="basic" {% if (course.difficulty or 'basic')|lower == 'basic' %}selected{% endif %}>Basic</option>
+                            <option value="intermediate" {% if (course.difficulty or '')|lower == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="advanced" {% if (course.difficulty or '')|lower == 'advanced' %}selected{% endif %}>Advanced</option>
+                          </select>
+                        </div>
+                        <div class="col-md-2">
+                          <select class="form-select form-select-sm" name="allow_coin_redemption">
+                            <option value="1" {% if course.allow_coin_redemption %}selected{% endif %}>Enabled</option>
+                            <option value="0" {% if not course.allow_coin_redemption %}selected{% endif %}>Disabled</option>
+                          </select>
+                        </div>
+                        <div class="col-md-2">
+                          <input class="form-control form-control-sm" type="number" min="0" name="coin_price" value="{{ course.coin_redemption_price }}">
+                        </div>
+                        <div class="col-md-2">
+                          <select class="form-select form-select-sm" name="community_enabled">
+                            <option value="1" {% if course.community_enabled %}selected{% endif %}>Chat on</option>
+                            <option value="0" {% if not course.community_enabled %}selected{% endif %}>Chat off</option>
+                          </select>
+                        </div>
+                        <div class="col-md-2 small text-muted">
+                          {% if reward %}
+                            Lesson {{ reward.lesson_base }}-{{ reward.lesson_high }}<br>
+                            Boss {{ reward.boss_reward }}+
+                          {% else %}
+                            No preview
+                          {% endif %}
+                        </div>
+                        <div class="col-md-2">
+                          <button class="btn btn-primary btn-sm w-100">Save</button>
+                        </div>
+                      </form>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="7" class="text-muted text-center py-4">No courses found.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Create Boss Level</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('superadmin.economy_create_boss_level') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+              <label class="form-label">Course</label>
+              <select class="form-select" name="course_id">
+                {% for course in courses %}
+                  <option value="{{ course.id }}">{{ course.title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Title</label>
+              <input class="form-control" name="title" placeholder="Boss level title">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description" rows="2" placeholder="Short challenge description"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Prompt</label>
+              <textarea class="form-control" name="prompt_text" rows="3" placeholder="Optional prompt or instructions"></textarea>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Reward coins</label>
+                <input class="form-control" type="number" min="1" name="reward_coins" value="50">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Unlock %</label>
+                <input class="form-control" type="number" min="0" max="100" name="unlock_completion_percent" value="100">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Min accuracy</label>
+                <input class="form-control" type="number" min="0" max="100" name="min_accuracy" value="60">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Sort order</label>
+                <input class="form-control" type="number" min="0" name="sort_order" value="0">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="is_active">
+                  <option value="1" selected>Active</option>
+                  <option value="0">Paused</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary">Create boss level</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100" id="leaderboard-reward-control">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Leaderboard Reward Control</h5>
+          <div class="small text-muted mt-1">Choose extra bonus coins for 1st, 2nd, and 3rd place. Students can claim these from the Rewards page.</div>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('superadmin.economy_update_leaderboard_rewards') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3 mb-3">
+              <div class="col-12"><div class="fw-semibold">Weekly Top 3</div></div>
+              <div class="col-md-4">
+                <label class="form-label">1st place</label>
+                <input class="form-control" type="number" min="0" name="weekly_first_coins" value="{{ leaderboard_reward_policy.weekly_first_coins }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">2nd place</label>
+                <input class="form-control" type="number" min="0" name="weekly_second_coins" value="{{ leaderboard_reward_policy.weekly_second_coins }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">3rd place</label>
+                <input class="form-control" type="number" min="0" name="weekly_third_coins" value="{{ leaderboard_reward_policy.weekly_third_coins }}">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-12"><div class="fw-semibold">Monthly Top 3</div></div>
+              <div class="col-md-4">
+                <label class="form-label">1st place</label>
+                <input class="form-control" type="number" min="0" name="monthly_first_coins" value="{{ leaderboard_reward_policy.monthly_first_coins }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">2nd place</label>
+                <input class="form-control" type="number" min="0" name="monthly_second_coins" value="{{ leaderboard_reward_policy.monthly_second_coins }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">3rd place</label>
+                <input class="form-control" type="number" min="0" name="monthly_third_coins" value="{{ leaderboard_reward_policy.monthly_third_coins }}">
+              </div>
+            </div>
+            <button class="btn btn-primary">Save leaderboard rewards</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Top Rank Bonus Preview</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            {% for row in leaderboard_reward_guide %}
+              <div class="col-md-6">
+                <div class="border rounded-4 p-3 h-100">
+                  <div class="fw-semibold mb-2">{{ row.label }} leaderboard</div>
+                  <div class="small text-muted mb-3">{{ row.period_name }}</div>
+                  <div class="d-flex justify-content-between small mb-2"><span>1st place</span><strong>{{ row.first }} coins</strong></div>
+                  <div class="d-flex justify-content-between small mb-2"><span>2nd place</span><strong>{{ row.second }} coins</strong></div>
+                  <div class="d-flex justify-content-between small"><span>3rd place</span><strong>{{ row.third }} coins</strong></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm" id="reward-policy-control">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Reward Policy Control</h5>
+          <div class="small text-muted mt-1">SuperAdmin controls exactly how many coins students can earn in basic, intermediate, and advanced courses.</div>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            {% for policy in reward_policies %}
+              <div class="col-xl-4">
+                <div class="border rounded-4 p-3 h-100">
+                  <div class="fw-semibold fs-5 mb-1">{{ policy.label }}</div>
+                  <div class="small text-muted mb-3">{{ policy.difficulty_band|title }} difficulty rewards</div>
+                  <form method="post" action="{{ url_for('superadmin.economy_update_reward_policy', difficulty_band=policy.difficulty_band) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                      <label class="form-label">Display label</label>
+                      <input class="form-control form-control-sm" name="label" value="{{ policy.label }}">
+                    </div>
+                    <div class="row g-2 mb-3">
+                      <div class="col-6">
+                        <label class="form-label">Speaking base</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_base" value="{{ policy.speaking_base }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Relevance bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_relevance_bonus" value="{{ policy.speaking_relevance_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Progress bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_progress_bonus" value="{{ policy.speaking_progress_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Good-score bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_good_bonus" value="{{ policy.speaking_good_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Strong-score bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_strong_bonus" value="{{ policy.speaking_strong_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Full-length bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_full_length_bonus" value="{{ policy.speaking_full_length_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">First-try bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_first_try_bonus" value="{{ policy.speaking_first_try_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Lesson base</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="lesson_base" value="{{ policy.lesson_base }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Lesson mid bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="lesson_accuracy_mid_bonus" value="{{ policy.lesson_accuracy_mid_bonus }}">
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Lesson high bonus</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="lesson_accuracy_high_bonus" value="{{ policy.lesson_accuracy_high_bonus }}">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label">Suggested boss reward</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="boss_suggested_reward" value="{{ policy.boss_suggested_reward }}">
+                      </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm">Save {{ policy.label }}</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm" id="course-reward-overrides">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Course Reward Overrides</h5>
+          <div class="small text-muted mt-1">This is where SuperAdmin decides the exact reward coins for a specific course. Leave any field blank to use the selected difficulty band values.</div>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            {% for course in courses %}
+              {% set reward = course_reward_map.get(course.id) %}
+              <div class="col-12">
+                <div class="border rounded-4 p-3">
+                  <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                      <div class="fw-semibold fs-5">{{ course.title }}</div>
+                      <div class="small text-muted">{{ (course.difficulty or 'basic')|title }} band{% if reward and reward.is_custom %} • Custom override active{% endif %}</div>
+                    </div>
+                    <div class="small text-muted text-end">
+                      {% if reward %}
+                        Lesson {{ reward.lesson_base }}-{{ reward.lesson_high }}<br>
+                        Speaking {{ reward.speaking_min }}-{{ reward.speaking_max }}<br>
+                        Boss {{ reward.boss_reward }}+
+                      {% endif %}
+                    </div>
+                  </div>
+                  <form method="post" action="{{ url_for('superadmin.economy_update_course_reward_overrides', course_id=course.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row g-2">
+                      <div class="col-md-2">
+                        <label class="form-label">Speaking base</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_base_override" value="{{ '' if course.speaking_base_override is none else course.speaking_base_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Relevance</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_relevance_bonus_override" value="{{ '' if course.speaking_relevance_bonus_override is none else course.speaking_relevance_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Progress</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_progress_bonus_override" value="{{ '' if course.speaking_progress_bonus_override is none else course.speaking_progress_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Good score</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_good_bonus_override" value="{{ '' if course.speaking_good_bonus_override is none else course.speaking_good_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Strong score</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_strong_bonus_override" value="{{ '' if course.speaking_strong_bonus_override is none else course.speaking_strong_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Full-length</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_full_length_bonus_override" value="{{ '' if course.speaking_full_length_bonus_override is none else course.speaking_full_length_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">First try</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="speaking_first_try_bonus_override" value="{{ '' if course.speaking_first_try_bonus_override is none else course.speaking_first_try_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Lesson base</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="lesson_base_override" value="{{ '' if course.lesson_base_override is none else course.lesson_base_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Lesson mid</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="lesson_accuracy_mid_bonus_override" value="{{ '' if course.lesson_accuracy_mid_bonus_override is none else course.lesson_accuracy_mid_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Lesson high</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="lesson_accuracy_high_bonus_override" value="{{ '' if course.lesson_accuracy_high_bonus_override is none else course.lesson_accuracy_high_bonus_override }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Boss reward</label>
+                        <input class="form-control form-control-sm" type="number" min="0" name="boss_reward_override" value="{{ '' if course.boss_reward_override is none else course.boss_reward_override }}">
+                      </div>
+                      <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary btn-sm w-100">Save overrides</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            {% else %}
+              <div class="col-12 text-muted">No courses available for reward overrides.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Active Boss Levels</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            {% for row in boss_levels %}
+              <div class="col-12">
+                <div class="border rounded-4 p-3">
+                  <div class="d-flex justify-content-between gap-3">
+                    <div>
+                      <div class="fw-semibold">{{ row.title }}</div>
+                      <div class="small text-muted">{{ row.course.title }}</div>
+                    </div>
+                    <span class="badge {% if row.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if row.is_active else 'Paused' }}</span>
+                  </div>
+                  <div class="small text-muted mt-2">Reward {{ row.reward_coins }} coins • Unlock {{ row.unlock_completion_percent }}% • Min accuracy {{ row.min_accuracy }}%</div>
+                </div>
+              </div>
+            {% else %}
+              <div class="col-12"><div class="text-muted">No boss levels yet.</div></div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Recent Coin Redemptions</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead><tr><th class="ps-3">Student</th><th>Course</th><th>Coins</th><th class="pe-3">Time</th></tr></thead>
+              <tbody>
+                {% for row in redemptions %}
+                  <tr>
+                    <td class="ps-3">{{ row.student.full_name if row.student else row.student_id }}</td>
+                    <td>{{ row.course.title if row.course else row.course_id }}</td>
+                    <td>{{ row.coins_spent }}</td>
+                    <td class="pe-3 small text-muted">{{ row.created_at.strftime('%d %b %Y %I:%M %p') }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="text-center text-muted py-4">No redemptions yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Weekly Leaders</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead><tr><th class="ps-3">Rank</th><th>Student</th><th class="pe-3 text-end">Coins</th></tr></thead>
+              <tbody>
+                {% for row in weekly_leaders %}
+                  <tr><td class="ps-3">#{{ row.rank }}</td><td>{{ row.display_name }}</td><td class="pe-3 text-end">{{ row.coins_earned }}</td></tr>
+                {% else %}
+                  <tr><td colspan="3" class="text-muted text-center py-4">No weekly data.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Monthly Leaders</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead><tr><th class="ps-3">Rank</th><th>Student</th><th class="pe-3 text-end">Coins</th></tr></thead>
+              <tbody>
+                {% for row in monthly_leaders %}
+                  <tr><td class="ps-3">#{{ row.rank }}</td><td>{{ row.display_name }}</td><td class="pe-3 text-end">{{ row.coins_earned }}</td></tr>
+                {% else %}
+                  <tr><td colspan="3" class="text-muted text-center py-4">No monthly data.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Leaderboard Student Control</h5>
+          <div class="small text-muted mt-1">Admins and SuperAdmins are excluded automatically. Use this panel to hide or show students on the leaderboard.</div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-3">Student</th>
+                  <th>Username</th>
+                  <th>Wallet</th>
+                  <th>Leaderboard</th>
+                  <th class="pe-3">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for student in leaderboard_students %}
+                  <tr>
+                    <td class="ps-3">
+                      <div class="fw-semibold">{{ student.full_name }}</div>
+                      <div class="small text-muted">Student account</div>
+                    </td>
+                    <td>{{ student.username }}</td>
+                    <td>{{ student.coin_balance or 0 }} coins</td>
+                    <td>
+                      <span class="badge {% if student.show_on_leaderboard %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+                        {{ 'Visible' if student.show_on_leaderboard else 'Hidden' }}
+                      </span>
+                    </td>
+                    <td class="pe-3">
+                      <form class="d-flex gap-2" method="post" action="{{ url_for('superadmin.economy_update_leaderboard_student', student_id=student.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <select class="form-select form-select-sm" name="show_on_leaderboard">
+                          <option value="1" {% if student.show_on_leaderboard %}selected{% endif %}>Show</option>
+                          <option value="0" {% if not student.show_on_leaderboard %}selected{% endif %}>Hide</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm">Save</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="5" class="text-center text-muted py-4">No student accounts found.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Reward Policy Matrix</h5>
+          <div class="small text-muted mt-1">Stable reward ranges now live in the economy service and drive lesson plus speaking rewards.</div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-3">Difficulty</th>
+                  <th>Speaking Session</th>
+                  <th>Lesson Complete</th>
+                  <th>Suggested Boss Reward</th>
+                  <th class="pe-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in reward_guide %}
+                  <tr>
+                    <td class="ps-3 fw-semibold">{{ row.label }}</td>
+                    <td>{{ row.speaking_min }} to {{ row.speaking_max }}</td>
+                    <td>{{ row.lesson_base }} / {{ row.lesson_mid }} / {{ row.lesson_high }}</td>
+                    <td>{{ row.boss_reward }}+</td>
+                    <td class="pe-3 small text-muted">Lesson uses accuracy tiers. Speaking uses quality, relevance, answer length, and first-try completion.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Streak Reward Ladder</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            {% for row in streak_milestones %}
+              <div class="col-12">
+                <div class="border rounded-4 p-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-semibold">{{ row.days }} days</div>
+                    <div class="small text-muted">Milestone reward</div>
+                  </div>
+                  <span class="badge text-bg-warning text-dark">{{ row.coins }} coins</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+.writing-workspace-textarea {
+    min-height: 420px;
+    resize: vertical;
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+
+  .workspace-stats {
+    margin-top: 0.5rem;
+  }
+
+  .workspace-stat-box {
+    min-width: 130px;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .workspace-stat-label {
+    font-size: 0.8rem;
+    color: #b8b8c7;
+    margin-bottom: 0.15rem;
+  }
+
+  .workspace-stat-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+  }

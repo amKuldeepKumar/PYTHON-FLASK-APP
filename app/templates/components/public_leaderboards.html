@@ -1,0 +1,114 @@
+<section class="premium-leaderboard-section py-5">
+  <div class="container">
+    <div class="premium-leaderboard-hero">
+      <div>
+        <div class="premium-leaderboard-kicker">Hall Of Champions</div>
+        <h2 class="premium-leaderboard-title">Top coin earners this week and month</h2>
+        <p class="premium-leaderboard-copy">Students climb the front-page board by learning consistently, winning momentum, and clearing more work.</p>
+      </div>
+      <a href="{{ url_for('main.courses') }}" class="premium-leaderboard-cta">Explore Courses</a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <article class="leaderboard-panel">
+          <div class="leaderboard-panel__head">
+            <div>
+              <div class="leaderboard-panel__eyebrow">Weekly Crown</div>
+              <h3 class="leaderboard-panel__title">This Week's Standouts</h3>
+            </div>
+            <span class="leaderboard-panel__chip">Live</span>
+          </div>
+
+          <div class="leaderboard-list">
+            {% for row in weekly_leaders %}
+              {% if row.rank == 1 %}
+                {% set rank_label = 'Champion' %}
+                {% set rank_class = 'is-champion' %}
+                {% set rank_note = 'Leads the weekly board' %}
+              {% elif row.rank == 2 %}
+                {% set rank_label = 'Elite' %}
+                {% set rank_class = 'is-elite' %}
+                {% set rank_note = 'Strong pursuit position' %}
+              {% elif row.rank == 3 %}
+                {% set rank_label = 'Rising Star' %}
+                {% set rank_class = 'is-rising' %}
+                {% set rank_note = 'Climbing with momentum' %}
+              {% else %}
+                {% set rank_label = 'Contender' %}
+                {% set rank_class = 'is-contender' %}
+                {% set rank_note = 'Still in the race' %}
+              {% endif %}
+              <div class="leaderboard-entry {{ rank_class }}">
+                <div class="leaderboard-entry__rank">#{{ row.rank }}</div>
+                <div class="leaderboard-entry__body">
+                  <div class="leaderboard-entry__topline">
+                    <div class="leaderboard-entry__name">{{ row.display_name }}</div>
+                    <span class="leaderboard-entry__tag">{{ rank_label }}</span>
+                  </div>
+                  <div class="leaderboard-entry__meta">{{ rank_note }}</div>
+                </div>
+                <div class="leaderboard-entry__score">
+                  <strong>{{ row.coins_earned }}</strong>
+                  <span>coins</span>
+                </div>
+              </div>
+            {% else %}
+              <div class="leaderboard-empty">No weekly leaderboard activity yet.</div>
+            {% endfor %}
+          </div>
+        </article>
+      </div>
+
+      <div class="col-lg-6">
+        <article class="leaderboard-panel">
+          <div class="leaderboard-panel__head">
+            <div>
+              <div class="leaderboard-panel__eyebrow">Monthly Prestige</div>
+              <h3 class="leaderboard-panel__title">This Month's Leaders</h3>
+            </div>
+            <span class="leaderboard-panel__chip">Featured</span>
+          </div>
+
+          <div class="leaderboard-list">
+            {% for row in monthly_leaders %}
+              {% if row.rank == 1 %}
+                {% set rank_label = 'Champion' %}
+                {% set rank_class = 'is-champion' %}
+                {% set rank_note = 'Owns the monthly throne' %}
+              {% elif row.rank == 2 %}
+                {% set rank_label = 'Elite' %}
+                {% set rank_class = 'is-elite' %}
+                {% set rank_note = 'Premium performance band' %}
+              {% elif row.rank == 3 %}
+                {% set rank_label = 'Rising Star' %}
+                {% set rank_class = 'is-rising' %}
+                {% set rank_note = 'Breaking into the spotlight' %}
+              {% else %}
+                {% set rank_label = 'Contender' %}
+                {% set rank_class = 'is-contender' %}
+                {% set rank_note = 'Building the climb' %}
+              {% endif %}
+              <div class="leaderboard-entry {{ rank_class }}">
+                <div class="leaderboard-entry__rank">#{{ row.rank }}</div>
+                <div class="leaderboard-entry__body">
+                  <div class="leaderboard-entry__topline">
+                    <div class="leaderboard-entry__name">{{ row.display_name }}</div>
+                    <span class="leaderboard-entry__tag">{{ rank_label }}</span>
+                  </div>
+                  <div class="leaderboard-entry__meta">{{ rank_note }}</div>
+                </div>
+                <div class="leaderboard-entry__score">
+                  <strong>{{ row.coins_earned }}</strong>
+                  <span>coins</span>
+                </div>
+              </div>
+            {% else %}
+              <div class="leaderboard-empty">No monthly leaderboard activity yet.</div>
+            {% endfor %}
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" data-theme="{{ active_theme_mode | default('dark') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ meta_title or (seo_settings.site_name if seo_settings else 'Fluencify') }}{% endblock %}</title>
+  <meta name="description" content="{{ meta_description or (seo_settings.default_meta_description if seo_settings else '') }}">
+  {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('theme.tokens_css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/components.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/layouts.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-fx.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-fonts.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/alphabet-background.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-stack.css') }}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+  <link href="{{ url_for('theme.overrides_css') }}" rel="stylesheet">
+  {% if seo_settings and seo_settings.custom_json_ld %}<script type="application/ld+json">{{ seo_settings.custom_json_ld | safe }}</script>{% endif %}
+  {% if page_json_ld is defined and page_json_ld %}<script type="application/ld+json">{{ page_json_ld | safe }}</script>{% endif %}
+  <style>
+    .site-announcement{background:rgba(255,255,255,.06);border-bottom:1px solid var(--border);font-size:.92rem}
+    .site-footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));}
+    .site-footer-grid{
+  display: grid;
+  grid-template-columns: repeat(var(--footer-columns, 4), minmax(0,1fr));
+  gap: 1.25rem;
+}
+    .site-footer-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:1.15rem 1.1rem;height:100%}
+    .site-footer-logo{max-height:44px;width:auto;display:block;margin-bottom:.75rem}
+    .site-footer-title{font-weight:800;margin-bottom:.9rem;color:var(--heading-text)}
+    .site-footer-links{list-style:none;padding:0;margin:0}
+    .site-footer-links li+li{margin-top:.55rem}
+    .site-footer-links a,.site-social-link{color:var(--text);text-decoration:none;opacity:.88}
+    .site-footer-links a:hover,.site-social-link:hover{opacity:1}
+    .site-social-wrap{display:flex;flex-wrap:wrap;gap:.55rem}
+    .site-social-link,.site-social-disabled{width:40px;height:40px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:rgba(255,255,255,.04)}
+    .site-social-disabled{opacity:.35;cursor:not-allowed}
+    .site-footer-copy{color:var(--muted)}
+    @media (max-width:991.98px){.site-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media (max-width:575.98px){.site-footer-grid{grid-template-columns:1fr;}}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body 
+  class="public-theme lang-{{ current_language }}{% if active_theme and active_theme.header_sticky_enabled %} has-sticky-header{% endif %}"
+  style="--footer-columns: {{ site_shell.footer_columns or 4 }};"
+>
+  {% if seo_settings and seo_settings.body_start_html %}{{ seo_settings.body_start_html|safe }}{% endif %}
+  {% from "layout/macros.html" import flash_messages %}
+  {% if seo_settings and seo_settings.header_announcement_enabled and seo_settings.header_announcement_text %}<div class="site-announcement text-center py-2">{{ seo_settings.header_announcement_text }}</div>{% endif %}
+  {% include "layout/_header.html" %}
+  {{ flash_messages() }}
+  <main class="pb-4">{% block content %}{% endblock %}</main>
+  {% set widgets = site_shell.footer_widgets if site_shell and site_shell.footer_widgets else [] %}
+  <footer class="site-footer py-5">
+    <div class="container">
+      {% if widgets %}
+        <div class="site-footer-grid">
+          {% for widget in widgets %}
+            {% set requested_span = widget.span if widget.span is defined else 1 %}
+            {% set span = requested_span if requested_span and requested_span > 0 else 1 %}
+            <div style="grid-column: span {{ [span, site_shell.footer_columns or 4] | min }};">
+              <div class="site-footer-card">
+                {% if loop.first and seo_settings and seo_settings.footer_logo_url %}<img class="site-footer-logo" src="{{ seo_settings.footer_logo_url }}" alt="{{ seo_settings.site_name or 'Fluencify' }}">{% endif %}
+                {% if widget.title %}<div class="site-footer-title">{{ widget.title }}</div>{% endif %}
+                {% if widget.type == 'links' and widget.items %}
+                  <ul class="site-footer-links small">{% for item in widget.items %}<li><a href="{{ item.url or '#' }}">{{ item.label }}</a></li>{% endfor %}</ul>
+                {% elif widget.type == 'social' and widget.items %}
+                  <div class="site-social-wrap">
+                    {% for item in widget.items %}
+                      {% set platform = (item.platform or item.label or '') | lower %}
+                      {% set url = item.url or '' %}
+                      {% if 'facebook' in platform %}{% set icon = 'fa-brands fa-facebook-f' %}
+                      {% elif 'instagram' in platform %}{% set icon = 'fa-brands fa-instagram' %}
+                      {% elif 'youtube' in platform %}{% set icon = 'fa-brands fa-youtube' %}
+                      {% elif 'linkedin' in platform %}{% set icon = 'fa-brands fa-linkedin-in' %}
+                      {% elif 'twitter' in platform or platform == 'x' or 'x.com' in url %}{% set icon = 'fa-brands fa-x-twitter' %}
+                      {% elif 'whatsapp' in platform %}{% set icon = 'fa-brands fa-whatsapp' %}
+                      {% elif 'telegram' in platform %}{% set icon = 'fa-brands fa-telegram' %}
+                      {% else %}{% set icon = 'fa-solid fa-link' %}{% endif %}
+                      {% if url %}
+                        <a class="site-social-link" href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ item.label or item.platform }}"><i class="{{ icon }}"></i></a>
+                      {% else %}
+                        <span class="site-social-disabled" aria-hidden="true"><i class="{{ icon }}"></i></span>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% elif widget.type == 'contact' and widget.items %}
+                  <ul class="site-footer-links small">{% for item in widget.items %}<li><span class="fw-semibold">{{ item.label }}:</span> {{ item.value }}</li>{% endfor %}</ul>
+                {% elif widget.type == 'hours' and widget.items %}
+                  <ul class="site-footer-links small">{% for item in widget.items %}<li><span class="fw-semibold">{{ item.label }}</span> — {{ item.value }}</li>{% endfor %}</ul>
+                {% else %}
+                  <div class="small site-footer-copy">{{ widget.text or widget.content or '' }}</div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="small site-footer-copy mt-4">{{ seo_settings.footer_copyright if seo_settings and seo_settings.footer_copyright else '© 2026 Fluencify AI' }}</div>
+    </div>
+  </footer>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/browser-notifications.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/phase18-platform-stability.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/alphabet-background.js') }}"></script>
+  {% block scripts %}{% endblock %}
+  {% if seo_settings and seo_settings.whatsapp_enabled and seo_settings.whatsapp_number and not current_user.is_authenticated %}
+    <a class="wa-float wa-float-public" href="{{ url_for('main.whatsapp_redirect', source=request.path) }}" target="_blank" rel="noopener" aria-label="{{ seo_settings.whatsapp_button_text or 'Need Help? WhatsApp' }}">
+      <span class="wa-icon"><i class="fa-brands fa-whatsapp"></i></span>
+      <span class="wa-text d-none d-md-inline">{{ seo_settings.whatsapp_button_text or 'Need Help? WhatsApp' }}</span>
+    </a>
+  {% endif %}
+  {% if seo_settings and seo_settings.body_end_html %}{{ seo_settings.body_end_html | safe }}{% endif %}
+</body>
+</html>

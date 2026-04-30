@@ -1,0 +1,67 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Listening Practice • Fluencify{% endblock %}
+{% block page_title %}Listening Practice{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-listening-session.css') }}">{% endblock %}
+{% block content %}
+<div class="student-track-shell track-listening listening-shell">
+  <section class="listening-topbar track-hero">
+    <div>
+      <div class="listening-kicker">PHASE 10 • LISTENING CORE SYSTEM</div>
+      <h2 class="mb-2">{{ course.title }}</h2>
+      <div class="listening-top-copy">Listening topics, backend audio, caption control, replay rules, no-repeat protection, and answer input now live inside this course.</div>
+    </div>
+    <a class="surface-pill-btn" href="{{ url_for('student.course_detail', course_id=course.id) }}">Back to Course</a>
+  </section>
+
+  <div class="listening-metrics">
+    <div class="metric-card"><div class="metric-label">Track</div><div class="metric-value">Listening</div></div>
+    <div class="metric-card"><div class="metric-label">Topics</div><div class="metric-value">{{ total_lessons }}</div></div>
+    <div class="metric-card"><div class="metric-label">Replay rule</div><div class="metric-value">3 plays</div></div>
+    <div class="metric-card"><div class="metric-label">Control mode</div><div class="metric-value">Audio + Captions</div></div>
+  </div>
+
+  <section class="listening-board track-panel p-4">
+    <div class="listening-board-title track-section-kicker">AI Intelligence</div>
+    <article class="topic-card">
+      <div class="topic-card-top">
+        <div>
+          <div class="topic-kicker">Adaptive listening guidance</div>
+          <h3>{{ intelligence_track.action }}</h3>
+        </div>
+        <span class="topic-chip">{{ intelligence_track.confidence }}% confidence</span>
+      </div>
+      <div class="topic-meta">Current {{ intelligence_track.current_band }} • Recommended {{ intelligence_track.recommended_band }}</div>
+      <p>{{ intelligence_track.reason }} Tutor tip: {{ intelligence_track.tutor_tip }}</p>
+      <div class="topic-footer"><a class="surface-outline-btn" href="{{ url_for('student.ai_intelligence') }}">Open AI plan</a></div>
+    </article>
+  </section>
+
+  <section class="listening-board track-panel p-4">
+    <div class="listening-board-title track-section-kicker">Listening Topics</div>
+    <div class="topic-grid">
+      {% for row in lesson_rows %}
+        <article class="topic-card">
+          <div class="topic-card-top">
+            <div>
+              <div class="topic-kicker">Listening Topic • Level {{ row.level_number }}</div>
+              <h3>{{ row.topic_label }}</h3>
+            </div>
+            <span class="topic-chip">{{ row.question_count }} answers • {{ row.review_status }}</span>
+          </div>
+          <div class="topic-meta">{{ row.estimated_seconds }} sec • Replay limit {{ row.replay_limit }} • Caption toggle live • {% if row.has_ready_audio %}TTS ready{% else %}Uses lesson explanation{% endif %}</div>
+          <p>Listen to the audio first, then answer the questions in writing. The listening script stays hidden from the student view on this flow.</p>
+          <div class="topic-footer">
+            {% if row.cooldown %}
+              <button class="surface-outline-btn" type="button" disabled>Cooldown active</button>
+            {% else %}
+              <a class="surface-primary-btn" href="{{ url_for('student.course_listening_session', course_id=course.id, lesson_id=row.lesson.id) }}">Start Listening</a>
+            {% endif %}
+          </div>
+        </article>
+      {% else %}
+        <div class="topic-empty">No listening topics are available in this course yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

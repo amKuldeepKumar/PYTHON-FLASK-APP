@@ -1,0 +1,129 @@
+/* Global presentation layer for all roles. Keeps navigation, typography, and active theme transitions consistent. */
+:root {
+  --surface-soft: color-mix(in srgb, var(--surface) 88%, transparent);
+  --surface-strong: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, transparent);
+  --text-strong: var(--heading-text, var(--text));
+}
+
+html, body {
+  transition: background .25s ease, color .25s ease;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.public-theme main,
+.dashboard-content-wrap,
+.auth-card {
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-shell::before,
+body.public-theme::before,
+body.auth-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 14%, transparent), transparent 32%),
+    radial-gradient(circle at bottom left, color-mix(in srgb, var(--surface-2) 18%, transparent), transparent 28%);
+  opacity: .9;
+  z-index: 0;
+}
+
+.sidebar-shell,
+.topbar-panel,
+.auth-card,
+.card,
+.modal-content,
+.offcanvas,
+.dropdown-menu {
+  backdrop-filter: blur(clamp(4px, 1vw, 14px));
+}
+
+.brand-title,
+.topbar-page-title,
+.sidebar-user-name,
+.navbar-brand,
+.section-title,
+.page-title {
+  text-wrap: balance;
+}
+
+.btn,
+.badge,
+.topbar-kicker,
+.menu-heading,
+.metric-label {
+  letter-spacing: .01em;
+}
+
+.menu-link, .menu-parent, .menu-child, .topbar-panel, .sidebar-user, .auth-card, .card {
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.menu-link:hover, .menu-parent:hover, .menu-child:hover, .topbar-panel:hover, .sidebar-user:hover {
+  box-shadow: 0 14px 36px rgba(0,0,0,.12);
+}
+
+html[data-theme="light"] .sidebar-shell,
+html[data-theme="light"] .auth-card,
+html[data-theme="light"] .card,
+html[data-theme="light"] .topbar-panel {
+  box-shadow: 0 18px 48px rgba(15,23,42,.08);
+}
+
+html[data-theme="light"] .menu-link,
+html[data-theme="light"] .menu-parent,
+html[data-theme="light"] .menu-child {
+  color: color-mix(in srgb, var(--text) 96%, transparent);
+}
+
+.theme-inline-muted { color: var(--muted) !important; }
+.theme-inline-primary { color: var(--primary) !important; }
+.theme-pre-wrap { white-space: pre-wrap; }
+.theme-max-w-280 { max-width: 280px; }
+.theme-max-w-320 { max-width: 320px; }
+.theme-max-w-760 { max-width: 760px; }
+.theme-icon-xl { font-size: 42px; }
+.theme-surface-card { background: color-mix(in srgb, var(--surface) 94%, transparent) !important; border: 1px solid var(--border) !important; }
+.theme-progress-slim { height: 6px; }
+.theme-progress-md { height: 8px; }
+.theme-progress-lg { height: 10px; }
+.theme-progress-xl { height: 12px; }
+
+
+html, body, button, input, select, textarea {
+  font-family: var(--font-family, Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif) !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand-title,
+.topbar-page-title,
+.navbar-brand,
+.section-title,
+.page-title {
+  font-family: var(--heading-font-family, var(--font-family, Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif)) !important;
+}
+
+.badge,
+.menu-heading,
+.topbar-kicker,
+.code,
+pre,
+code,
+.mono {
+  font-family: var(--accent-font-family, JetBrains Mono, monospace) !important;
+}
+
+.topbar,
+.sidebar-shell,
+.public-theme .site-navbar,
+.public-theme .navbar,
+.public-theme footer {
+  transition: background .25s ease, border-color .25s ease, box-shadow .25s ease, color .25s ease;
+}

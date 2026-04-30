@@ -1,0 +1,97 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Institute Management • Fluencify{% endblock %}
+{% block page_title %}Institute Management{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-4 sa-studio">
+  <section class="sa-hero-panel">
+    <div class="sa-hero-grid">
+      <div>
+        <div class="sa-kicker">Organization Control</div>
+        <h1 class="sa-title">Manage institutes, principals, and learner structures from one view</h1>
+        <p class="sa-copy">This workspace lets SuperAdmin create institutes, monitor the academic ownership chain, and jump straight into the directory when a school needs attention.</p>
+        <div class="sa-pill-row">
+          <span class="sa-pill">{{ institutes|length }} institute rows</span>
+          <span class="sa-pill">{{ institutes|sum(attribute='student_count') if institutes else 0 }} students linked</span>
+          <span class="sa-pill">{{ institutes|sum(attribute='teacher_count') if institutes else 0 }} teachers tracked</span>
+        </div>
+      </div>
+      <div class="sa-stat-grid">
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Institutes</div>
+          <div class="sa-stat-value">{{ institutes|length }}</div>
+          <div class="sa-stat-note">Current organization records in the filtered list.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Sub Admins</div>
+          <div class="sa-stat-value">{{ institutes|sum(attribute='sub_admin_count') if institutes else 0 }}</div>
+          <div class="sa-stat-note">Operational staff assigned below principal admins.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Search Mode</div>
+          <div class="sa-stat-value">{{ 'Live' if q else 'All' }}</div>
+          <div class="sa-stat-note">Directory results update from the search field below.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sa-panel">
+      <div class="row g-4 align-items-start">
+        <div class="col-xl-7">
+          <form class="row g-3" method="get">
+            <div class="col-md-9"><input type="text" name="q" class="form-control" placeholder="Search institute or admin" value="{{ q or '' }}"></div>
+            <div class="col-md-3 d-grid"><button class="btn btn-primary">Search</button></div>
+          </form>
+        </div>
+        <div class="col-xl-5">
+          <div class="sa-grid-card h-100">
+            <div class="fw-semibold mb-1">Create Institute</div>
+            <div class="text-muted small mb-3">Create the institute and its principal/admin in one step.</div>
+            <form method="post" action="{{ url_for('superadmin.institutes_create') }}" class="row g-3">
+              {{ create_form.hidden_tag() }}
+              <input type="hidden" name="role" value="ADMIN">
+              <input type="hidden" name="parent_admin_id" value="0">
+              <div class="col-md-6">
+                <label class="form-label">Institute Name</label>
+                {{ create_form.organization_name(class="form-control", placeholder="Institute name") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Principal Name</label>
+                {{ create_form.full_name(class="form-control", placeholder="Principal / admin") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                {{ create_form.username(class="form-control", placeholder="principal username") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                {{ create_form.email(class="form-control", placeholder="principal@institute.com") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Password</label>
+                {{ create_form.password(class="form-control", placeholder="At least 6 characters") }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Confirm Password</label>
+                {{ create_form.confirm_password(class="form-control", placeholder="Repeat password") }}
+              </div>
+              <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="form-check form-switch mb-0">
+                  {{ create_form.is_active(class="form-check-input") }}
+                  <label class="form-check-label" for="{{ create_form.is_active.id }}">Active now</label>
+                </div>
+                <button class="btn btn-primary">Create Institute</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+  </section>
+  <section class="sa-table-panel">
+    <div class="sa-table-wrap table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Institute</th><th>Principal / Admin</th><th>Sub Admins</th><th>Teachers</th><th>Students</th><th class="text-end">Open</th></tr></thead><tbody>{% for row in institutes %}<tr><td><div class="fw-semibold">{{ row.name }}</div><div class="small text-muted">Institute record</div></td><td>{{ row.admin_name }}</td><td>{{ row.sub_admin_count }}</td><td>{{ row.teacher_count }}</td><td>{{ row.student_count }}</td><td class="text-end"><a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.directory', q=row.name, search_in='all') }}">View</a></td></tr>{% else %}<tr><td colspan="6" class="text-muted py-4">No institutes found.</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+</div>
+{% endblock %}

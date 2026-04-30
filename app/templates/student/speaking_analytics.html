@@ -1,0 +1,139 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Speaking Analytics • Fluencify{% endblock %}
+{% block page_title %}Speaking Analytics{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-speaking-analytics.css') }}">{% endblock %}
+
+{% block content %}
+{% set summary = analytics.summary %}
+<div class="d-grid gap-4">
+  <section class="analytics-hero p-4 p-lg-5">
+    <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+      <div>
+        <div class="small text-uppercase text-secondary mb-2">Phase 6E • Analytics & Progress</div>
+        <h2 class="fw-bold mb-2">Track your speaking growth clearly</h2>
+        <p class="text-secondary mb-0">See your score trend, time spent, total attempts, weak areas, and topic-by-topic progress from one place.</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-light" href="{{ url_for('student.speaking_home') }}"><i class="bi bi-mic-fill me-1"></i>Practice</a>
+        <a class="btn btn-outline-light" href="{{ url_for('student.speaking_history') }}"><i class="bi bi-clock-history me-1"></i>History</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-3">
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Completed sessions</div><div class="metric-value">{{ summary.sessions_completed or 0 }}</div><div class="small text-secondary mt-2">out of {{ summary.sessions_started or 0 }} started</div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Attempts count</div><div class="metric-value">{{ summary.attempts_count or 0 }}</div><div class="small text-secondary mt-2">all speaking submissions</div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Time spent</div><div class="metric-value">{{ summary.time_spent_text or '0s' }}</div><div class="small text-secondary mt-2">total speaking practice</div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Average score</div><div class="metric-value">{{ '%.1f'|format(summary.avg_score or 0) }}/10</div><div class="small text-secondary mt-2">Best {{ '%.1f'|format(summary.best_score or 0) }}/10</div></div></div>
+    <div class="col-12 col-md-6 col-xl-4"><div class="metric-card"><div class="metric-label">Score trend</div><div class="metric-value">{{ summary.score_trend or 'Not enough data' }}</div><div class="small text-secondary mt-2">Delta {{ '%+.1f'|format(summary.score_trend_delta or 0) }} points</div></div></div>
+    <div class="col-12 col-md-6 col-xl-4"><div class="metric-card"><div class="metric-label">Average relevance</div><div class="metric-value">{{ '%.1f'|format(summary.avg_relevance or 0) }}%</div><div class="small text-secondary mt-2">how closely answers matched prompts</div></div></div>
+    <div class="col-12 col-md-6 col-xl-4"><div class="metric-card"><div class="metric-label">Average words</div><div class="metric-value">{{ '%.1f'|format(summary.avg_words or 0) }}</div><div class="small text-secondary mt-2">response length per attempt</div></div></div>
+  </section>
+
+  <section class="row g-4">
+    <div class="col-12 col-xl-8">
+      <div class="analytics-card h-100">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div><h4 class="fw-bold mb-1">Score trend graph</h4><div class="small text-secondary">Each point shows one speaking attempt.</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="scoreTrendChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="analytics-card h-100">
+        <h4 class="fw-bold mb-1">Weak areas</h4>
+        <div class="small text-secondary mb-3">Topics that need more focus because score, relevance, or retry rate is weaker.</div>
+        {% if analytics.weak_areas %}
+          <div class="d-grid gap-2">
+            {% for item in analytics.weak_areas %}
+              <div class="topic-card">
+                <div class="fw-semibold mb-2">{{ item.label }}</div>
+                <div class="small text-secondary">Attempts {{ item.attempts }} • Score {{ '%.1f'|format(item.avg_score) }}/10 • Relevance {{ '%.0f'|format(item.avg_relevance) }}% • Retry {{ '%.0f'|format(item.retry_rate) }}%</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="topic-card">Great progress. No major weak area is visible yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-4">
+    <div class="col-12 col-xl-6">
+      <div class="analytics-card h-100">
+        <h4 class="fw-bold mb-1">Time spent graph</h4>
+        <div class="small text-secondary mb-3">Minutes spent and words spoken across attempts.</div>
+        <div class="chart-wrap"><canvas id="timeSpentChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-6">
+      <div class="analytics-card h-100">
+        <h4 class="fw-bold mb-1">Topic progress graph</h4>
+        <div class="small text-secondary mb-3">Average score and total attempts by topic.</div>
+        <div class="chart-wrap"><canvas id="topicChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="analytics-card">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h4 class="fw-bold mb-1">Topic performance</h4>
+        <div class="small text-secondary">Use this to see where you are already strong and where more practice is needed.</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="weak-pill">Weak areas <strong>{{ summary.weak_areas_count or 0 }}</strong></span>
+      </div>
+    </div>
+    <div class="topic-grid">
+      {% for item in analytics.topic_cards %}
+        <div class="topic-card">
+          <div class="fw-semibold mb-2">{{ item.label }}</div>
+          <div class="small text-secondary">Attempts {{ item.attempts }}</div>
+          <div class="small text-secondary">Average score {{ '%.1f'|format(item.avg_score) }}/10</div>
+          <div class="small text-secondary">Average relevance {{ '%.0f'|format(item.avg_relevance) }}%</div>
+          <div class="small text-secondary">Retry rate {{ '%.0f'|format(item.retry_rate) }}%</div>
+        </div>
+      {% else %}
+        <div class="topic-card">No speaking attempts yet. Start one speaking session to build your analytics.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="analytics-card">
+    <h4 class="fw-bold mb-1">Recent attempt summary</h4>
+    <div class="small text-secondary mb-3">The latest speaking evaluations with score, relevance, and feedback.</div>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Date</th><th>Topic</th><th>Prompt</th><th>Score</th><th>Relevance</th><th>Duration</th><th>Feedback</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in analytics.recent_attempts %}
+          <tr>
+            <td>{{ row.date_label }}</td>
+            <td>{{ row.topic }}</td>
+            <td>{{ row.prompt }}</td>
+            <td>{{ '%.1f'|format(row.score) }}/10</td>
+            <td>{{ '%.0f'|format(row.relevance) }}%</td>
+            <td>{{ row.duration_text }}</td>
+            <td>{{ row.feedback }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="text-center text-secondary py-4">No attempts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='shared/js/student-speaking-analytics.js') }}"></script>
+{% endblock %}

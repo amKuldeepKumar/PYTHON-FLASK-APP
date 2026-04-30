@@ -1,0 +1,75 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Chat Moderation • Fluencify{% endblock %}
+{% block page_title %}Chat Moderation{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="mb-1">Blocked Student Chat Review</h1>
+      <p class="text-secondary mb-0">Review messages blocked by the student safety layer for abuse, drugs, weapons, illegal activity, and off-platform contact sharing.</p>
+    </div>
+    <span class="badge text-bg-secondary">{{ rows|length }} events</span>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Blocked Categories</th>
+              <th>Attempted Message</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ row.sender.full_name if row.sender else row.sender_student_id }}</div>
+                  <div class="small text-muted">{{ row.created_at.strftime('%d %b %Y %I:%M %p') }}</div>
+                </td>
+                <td>{{ row.course.title if row.course else row.course_id }}</td>
+                <td>
+                  {% for item in (row.flagged_categories or '').split(',') if item %}
+                    <span class="badge text-bg-warning me-1 mb-1">{{ item.replace('_', ' ') }}</span>
+                  {% endfor %}
+                </td>
+                <td style="max-width: 340px;">
+                  <div class="small">{{ row.attempted_body }}</div>
+                  {% if row.moderator_notes %}
+                    <div class="small text-muted mt-2">Notes: {{ row.moderator_notes }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge {% if row.status == 'blocked' %}text-bg-danger{% elif row.status == 'reviewed' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ row.status|title }}</span>
+                </td>
+                <td class="text-end" style="min-width: 260px;">
+                  <form method="post" class="d-flex flex-column gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="event_id" value="{{ row.id }}">
+                    <select class="form-select form-select-sm" name="moderation_status">
+                      <option value="reviewed">Reviewed</option>
+                      <option value="dismissed">Dismissed</option>
+                    </select>
+                    <input class="form-control form-control-sm" type="text" name="moderator_notes" placeholder="Optional notes">
+                    <button class="btn btn-outline-primary btn-sm">Save Review</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-secondary">No blocked student chat events right now.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "layout/auth_base.html" %}
+{% block title %}Register • Fluencify{% endblock %}
+
+{% block content %}
+<div class="text-center mb-3">
+  <div class="mb-2 theme-icon-xl"><i class="bi bi-mortarboard-fill"></i></div>
+  <h3 class="fw-bold mb-1 theme-inline-primary">Welcome to Fluencify</h3>
+  <div class="small theme-inline-muted">Create your student account</div>
+</div>
+
+<h5 class="fw-bold mb-3">Sign Up</h5>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+
+  <div class="mb-3 input-icon-group">
+    <i class="bi bi-person input-icon-left"></i>
+    {{ form.username(class="form-control auth-input", placeholder="Username") }}
+  </div>
+
+  <div class="mb-3 input-icon-group">
+    <i class="bi bi-envelope input-icon-left"></i>
+    {{ form.email(class="form-control auth-input", placeholder="Email") }}
+  </div>
+
+  <div class="mb-3 input-icon-group password-field-wrap">
+    <i class="bi bi-key input-icon-left"></i>
+    {{ form.password(class="form-control auth-input", placeholder="Password", id="regPassword") }}
+    <button
+      type="button"
+      class="input-toggle-btn"
+      data-password-toggle="#regPassword"
+      data-password-icon="#toggleRegPasswordIcon"
+      aria-label="Show password"
+      aria-pressed="false"
+    >
+      <i class="bi bi-eye-slash" id="toggleRegPasswordIcon"></i>
+    </button>
+  </div>
+
+  <div class="mb-3 input-icon-group password-field-wrap">
+    <i class="bi bi-key input-icon-left"></i>
+    {{ form.confirm_password(class="form-control auth-input", placeholder="Confirm Password", id="regConfirmPassword") }}
+    <button
+      type="button"
+      class="input-toggle-btn"
+      data-password-toggle="#regConfirmPassword"
+      data-password-icon="#toggleRegConfirmPasswordIcon"
+      aria-label="Show password"
+      aria-pressed="false"
+    >
+      <i class="bi bi-eye-slash" id="toggleRegConfirmPasswordIcon"></i>
+    </button>
+  </div>
+
+  <div class="small mb-3">
+    Already registered? <a href="{{ url_for('auth.login') }}">Login</a>
+  </div>
+
+  <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill">Register</button>
+</form>
+{% endblock %}

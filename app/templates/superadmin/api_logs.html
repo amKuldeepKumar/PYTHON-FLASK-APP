@@ -1,0 +1,53 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}API Logs • Fluencify{% endblock %}
+{% block page_title %}API Logs{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Rows</div><div class="fs-3 fw-bold">{{ summary.total_rows }}</div></div></div>
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Successful</div><div class="fs-3 fw-bold">{{ summary.ok_rows }}</div></div></div>
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Tracked Tokens</div><div class="fs-3 fw-bold">{{ summary.tracked_tokens }}</div></div></div>
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Estimated Cost</div><div class="fs-3 fw-bold">{{ '%.4f'|format(summary.estimated_cost) }}</div></div></div>
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Cache Hits</div><div class="fs-3 fw-bold">{{ summary.cache_hits }}</div></div></div>
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Fallback Runs</div><div class="fs-3 fw-bold">{{ summary.fallback_runs }}</div></div></div>
+    <div class="col-md-3"><div class="surface rounded-4 p-3 h-100"><div class="text-secondary small">Blocked / Errors</div><div class="fs-3 fw-bold">{{ summary.blocked_rows }}</div></div></div>
+  </div>
+<div class="surface rounded-4 p-3">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Task</th>
+          <th>Provider</th>
+          <th>Status</th>
+          <th>Tokens</th>
+          <th>Latency</th>
+          <th>Cost</th>
+          <th>Cache</th>
+          <th>Fallback</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td class="text-secondary">{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '' }}</td>
+            <td class="fw-semibold">{{ r.task_key }}</td>
+            <td>{{ r.provider_name or 'System' }}</td>
+            <td>{% if r.status == 'success' %}<span class="badge text-bg-success">OK</span>{% else %}<span class="badge text-bg-danger">{{ r.status|title }}</span>{% endif %}</td>
+            <td class="text-secondary">{{ r.total_tokens or 0 }}</td>
+            <td class="text-secondary">{{ r.latency_ms or 0 }} ms</td>
+            <td class="text-secondary">{{ '%.4f'|format((r.estimated_cost or 0)|float) }}</td>
+            <td class="text-secondary">{{ 'Yes' if r.cache_hit else 'No' }}</td>
+            <td class="text-secondary">{{ 'Yes' if r.fallback_used else 'No' }}</td>
+            <td class="text-secondary">{{ r.error_message or r.redacted_response or '' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

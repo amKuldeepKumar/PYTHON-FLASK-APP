@@ -1,0 +1,67 @@
+/* Final workspace bridge to keep student + superadmin screens on the same theme language. */
+
+.dashboard-theme .card,
+.dashboard-theme .portal-card,
+.dashboard-theme .glass-card,
+.dashboard-theme .admin-studio-card,
+.dashboard-theme .theme-preset-card,
+.dashboard-theme .reading-panel,
+.dashboard-theme .reading-topic-card,
+.dashboard-theme .analytics-card,
+.dashboard-theme .metric-box,
+.dashboard-theme .topic-card,
+.dashboard-theme .s-panel,
+.dashboard-theme .superadmin-course-shell .card,
+.dashboard-theme .superadmin-dashboard-shell .card {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--surface) 98%, transparent),
+    color-mix(in srgb, var(--surface-2) 96%, transparent)) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border)) !important;
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--shadow) 14%, transparent) !important;
+}
+
+.dashboard-theme .btn-primary {
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.dashboard-theme .btn-outline-secondary,
+.dashboard-theme .btn-outline-light {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+}
+
+.dashboard-theme .btn-outline-secondary:hover,
+.dashboard-theme .btn-outline-light:hover {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border)) !important;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface)) !important;
+}
+
+.dashboard-theme .form-control,
+.dashboard-theme .form-select,
+.dashboard-theme textarea,
+.dashboard-theme input[type='text'],
+.dashboard-theme input[type='email'],
+.dashboard-theme input[type='number'],
+.dashboard-theme input[type='search'] {
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.dashboard-theme .form-control:focus,
+.dashboard-theme .form-select:focus,
+.dashboard-theme textarea:focus,
+.dashboard-theme input:focus {
+  border-color: color-mix(in srgb, var(--primary) 26%, var(--border)) !important;
+  box-shadow: 0 0 0 .22rem color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+
+.dashboard-theme .badge {
+  border-radius: 999px;
+}
+
+.dashboard-theme .topbar,
+.dashboard-theme .sidebar-shell {
+  backdrop-filter: blur(18px);
+}

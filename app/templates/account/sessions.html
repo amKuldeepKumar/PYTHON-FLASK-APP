@@ -1,0 +1,78 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Sessions • Fluencify{% endblock %}
+{% block page_title %}Sessions{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="mb-1">Active device sessions</h5>
+      <div class="text-secondary small">Review the devices signed into your account and revoke anything unfamiliar.</div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if current_user.is_superadmin %}
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.access_activity') }}">Open Access Activity</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('account.revoke_other_sessions_route') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-outline-danger btn-sm" type="submit">Revoke Other Sessions</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Browser / OS</th>
+              <th>IP</th>
+              <th>Location</th>
+              <th>Last Seen</th>
+              <th>Started</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in sessions %}
+              <tr>
+                <td>
+                  {% if row.revoked_at %}
+                    <span class="badge bg-secondary">Revoked</span>
+                  {% elif current_session and row.id == current_session.id %}
+                    <span class="badge bg-success">Current</span>
+                  {% else %}
+                    <span class="badge bg-info">Active</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="fw-semibold">{{ row.browser or 'Unknown' }} • {{ row.os_name or 'Unknown' }}</div>
+                  <div class="text-secondary small">{{ row.device_type or 'Device' }}</div>
+                </td>
+                <td>{{ row.ip_address or '—' }}</td>
+                <td>{{ row.location_display }}</td>
+                <td>{{ row.last_seen_at.strftime('%d %b %Y %I:%M %p') if row.last_seen_at else '—' }}</td>
+                <td>{{ row.created_at.strftime('%d %b %Y %I:%M %p') if row.created_at else '—' }}</td>
+                <td>
+                  {% if not row.revoked_at and (not current_session or row.id != current_session.id) %}
+                    <form method="post" action="{{ url_for('account.revoke_session', session_id=row.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-outline-danger btn-sm" type="submit">Revoke</button>
+                    </form>
+                  {% else %}
+                    <span class="text-secondary small">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="text-secondary">No sessions found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

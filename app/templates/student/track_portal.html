@@ -1,0 +1,61 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ track_label }} • Fluencify{% endblock %}
+{% block page_title %}{{ track_label }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-track-portal.css') }}">{% endblock %}
+{% block content %}
+<div class="track-portal-shell">
+  <section class="track-hero">
+    <div class="track-eyebrow">Student track portal</div>
+    <h2 class="track-title">{{ track_label }} in the same theme flow</h2>
+    <p class="track-subtitle">{{ subtitle }}</p>
+    <div class="track-actions">
+      <a class="btn btn-outline-light" href="{{ url_for('student.dashboard') }}"><i class="bi bi-grid me-1"></i>Dashboard</a>
+      <a class="btn btn-outline-light" href="{{ url_for('student.my_courses') }}"><i class="bi bi-journal-check me-1"></i>My Courses</a>
+      <a class="btn btn-light" href="{{ url_for('student.course_library') }}"><i class="bi bi-collection-play me-1"></i>Course Library</a>
+    </div>
+  </section>
+
+  <section class="track-summary-grid">
+    <article class="track-summary-card"><div class="track-summary-label">Enrolled {{ track_label }} courses</div><div class="track-summary-value">{{ courses|length }}</div></article>
+    <article class="track-summary-card"><div class="track-summary-label">Published courses visible</div><div class="track-summary-value">{{ published_count }}</div></article>
+    <article class="track-summary-card"><div class="track-summary-label">Track type</div><div class="track-summary-value" style="font-size:1.15rem;">{{ track_key|title }}</div></article>
+    <article class="track-summary-card"><div class="track-summary-label">Portal mode</div><div class="track-summary-value" style="font-size:1.15rem;">{{ 'Launcher' if courses else 'Guided' }}</div></article>
+  </section>
+
+  {% if courses %}
+  <section class="track-grid">
+    {% for item in courses %}
+    {% set course = item.course %}
+    <article class="track-course-card">
+      <div class="track-course-top">
+        <div>
+          <h3 class="track-course-title">{{ course.title }}</h3>
+          <div class="track-course-meta">{{ course.difficulty or 'General level' }} • {{ 'Premium' if course.is_premium else 'Free' }}</div>
+        </div>
+        <span class="badge text-bg-success">LIVE</span>
+      </div>
+      <p class="track-course-desc">{{ course.description or fallback_description }}</p>
+      <div class="track-course-stats">
+        <div class="track-stat"><span>Levels</span><strong>{{ course.max_level or 1 }}</strong></div>
+        <div class="track-stat"><span>Access</span><strong>{{ course.access_type|title if course.access_type else 'Free' }}</strong></div>
+        <div class="track-stat"><span>Status</span><strong>{{ course.status|title if course.status else 'Live' }}</strong></div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-light" href="{{ url_for(open_endpoint, course_id=course.id) }}">Open {{ track_label }}</a>
+        <a class="btn btn-outline-light" href="{{ url_for('student.course_detail', course_id=course.id) }}">Course detail</a>
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+  {% else %}
+  <section class="track-empty-card">
+    <h3 class="track-course-title mb-2">No enrolled {{ track_label|lower }} course yet</h3>
+    <p class="track-empty-note mb-3">Your direct {{ request.path }} route now stays inside the student theme. Enroll in a {{ track_label|lower }} course from Course Library, then this page will open it here.</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-light" href="{{ url_for('student.course_library') }}">Browse courses</a>
+      <a class="btn btn-outline-light" href="{{ url_for('student.my_courses') }}">Open my courses</a>
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

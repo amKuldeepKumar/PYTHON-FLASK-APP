@@ -1,0 +1,157 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Speaking Prompts • Superadmin{% endblock %}
+{% block page_title %}Speaking Prompts{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-3"><div><h4 class="mb-1">Create Prompt</h4><div class="small text-secondary">Course-scoped prompt manager for Phase 1 + 2 + 3.</div></div>{% if selected_course %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.course_detail', course_id=selected_course.id, tab='questions-prompts') }}">Back to Course</a>{% else %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.courses') }}">Back to Courses</a>{% endif %}</div>
+
+        <form method="get" class="row g-3 mb-3"><div class="col-12"><label class="form-label">Select Speaking Course</label><select class="form-select" name="course_id" onchange="this.form.submit()"><option value="">All speaking courses</option>{% for course in course_choices %}<option value="{{ course.id }}" {% if selected_course_id == course.id %}selected{% endif %}>{{ course.title }}</option>{% endfor %}</select></div></form>
+
+        <form method="post" class="row g-3">
+          <input type="hidden" name="course_id" value="{{ selected_course_id or  }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-12">
+            <label class="form-label">Topic</label>
+            <select class="form-select" name="topic_id" required>
+              <option value="">Choose topic</option>
+              {% for topic in topics %}
+                <option value="{{ topic.id }}" {% if selected_topic_id == topic.id %}selected{% endif %}>{{ topic.title }}{% if topic.course %} — {{ topic.course.title }}{% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Prompt title</label>
+            <input type="text" class="form-control" name="title" required>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Prompt text</label>
+            <textarea class="form-control" name="prompt_text" rows="4" required></textarea>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Instruction text</label>
+            <textarea class="form-control" name="instruction_text" rows="3"></textarea>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Difficulty</label>
+            <select class="form-select" name="difficulty">
+              {% for level in level_choices %}
+                <option value="{{ level }}">{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Target time (sec)</label>
+            <input type="number" class="form-control" name="target_duration_seconds" value="60" min="15">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Min time (sec)</label>
+            <input type="number" class="form-control" name="min_duration_seconds" value="30" min="5">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Max time (sec)</label>
+            <input type="number" class="form-control" name="max_duration_seconds" value="90" min="15">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Display order</label>
+            <input type="number" class="form-control" name="display_order" value="0" min="0">
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_active" id="promptActive" checked>
+              <label class="form-check-label" for="promptActive">Active</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-grid">
+            <button type="submit" class="btn btn-primary">Create Prompt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Prompt Library</h4>
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('superadmin.speaking_topics', course_id=selected_course_id or 0) }}">Back to Topics</a>
+        </div>
+
+        <form method="get" class="mb-3"><input type="hidden" name="course_id" value="{{ selected_course_id or "" }}">
+          <label class="form-label">Filter by topic</label>
+          <select class="form-select" name="topic_id" onchange="this.form.submit()">
+            <option value="">All topics</option>
+            {% for topic in topics %}
+              <option value="{{ topic.id }}" {% if selected_topic_id == topic.id %}selected{% endif %}>{{ topic.title }}{% if topic.course %} — {{ topic.course.title }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Prompt</th>
+                <th>Topic</th>
+                <th>Timing</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for prompt in prompts %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ prompt.title }}</div>
+                  <div class="small text-secondary mt-1">{{ prompt.prompt_text }}</div>
+                  {% if prompt.instruction_text %}
+                    <div class="small text-secondary mt-1">Instruction: {{ prompt.instruction_text }}</div>
+                  {% endif %}
+                </td>
+                <td>{{ prompt.topic.title }}</td>
+                <td>T: {{ prompt.effective_target_duration }}s • Min: {{ prompt.effective_min_duration }}s • Max: {{ prompt.effective_max_duration }}s</td>
+                <td>
+                  {% if prompt.is_active %}
+                    <span class="badge text-bg-success">Active</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Inactive</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <form method="post" action="{{ url_for('superadmin.speaking_prompt_toggle', prompt_id=prompt.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="course_id" value="{{ selected_course_id or (prompt.topic.course_id if prompt.topic else 0) or 0 }}">
+                    <button class="btn btn-sm {% if prompt.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" type="submit">
+                      {% if prompt.is_active %}Disable{% else %}Enable{% endif %}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="text-center py-4 text-secondary">No prompts yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

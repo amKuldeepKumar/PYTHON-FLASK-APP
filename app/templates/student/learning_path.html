@@ -1,0 +1,97 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}My Learning Path • Fluencify{% endblock %}
+{% block page_title %}My Learning Path{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-recommendation-pro.css') }}">
+{% endblock %}
+{% block content %}
+<div class="rec-page">
+  <section class="rec-hero">
+    <div class="rec-hero__copy">
+      <span class="rec-kicker"><i class="bi bi-signpost-split"></i> Recommended Learning Path</span>
+      <h1>Your next best course path</h1>
+      <p>{% if learning_path_payload.has_result %}{{ learning_path_payload.summary }}{% else %}Take the placement test once. Fluencify will suggest your best starting course, next course, and later path automatically.{% endif %}</p>
+      <div class="rec-actions">
+        <a class="btn rec-btn rec-btn--primary" href="{{ url_for('student.placement_test') }}">{{ 'Retake Placement Test' if learning_path_payload.has_result else 'Take Placement Test' }}</a>
+        <a class="btn rec-btn rec-btn--light" href="{{ url_for('student.course_library') }}">Open Course Library</a>
+      </div>
+    </div>
+    <div class="rec-score-card">
+      <div class="rec-score-card__icon"><i class="bi bi-compass"></i></div>
+      <div class="rec-mini-grid">
+        <div><span>Level</span><strong>{{ learning_path_payload.current_level or 'Pending' }}</strong></div>
+        <div><span>Goal</span><strong>{{ learning_path_payload.goal_label or 'Choose goal' }}</strong></div>
+        <div><span>Focus</span><strong>{{ learning_path_payload.focus_skill_label or 'Skill focus' }}</strong></div>
+      </div>
+    </div>
+  </section>
+
+  {% if not learning_path_payload.has_result %}
+  <section class="rec-empty-card">
+    <div class="rec-empty-card__icon"><i class="bi bi-clipboard-check"></i></div>
+    <div>
+      <span class="rec-kicker">Not ready yet</span>
+      <h2>Take the test first</h2>
+      <p>After completion, this page will become your personalized learning roadmap.</p>
+    </div>
+    <a class="btn rec-btn rec-btn--primary" href="{{ url_for('student.placement_test') }}">Start Test</a>
+  </section>
+  {% else %}
+  <section class="rec-overview-grid">
+    <article class="rec-info-card">
+      <span class="rec-card-icon rec-card-icon--green"><i class="bi bi-stars"></i></span>
+      <h3>Strong areas</h3>
+      <p>{{ learning_path_payload.strong_labels|join(', ') if learning_path_payload.strong_labels else 'Your strong skills will appear here.' }}</p>
+    </article>
+    <article class="rec-info-card">
+      <span class="rec-card-icon rec-card-icon--orange"><i class="bi bi-tools"></i></span>
+      <h3>Repair first</h3>
+      <p>{{ learning_path_payload.weak_labels|join(', ') if learning_path_payload.weak_labels else 'Your weak areas will appear here.' }}</p>
+    </article>
+    <article class="rec-info-card">
+      <span class="rec-card-icon rec-card-icon--blue"><i class="bi bi-lightning-charge"></i></span>
+      <h3>Fit summary</h3>
+      <p>{{ learning_path_payload.fit_summary or 'Your best path is ready.' }}</p>
+    </article>
+  </section>
+
+  <section class="rec-section-card">
+    <div class="rec-section-head">
+      <div><span class="rec-kicker">Step plan</span><h2>Start now, next, and later</h2></div>
+    </div>
+    <div class="rec-step-grid">
+      {% for step in learning_path_payload.path_steps %}
+      <article class="rec-step-card">
+        <span class="rec-step-number">{{ step.step }}</span>
+        <small>{{ step.stage }}</small>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.reason }}</p>
+      </article>
+      {% else %}
+      <article class="rec-step-card"><span class="rec-step-number">1</span><small>Start</small><h3>Open your best course</h3><p>Use your recommended course list below to continue.</p></article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if recommended_cards %}
+  <section class="rec-section-card">
+    <div class="rec-section-head">
+      <div><span class="rec-kicker">Course matches</span><h2>Recommended courses for your path</h2></div>
+      <a href="{{ url_for('student.course_library') }}" class="btn rec-btn rec-btn--light">View All</a>
+    </div>
+    <div class="rec-course-grid">
+      {% for card in recommended_cards %}
+      {% set fit = card.recommendation_fit %}
+      <article class="rec-course-card">
+        <div class="rec-course-card__top"><span>{{ fit.label }}</span><strong>{{ fit.score }}% fit</strong></div>
+        <h3>{{ card.course_title }}</h3>
+        <p>{{ fit.reason }}</p>
+        <a href="{{ card.target_url if card.is_enrolled else url_for('student.course_detail', course_id=card.course_id) }}" class="btn rec-btn rec-btn--primary">{{ 'Continue' if card.is_enrolled else 'View Course' }}</a>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

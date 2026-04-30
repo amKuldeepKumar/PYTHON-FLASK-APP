@@ -1,0 +1,48 @@
+LANGUAGE_ENGINE = [
+
+# 🌍 GLOBAL
+{"code":"en","name":"English","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"zh","name":"Chinese","script":"Han","font":"Noto Sans SC","tts":"google","stt":"google"},
+{"code":"es","name":"Spanish","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"hi","name":"Hindi","script":"Devanagari","font":"Noto Sans Devanagari","tts":"azure","stt":"azure"},
+{"code":"ar","name":"Arabic","script":"Arabic","font":"Noto Sans Arabic","tts":"azure","stt":"azure"},
+{"code":"bn","name":"Bengali","script":"Bengali","font":"Noto Sans Bengali","tts":"google","stt":"google"},
+{"code":"pt","name":"Portuguese","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"ru","name":"Russian","script":"Cyrillic","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"ja","name":"Japanese","script":"Kana/Kanji","font":"Noto Sans JP","tts":"google","stt":"google"},
+{"code":"de","name":"German","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"fr","name":"French","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"ko","name":"Korean","script":"Hangul","font":"Noto Sans KR","tts":"google","stt":"google"},
+{"code":"tr","name":"Turkish","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"it","name":"Italian","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"vi","name":"Vietnamese","script":"Latin","font":"Noto Sans","tts":"google","stt":"google"},
+{"code":"fa","name":"Persian","script":"Arabic","font":"Noto Sans Arabic","tts":"azure","stt":"azure"},
+{"code":"th","name":"Thai","script":"Thai","font":"Noto Sans Thai","tts":"google","stt":"google"},
+{"code":"id","name":"Indonesian","script":"Latin","font":"Noto Sans","tts":"google","stt":"google"},
+{"code":"ms","name":"Malay","script":"Latin","font":"Noto Sans","tts":"google","stt":"google"},
+{"code":"sw","name":"Swahili","script":"Latin","font":"Noto Sans","tts":"google","stt":"google"},
+
+# 🇮🇳 INDIA
+{"code":"pa","name":"Punjabi","script":"Gurmukhi","font":"Noto Sans Gurmukhi","tts":"azure","stt":"azure"},
+{"code":"gu","name":"Gujarati","script":"Gujarati","font":"Noto Sans Gujarati","tts":"google","stt":"google"},
+{"code":"mr","name":"Marathi","script":"Devanagari","font":"Noto Sans Devanagari","tts":"azure","stt":"azure"},
+{"code":"ta","name":"Tamil","script":"Tamil","font":"Noto Sans Tamil","tts":"google","stt":"google"},
+{"code":"te","name":"Telugu","script":"Telugu","font":"Noto Sans Telugu","tts":"google","stt":"google"},
+{"code":"kn","name":"Kannada","script":"Kannada","font":"Noto Sans Kannada","tts":"google","stt":"google"},
+{"code":"ml","name":"Malayalam","script":"Malayalam","font":"Noto Sans Malayalam","tts":"google","stt":"google"},
+{"code":"or","name":"Odia","script":"Odia","font":"Noto Sans Oriya","tts":"google","stt":"google"},
+{"code":"as","name":"Assamese","script":"Bengali","font":"Noto Sans Bengali","tts":"google","stt":"google"},
+{"code":"ur","name":"Urdu","script":"Arabic","font":"Noto Sans Arabic","tts":"azure","stt":"azure"},
+
+# 🌏 EXPANSION
+{"code":"nl","name":"Dutch","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"pl","name":"Polish","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"uk","name":"Ukrainian","script":"Cyrillic","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"el","name":"Greek","script":"Greek","font":"Noto Sans","tts":"google","stt":"google"},
+{"code":"he","name":"Hebrew","script":"Hebrew","font":"Noto Sans Hebrew","tts":"google","stt":"google"},
+{"code":"cs","name":"Czech","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"ro","name":"Romanian","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"hu","name":"Hungarian","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+{"code":"tl","name":"Filipino","script":"Latin","font":"Noto Sans","tts":"google","stt":"google"},
+{"code":"da","name":"Danish","script":"Latin","font":"Noto Sans","tts":"azure","stt":"azure"},
+]

@@ -1,0 +1,304 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Learner Ops • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Learner Ops{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-learner-ops.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 sa-studio learner-ops-page">
+  <section class="sa-hero-panel ops-hero">
+    <div class="sa-hero-grid">
+      <div>
+        <div class="sa-kicker">SuperAdmin Revenue and Access Intelligence</div>
+        <h1 class="sa-title">Track every learner, purchase, login, and ownership path from one live workspace</h1>
+        <p class="sa-copy mb-0">Follow which course was bought by which student, who is active right now, which admin or institute owns the learner, where they logged in from, which browser they used, and when they were last seen.</p>
+        <div class="sa-action-row mt-4">
+          <a class="btn btn-primary" href="{{ url_for('superadmin.dashboard') }}">Back to Overview</a>
+          <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.access_activity') }}">Open Access Activity</a>
+          <a class="btn btn-outline-secondary" href="{{ url_for('main.home') }}">Open Website</a>
+        </div>
+      </div>
+      <div class="sa-stat-grid">
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Visible Learner Rows</div>
+          <div class="sa-stat-value">{{ report.summary.sales_count }}</div>
+          <div class="sa-stat-note">Enrollment or purchase records in the current filter window.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Paid Orders</div>
+          <div class="sa-stat-value">{{ report.summary.paid_count }}</div>
+          <div class="sa-stat-note">Rows backed by a paid payment record.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Paid Revenue</div>
+          <div class="sa-stat-value">{{ '%.2f'|format(report.summary.paid_revenue) }}</div>
+          <div class="sa-stat-note">Current filtered paid value snapshot.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Live Students</div>
+          <div class="sa-stat-value">{{ report.summary.live_students }}</div>
+          <div class="sa-stat-note">Students active in the most recent 30-minute window.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Visible Access Rows</div>
+          <div class="sa-stat-value">{{ report.summary.access_count }}</div>
+          <div class="sa-stat-note">Recent sessions matching the selected filters.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Coverage</div>
+          <div class="sa-stat-value">{{ report.summary.cities_seen }} / {{ report.summary.browsers_seen }}</div>
+          <div class="sa-stat-note">Cities and browsers visible inside the current result set.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sa-panel ops-filter-panel">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+      <div>
+        <div class="sa-kicker">Live Filters</div>
+        <h2 class="h4 mb-1">Cut the report by course, student, admin, institute, browser, city, and date range</h2>
+        <div class="sa-muted">Use student or email keywords in search. Admin and institute filters work together so you can isolate one organization or compare direct learners against managed learners.</div>
+      </div>
+    </div>
+
+    <form class="row g-3" method="get">
+      <div class="col-12 col-xl-4">
+        <label class="form-label">Student, email, or course keyword</label>
+        <input class="form-control" type="text" name="q" value="{{ current_query }}" placeholder="Search learner or course">
+      </div>
+      <div class="col-12 col-md-6 col-xl-2">
+        <label class="form-label">Role</label>
+        <select class="form-select" name="role">
+          {% for value, label in role_choices %}
+          <option value="{{ value }}" {% if value == current_role %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <label class="form-label">Course</label>
+        <select class="form-select" name="course_id">
+          {% for value, label in course_choices %}
+          <option value="{{ value }}" {% if value == current_course_id %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <label class="form-label">Admin / Institute owner</label>
+        <select class="form-select" name="admin_id">
+          {% for value, label in admin_choices %}
+          <option value="{{ value }}" {% if value == current_admin_id %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4 col-xl-2">
+        <label class="form-label">Institute name</label>
+        <input class="form-control" type="text" name="institute" value="{{ current_institute }}" placeholder="Institute">
+      </div>
+      <div class="col-12 col-md-4 col-xl-2">
+        <label class="form-label">City</label>
+        <input class="form-control" type="text" name="city" value="{{ current_city }}" placeholder="City">
+      </div>
+      <div class="col-12 col-md-4 col-xl-2">
+        <label class="form-label">Browser</label>
+        <input class="form-control" type="text" name="browser" value="{{ current_browser }}" placeholder="Chrome, Edge, Firefox">
+      </div>
+      <div class="col-12 col-md-6 col-xl-2">
+        <label class="form-label">From date</label>
+        <input class="form-control" type="date" name="date_from" value="{{ current_date_from }}">
+      </div>
+      <div class="col-12 col-md-6 col-xl-2">
+        <label class="form-label">To date</label>
+        <input class="form-control" type="date" name="date_to" value="{{ current_date_to }}">
+      </div>
+      <div class="col-12 col-xl-4 d-flex align-items-end">
+        <div class="sa-action-row w-100">
+          <button class="btn btn-primary" type="submit">Apply Filters</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.learner_ops') }}">Reset</a>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-12 col-xxl-8">
+      <section class="sa-table-panel">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+          <div>
+            <div class="sa-kicker">Commerce View</div>
+            <h2 class="h4 mb-1">Student purchases and enrollments</h2>
+            <div class="sa-muted">This table answers who bought what, who enrolled without payment, and who owns the student relationship.</div>
+          </div>
+          <span class="sa-pill">{{ report.sales_rows|length }} visible rows</span>
+        </div>
+
+        <div class="sa-table-wrap">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 ops-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Course</th>
+                  <th>Purchase</th>
+                  <th>Ownership</th>
+                  <th>Location</th>
+                  <th>Device</th>
+                  <th>Activity</th>
+                  <th>Access</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in report.sales_rows %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ row.student_name }}</div>
+                    <div class="small text-muted">{{ row.student_email }}</div>
+                  </td>
+                  <td>
+                    <div class="fw-semibold">{{ row.course_title }}</div>
+                    <div class="small text-muted">{{ row.track_type }}</div>
+                  </td>
+                  <td>
+                    <div class="ops-badge-row">
+                      <span class="badge {% if row.purchase_state == 'Paid' %}text-bg-success{% else %}text-bg-light{% endif %}">{{ row.purchase_state }}</span>
+                      <span class="badge text-bg-light">{{ row.purchase_scope }}</span>
+                    </div>
+                    <div class="small text-muted mt-1">
+                      {% if row.amount %}
+                      {{ row.currency_code }} {{ '%.2f'|format(row.amount) }}
+                      {% else %}
+                      No payment row
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="fw-semibold">{{ row.owner_name }}</div>
+                    <div class="small text-muted">{{ row.owner_label }} • {{ row.institute_name }}</div>
+                    <div class="small text-muted">Teacher: {{ row.teacher_name }}</div>
+                  </td>
+                  <td>
+                    <div>{{ row.location_display }}</div>
+                    <div class="small text-muted">{{ row.city or 'City unavailable' }}</div>
+                  </td>
+                  <td>
+                    <div>{{ row.browser_display }}</div>
+                  </td>
+                  <td>
+                    <div class="small">{{ row.activity_at.strftime('%Y-%m-%d %H:%M') if row.activity_at else 'Unknown' }}</div>
+                    <div class="small text-muted">Login: {{ row.login_at.strftime('%Y-%m-%d %H:%M') if row.login_at else '—' }}</div>
+                    <div class="small text-muted">Last seen: {{ row.last_seen_at.strftime('%Y-%m-%d %H:%M') if row.last_seen_at else '—' }}</div>
+                  </td>
+                  <td>
+                    <span class="badge {% if row.is_live %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Live now' if row.is_live else 'Offline' }}</span>
+                    <div class="small text-muted mt-1">Logout: {{ row.logout_at.strftime('%Y-%m-%d %H:%M') if row.logout_at else 'Not recorded' }}</div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="8">
+                    <div class="sa-empty">No learner purchase or enrollment rows matched the current filter set.</div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-12 col-xxl-4">
+      <section class="sa-panel h-100">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+          <div>
+            <div class="sa-kicker">Access View</div>
+            <h2 class="h4 mb-1">Current and recent platform access</h2>
+            <div class="sa-muted">This answers who is operating right now, from where, using which browser, and under which hierarchy.</div>
+          </div>
+          <span class="sa-pill">{{ report.access_rows|length }} rows</span>
+        </div>
+
+        <div class="ops-access-stack">
+          {% for row in report.access_rows %}
+          <article class="ops-access-card">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+              <div>
+                <div class="fw-semibold">{{ row.user_name }}</div>
+                <div class="small text-muted">{{ row.role_label }} • {{ row.user_email }}</div>
+              </div>
+              <span class="badge {% if row.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if row.is_active else 'Recent' }}</span>
+            </div>
+            <div class="ops-meta-list">
+              <div><strong>Course:</strong> {{ row.course_title }}</div>
+              <div><strong>Owner:</strong> {{ row.owner_name }}</div>
+              <div><strong>Institute:</strong> {{ row.institute_name }}</div>
+              <div><strong>Teacher:</strong> {{ row.teacher_name }}</div>
+              <div><strong>Location:</strong> {{ row.location_display }}</div>
+              <div><strong>IP:</strong> {{ row.ip_address }}</div>
+              <div><strong>Browser:</strong> {{ row.browser_display }}</div>
+              <div><strong>Login:</strong> {{ row.login_at.strftime('%Y-%m-%d %H:%M') if row.login_at else '—' }}</div>
+              <div><strong>Last seen:</strong> {{ row.last_seen_at.strftime('%Y-%m-%d %H:%M') if row.last_seen_at else '—' }}</div>
+              <div><strong>Logout:</strong> {{ row.logout_at.strftime('%Y-%m-%d %H:%M') if row.logout_at else 'Not recorded' }}</div>
+            </div>
+          </article>
+          {% else %}
+          <div class="sa-empty">No recent access rows matched the current filter set.</div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="sa-table-panel">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+      <div>
+        <div class="sa-kicker">Course Intelligence</div>
+        <h2 class="h4 mb-1">Which courses are converting and staying active</h2>
+        <div class="sa-muted">Use this table to compare paid demand, live learners, and whether enrollments are coming through institutes or direct independent learners.</div>
+      </div>
+      <span class="sa-pill">{{ report.course_rows|length }} courses</span>
+    </div>
+
+    <div class="sa-table-wrap">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 ops-table">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Track</th>
+              <th>Paid</th>
+              <th>Total Enrollments</th>
+              <th>Live Learners</th>
+              <th>Institute / Admin</th>
+              <th>Independent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in report.course_rows %}
+            <tr>
+              <td class="fw-semibold">{{ row.course_title }}</td>
+              <td>{{ row.track_type }}</td>
+              <td>{{ row.paid_count }}</td>
+              <td>{{ row.enrollment_count }}</td>
+              <td>{{ row.active_count }}</td>
+              <td>{{ row.org_count }}</td>
+              <td>{{ row.independent_count }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7">
+                <div class="sa-empty">No course intelligence rows are available for this filter set yet.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

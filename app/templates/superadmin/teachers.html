@@ -1,0 +1,16 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Teacher Management • Fluencify{% endblock %}
+{% block page_title %}Teacher Management{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm"><div class="card-header bg-transparent"><h5 class="mb-0">Quick Create Teacher</h5></div><div class="card-body"><form method="post" action="{{ url_for('superadmin.admins_create') }}">{{ create_form.hidden_tag() }}{{ create_form.role(type='hidden', value='TEACHER') }}<div class="mb-3"><label class="form-label">{{ create_form.full_name.label.text }}</label>{{ create_form.full_name(class='form-control') }}</div><div class="mb-3"><label class="form-label">{{ create_form.username.label.text }}</label>{{ create_form.username(class='form-control') }}</div><div class="mb-3"><label class="form-label">{{ create_form.email.label.text }}</label>{{ create_form.email(class='form-control') }}</div><div class="mb-3"><label class="form-label">{{ create_form.parent_admin_id.label.text }}</label>{{ create_form.parent_admin_id(class='form-select') }}</div><div class="mb-3"><label class="form-label">{{ create_form.password.label.text }}</label>{{ create_form.password(class='form-control') }}</div><div class="mb-3"><label class="form-label">{{ create_form.confirm_password.label.text }}</label>{{ create_form.confirm_password(class='form-control') }}</div>{{ create_form.submit(class='btn btn-primary w-100', value='Create Teacher') }}</form></div></div>
+    </div>
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body"><form class="row g-3" method="get"><div class="col-md-5"><input type="text" name="q" class="form-control" placeholder="Search teacher" value="{{ q or '' }}"></div><div class="col-md-5"><select name="parent_admin_id" class="form-select">{% for id,label in parent_admin_choices %}<option value="{{ id }}" {% if parent_admin_id==id %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><div class="col-md-2 d-grid"><button class="btn btn-outline-light">Search</button></div></form></div></div>
+      <div class="card border-0 shadow-sm"><div class="card-body"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Teacher</th><th>Institute</th><th>Students</th><th>Status</th><th class="text-end">Action</th></tr></thead><tbody>{% for teacher in teachers %}<tr><td><div class="fw-semibold">{{ teacher.full_name }}</div><div class="small text-muted">{{ teacher.email }}</div></td><td>{{ teacher.organization_name or '—' }}</td><td>{{ teacher.assigned_students.count() if teacher.assigned_students is defined else 0 }}</td><td><span class="badge {% if teacher.is_active %}bg-success{% else %}bg-secondary{% endif %}">{{ 'Active' if teacher.is_active else 'Inactive' }}</span></td><td class="text-end"><a href="{{ url_for('superadmin.admins_edit', admin_id=teacher.id) }}" class="btn btn-sm btn-outline-light">Edit</a></td></tr>{% else %}<tr><td colspan="5" class="text-muted">No teachers found.</td></tr>{% endfor %}</tbody></table></div></div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

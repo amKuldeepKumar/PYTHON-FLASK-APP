@@ -1,0 +1,268 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ course.title }} • Fluencify{% endblock %}
+{% block page_title %}Course Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+            <div>
+              <div class="small text-muted">Enrolled Course</div>
+              <h2 class="fw-bold mb-1">{{ course.title }}</h2>
+              <div class="small text-muted">{{ course.language_code|upper }} • {{ course.track_type|title }}</div>
+            </div>
+            <span class="badge bg-primary">{{ course.status|title }}</span>
+          </div>
+
+          <p class="text-muted">{{ course.description or 'This course now has the LMS backbone, lesson flow, progress tracking, and answer logging ready for guided practice.' }}</p>
+
+          <div class="row g-2 text-center mb-3">
+            <div class="col-4">
+              <div class="border rounded p-2">
+                <div class="fw-bold">{{ course.lesson_count }}</div>
+                <div class="small text-muted">Lessons</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2">
+                <div class="fw-bold">{{ course.question_count }}</div>
+                <div class="small text-muted">Questions</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2">
+                <div class="fw-bold">{{ course_completion }}%</div>
+                <div class="small text-muted">Progress</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress mb-2" style="height: 12px;">
+            <div class="progress-bar" style="width: {{ course_completion }}%"></div>
+          </div>
+          {% if placement_result %}
+            <div class="border rounded-4 p-3 mt-3">
+              <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                <div>
+                  <div class="small text-muted text-uppercase">Placement Fit</div>
+                  <div class="fw-semibold">{{ course_fit.label }}</div>
+                </div>
+                <span class="badge bg-primary">{{ course_fit.score }}% fit</span>
+              </div>
+              <div class="small text-muted">{{ course_fit.reason }}</div>
+              <div class="small text-info mt-2">Recommended level: {{ placement_result.recommended_level|title }}{% if placement_result.goal %} • Goal: {{ placement_result.goal|replace('_', ' ')|title }}{% endif %}</div>
+            </div>
+          {% else %}
+            <div class="border rounded-4 p-3 mt-3">
+              <div class="small text-muted text-uppercase">Placement Fit</div>
+              <div class="small text-muted">Take the placement test to see whether this course is best for you right now.</div>
+              <a href="{{ url_for('student.placement_test') }}" class="btn btn-outline-primary btn-sm mt-2">Take Placement Test</a>
+            </div>
+          {% endif %}
+          <div class="small text-muted">Enrollment active since {{ enrollment.enrolled_at.strftime('%d %b %Y') }}</div>
+          <div class="small text-info mt-1">Current plan: {% if enrollment.has_full_access() %}Full course unlocked{% else %}Unlocked levels: {% for item in enrollment.purchased_levels %}{{ item }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</div>
+
+          {% if reward_overview is defined and reward_overview %}
+            <div class="border rounded-4 p-3 mt-3">
+              <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                <div>
+                  <div class="small text-muted text-uppercase">Course Coin Overview</div>
+                  <div class="fw-semibold">{{ reward_overview.label }} reward band</div>
+                </div>
+                <span class="badge bg-warning text-dark">{{ reward_overview.label }}</span>
+              </div>
+              <div class="row g-2 small">
+                <div class="col-6">
+                  <div class="border rounded p-2">
+                    <div class="text-muted">Speaking</div>
+                    <div class="fw-semibold">{{ reward_overview.speaking_min }} to {{ reward_overview.speaking_max }} coins</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="border rounded p-2">
+                    <div class="text-muted">Lesson</div>
+                    <div class="fw-semibold">{{ reward_overview.lesson_base }} to {{ reward_overview.lesson_high }} coins</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="border rounded p-2">
+                    <div class="text-muted">Boss Level</div>
+                    <div class="fw-semibold">{{ reward_overview.boss_reward }}+ coins possible</div>
+                  </div>
+                </div>
+                {% if course.allow_coin_redemption and course.coin_redemption_price %}
+                <div class="col-12">
+                  <div class="border rounded p-2">
+                    <div class="text-muted">Coin Unlock Value</div>
+                    <div class="fw-semibold">{{ course.coin_redemption_price }} coins for full unlock</div>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">Course Workspace</h3>
+            <div class="d-flex gap-2">
+              {% if course.community_enabled %}
+                <a href="{{ url_for('student.chat', course_id=course.id) }}" class="btn btn-outline-primary btn-sm">Open Community Chat</a>
+              {% endif %}
+              <a href="{{ url_for('student.my_courses') }}" class="btn btn-outline-secondary btn-sm">Back to My Courses</a>
+            </div>
+          </div>
+
+          {% if workspace_cards %}
+          <div class="row g-3 mb-4">
+            {% for item in workspace_cards %}
+            <div class="col-md-6 col-xl-3">
+              <div class="border rounded-4 p-3 h-100">
+                <div class="small text-muted text-uppercase mb-1">{{ item.title }}</div>
+                <div class="fw-semibold mb-2">{{ item.headline }}</div>
+                <div class="small text-muted mb-3">{{ item.description }}</div>
+                <div class="small text-secondary mb-2">{{ item.count_label }}</div>
+                <a href="{{ item.href }}" class="{{ item.button_class }}">{{ item.button_label }}</a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% if linked_speaking_topics or linked_reading_passages or (linked_writing_tasks is defined and linked_writing_tasks) %}
+            <div class="row g-3 mb-4">
+              {% if linked_speaking_topics %}
+                <div class="col-lg-4">
+                  <div class="border rounded-4 p-3 h-100">
+                    <div class="fw-semibold mb-2">Linked Speaking Topics</div>
+                    <div class="small text-muted mb-2">These topics are available for this course workspace.</div>
+                    {% for topic in linked_speaking_topics[:5] %}
+                      <div class="small mb-1">• {{ topic.title }}{% if topic.active_prompt_count %} ({{ topic.active_prompt_count }} prompts){% endif %}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              {% if linked_reading_passages %}
+                <div class="col-lg-4">
+                  <div class="border rounded-4 p-3 h-100">
+                    <div class="fw-semibold mb-2">Linked Reading Passages</div>
+                    <div class="small text-muted mb-2">Published passages available inside this course workspace.</div>
+                    {% for passage in linked_reading_passages[:5] %}
+                      <div class="small mb-1">• {{ passage.title }} ({{ passage.word_count }} words)</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              {% if linked_writing_tasks is defined and linked_writing_tasks %}
+                <div class="col-lg-4">
+                  <div class="border rounded-4 p-3 h-100">
+                    <div class="fw-semibold mb-2">Linked Writing Tasks</div>
+                    <div class="small text-muted mb-2">Published writing tasks available inside this course workspace.</div>
+                    {% for task in linked_writing_tasks[:5] %}
+                      <div class="small mb-1">• {{ task.title }}{% if task.min_words %} (min {{ task.min_words }} words){% endif %}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if normalized_track_type == 'interview' %}
+            <div class="border rounded-4 p-4">
+              <div class="fw-bold fs-5 mb-2">AI Interview Flow</div>
+              <div class="text-muted mb-3">This course uses live one-to-one AI interview interaction instead of the normal lesson-by-lesson question screen.</div>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('student.course_interview_start', course_id=course.id) }}" class="btn btn-primary btn-sm">Open Interview Setup</a>
+                <a href="{{ url_for('student.course_interview_home', course_id=course.id) }}" class="btn btn-outline-secondary btn-sm">Interview Dashboard</a>
+              </div>
+            </div>
+          {% else %}
+          {% for level in course.levels %}
+            {% set level_number = level.sort_order or loop.index %}
+            {% set level_unlocked = enrollment.has_full_access() or (level_number in enrollment.purchased_levels) %}
+            <div class="border rounded-4 p-3 mb-3 {% if not level_unlocked %}opacity-75{% endif %}">
+              <div class="fw-bold fs-5 mb-1">{{ level.title }}{% if not level_unlocked %} <span class="badge bg-warning text-dark">Locked</span>{% endif %}</div>
+              {% if level.description %}<div class="text-muted small mb-3">{{ level.description }}</div>{% endif %}
+
+              {% for lesson in level.lessons %}
+                {% set lp = lesson_progress_map.get(lesson.id) %}
+                <div class="border rounded p-3 mb-2">
+                  {% set lesson_stats = None %}
+                  {% if course_breakdown is defined and course_breakdown %}
+                    {% for level_stats in course_breakdown.levels %}
+                      {% if level_stats.id == level.id %}
+                        {% for lesson_item in level_stats.lessons %}
+                          {% if lesson_item.lesson_id == lesson.id %}
+                            {% set lesson_stats = lesson_item %}
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                  <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                    <div>
+                      <div class="fw-semibold">{{ lesson.title }}</div>
+                      <div class="small text-muted">
+                        {{ lesson.lesson_type|title }} • {{ lesson.estimated_minutes }} min • {{ lesson.question_count }} questions
+                      </div>
+                      <div class="small text-muted mt-1">{{ lesson.explanation_text or 'Practice this lesson in order and build confidence through guided attempts.' }}</div>
+                    </div>
+                    <div class="text-lg-end">
+                      <div class="small text-muted mb-1">{{ (lp.completion_percent if lp else 0) }}% complete</div>
+                      {% if level_unlocked %}
+                      <a href="{{ url_for('student.lesson_entry', lesson_id=lesson.id) }}" class="btn btn-primary btn-sm">
+                        {% if lp and lp.completed_at %}Review Lesson{% elif lp %}Continue Lesson{% else %}Start Lesson{% endif %}
+                      </a>
+                      {% else %}
+                      <a href="{{ url_for('student.course_checkout', course_id=course.id, purchase_scope='single_level', level=level_number) }}" class="btn btn-outline-warning btn-sm">Unlock Level {{ level_number }}</a>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="progress mt-3" style="height: 8px;">
+                    <div class="progress-bar" style="width: {{ (lp.completion_percent if lp else 0) }}%"></div>
+                  </div>
+                  {% if lesson_stats and lesson_stats.chapters %}
+                    <div class="row g-2 mt-2 small">
+                      <div class="col-md-3"><div class="border rounded p-2"><div class="text-muted">Completed</div><div class="fw-semibold">{{ lesson_stats.completed_questions }}/{{ lesson_stats.total_questions }}</div></div></div>
+                      <div class="col-md-3"><div class="border rounded p-2"><div class="text-muted">Pending</div><div class="fw-semibold">{{ lesson_stats.pending_questions }}</div></div></div>
+                      <div class="col-md-3"><div class="border rounded p-2"><div class="text-muted">Skipped</div><div class="fw-semibold">{{ lesson_stats.skipped_questions }}</div></div></div>
+                      <div class="col-md-3"><div class="border rounded p-2"><div class="text-muted">Retried</div><div class="fw-semibold">{{ lesson_stats.retry_questions }}</div></div></div>
+                    </div>
+                    <div class="mt-3">
+                      {% for chapter in lesson_stats.chapters %}
+                        <div class="border rounded-3 p-2 mb-2 bg-light-subtle">
+                          <div class="d-flex justify-content-between small fw-semibold"><span>{{ chapter.title }}</span><span>{{ chapter.completion_percent }}%</span></div>
+                          <div class="progress mt-2" style="height: 6px;"><div class="progress-bar" style="width: {{ chapter.completion_percent }}%"></div></div>
+                          {% if chapter.subsections %}
+                            <div class="mt-2 small text-muted">
+                              {% for subsection in chapter.subsections %}
+                                <div>{{ subsection.title }} — {{ subsection.completed_questions }}/{{ subsection.total_questions }} complete{% if subsection.skipped_questions %}, {{ subsection.skipped_questions }} skipped{% endif %}{% if subsection.retry_questions %}, {{ subsection.retry_questions }} retried{% endif %}</div>
+                              {% endfor %}
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% else %}
+                <div class="text-muted small">No lessons created yet for this level.</div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-muted">This course has no levels yet.</div>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

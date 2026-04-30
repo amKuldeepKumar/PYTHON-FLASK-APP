@@ -1,0 +1,4 @@
+/* Consolidated shared theme override stack for public and auth layouts. */
+@import url("./theme-bridge-strong.css");
+@import url("./phase18-platform-polish.css");
+@import url("./theme-final-fix.css");

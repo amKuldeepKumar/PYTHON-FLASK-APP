@@ -1,0 +1,197 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Translation API • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Translation API{% endblock %}
+
+{% block content %}
+<div class="alert alert-info border-0 rounded-4 mb-4" role="alert">
+  <strong>AI Central Notice:</strong> This page is now treated as a focused editor. For the clean overall structure, use <a href="{{ url_for('superadmin.ai_central') }}" class="alert-link">AI Central</a> to view Text AI, Speech Services, and Translation together.
+</div>
+<div class="row g-4">
+  <div class="col-12 col-xl-8">
+    <div class="surface rounded-4 p-4 h-100">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <div class="text-uppercase small fw-semibold mb-2" style="color: var(--primary);">API & Integrations</div>
+          <h2 class="fw-bold mb-1">Translation Provider Registry</h2>
+          <div class="text-muted">Configure the API used for lesson translation, cache misses, and multilingual support across all enabled languages.</div>
+        </div>
+        <span class="badge {% if provider.is_enabled %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+          {% if provider.is_enabled %}ACTIVE{% else %}DISABLED{% endif %}
+        </span>
+      </div>
+
+      <form method="post" class="row g-3">
+        {{ form.hidden_tag() }}
+        <div class="col-md-6">
+          <label class="form-label">Provider Name</label>
+          {{ form.name(class="form-control") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Provider Type</label>
+          {{ form.provider_type(class="form-select") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">API Base URL</label>
+          {{ form.api_base_url(class="form-control", placeholder="https://api.example.com/v1") }}
+          <div class="form-text">For OpenAI-compatible providers, use the base URL ending in /v1.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">API Key</label>
+          {{ form.api_key(class="form-control", placeholder="Paste secure provider key") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Model / Service Name</label>
+          {{ form.model_name(class="form-control", placeholder="gpt-4.1-mini or provider model") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Source Language</label>
+          {{ form.source_language_code(class="form-control") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Credits Left</label>
+          {{ form.credits_remaining(class="form-control") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Credit Unit</label>
+          {{ form.credit_unit(class="form-control") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Cost per uncached request</label>
+          {{ form.per_request_cost(class="form-control") }}
+        </div>
+        <div class="col-md-6 d-flex align-items-center">
+          <div class="form-check form-switch me-4">
+            {{ form.is_enabled(class="form-check-input") }}
+            <label class="form-check-label" for="{{ form.is_enabled.id }}">Enable this provider</label>
+          </div>
+          <div class="form-check form-switch">
+            {{ form.supports_live_credit_check(class="form-check-input") }}
+            <label class="form-check-label" for="{{ form.supports_live_credit_check.id }}">Supports live credit sync</label>
+          </div>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+          {{ form.submit(class="btn btn-primary px-4") }}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="surface rounded-4 p-4 mb-4">
+      <div class="small text-uppercase fw-semibold mb-2" style="color: var(--primary);">Live Summary</div>
+      <div class="d-flex flex-column gap-3">
+        <div>
+          <div class="text-muted small">Active Provider</div>
+          <div class="fw-semibold">{{ provider.name or provider.provider_label }}</div>
+          <div class="small text-muted">{{ provider.provider_label }}</div>
+        </div>
+        <div>
+          <div class="text-muted small">Credits Left</div>
+          <div class="fw-bold fs-3">{{ '%.2f'|format(provider.credits_remaining or 0) }}</div>
+          <div class="small text-muted">{{ provider.credit_unit or 'credits' }}</div>
+        </div>
+        <div>
+          <div class="text-muted small">Last Credit Sync</div>
+          <div class="fw-semibold">{{ provider.last_credit_sync_at.strftime('%Y-%m-%d %H:%M') if provider.last_credit_sync_at else 'Not synced yet' }}</div>
+        </div>
+        <div>
+          <div class="text-muted small">Cache Entries</div>
+          <div class="fw-semibold">{{ cache_entries }}</div>
+        </div>
+        <div>
+          <div class="text-muted small">Last Error</div>
+          <div class="small {% if provider.last_error %}text-warning{% else %}text-muted{% endif %}">{{ provider.last_error or 'No provider errors logged.' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface rounded-4 p-4">
+      <div class="small text-uppercase fw-semibold mb-2" style="color: var(--primary);">How it works</div>
+      <ol class="small mb-0 ps-3" style="line-height:1.7; color: var(--text-secondary, #c7d2e6);">
+        <li>English content remains the master source.</li>
+        <li>Student selects any enabled support language.</li>
+        <li>The app checks the translation cache first.</li>
+        <li>If the translation is missing, the provider generates it once.</li>
+        <li>The result is saved and reused across all future requests.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="surface rounded-4 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-1">Translation Test</h5>
+          <div class="text-muted small">Use this to verify provider output and warm the database cache.</div>
+        </div>
+        <span class="badge text-bg-info">Cache-aware</span>
+      </div>
+      <form method="post" class="row g-3">
+        {{ test_form.hidden_tag() }}
+        <div class="col-12">
+          <label class="form-label">English Source Text</label>
+          {{ test_form.text(class="form-control", rows="5", placeholder="Enter source text to translate") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Target Language</label>
+          {{ test_form.target_language_code(class="form-select") }}
+        </div>
+        <div class="col-md-6 d-flex align-items-end justify-content-end">
+          {{ test_form.submit(class="btn btn-outline-light px-4") }}
+        </div>
+      </form>
+
+      {% if translated_text %}
+      <div class="mt-4 p-3 rounded-4" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Translated Output</div>
+          <span class="badge {% if translated_from_cache %}text-bg-success{% else %}text-bg-warning{% endif %}">
+            {% if translated_from_cache %}FROM CACHE{% else %}NEW API RESULT{% endif %}
+          </span>
+        </div>
+        <div class="small text-muted mb-2">Provider: {{ provider.name or provider.provider_label }}</div>
+        <div style="white-space: pre-wrap; line-height: 1.7;">{{ translated_text }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="surface rounded-4 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-1">Recent Translation/API Logs</h5>
+          <div class="text-muted small">Latest provider requests recorded by the system.</div>
+        </div>
+        <a href="{{ url_for('superadmin.api_logs') }}" class="btn btn-sm btn-outline-light">Open full logs</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>System</th>
+              <th>Status</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in recent_logs %}
+              <tr>
+                <td class="text-secondary small">{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '' }}</td>
+                <td class="fw-semibold">{{ r.system }}</td>
+                <td>
+                  {% if r.ok %}<span class="badge text-bg-success">{{ r.status_code or 'OK' }}</span>{% else %}<span class="badge text-bg-danger">{{ r.status_code or 'ERR' }}</span>{% endif %}
+                </td>
+                <td class="text-secondary small">{{ r.message or '' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="text-secondary">No API activity logged yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

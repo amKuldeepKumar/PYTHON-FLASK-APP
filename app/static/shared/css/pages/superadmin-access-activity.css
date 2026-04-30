@@ -1,0 +1,59 @@
+.access-activity-page .activity-kicker {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-primary, #2563eb);
+}
+
+.access-activity-page .activity-title {
+  font-size: clamp(1.8rem, 2.5vw, 2.6rem);
+  font-weight: 800;
+  color: var(--heading-text, #0f172a);
+}
+
+.access-activity-page .activity-summary-card,
+.access-activity-page .activity-session-card {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+}
+
+.access-activity-page .activity-summary-card {
+  padding: 1rem 1.1rem;
+}
+
+.access-activity-page .activity-summary-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted, #64748b);
+}
+
+.access-activity-page .activity-summary-value {
+  margin-top: 0.45rem;
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.access-activity-page .activity-table thead th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted, #64748b);
+}
+
+.access-activity-page .activity-table td {
+  background: transparent;
+}
+
+.access-activity-page .activity-session-stack {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.access-activity-page .activity-session-card {
+  padding: 1rem 1.05rem;
+}

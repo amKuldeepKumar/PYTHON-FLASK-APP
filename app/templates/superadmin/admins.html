@@ -1,0 +1,99 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Admin Management • Fluencify{% endblock %}
+{% block page_title %}Admin Management{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent"><h5 class="mb-0">{% if editing_admin %}Edit User{% elif password_admin %}Change Password{% else %}Create Admin / Sub Admin / Teacher{% endif %}</h5></div>
+        <div class="card-body">
+          {% if editing_admin %}
+          <form method="post" action="{{ url_for('superadmin.admins_edit', admin_id=editing_admin.id) }}">
+            {{ edit_form.hidden_tag() }}
+            <div class="mb-3"><label class="form-label">{{ edit_form.full_name.label.text }}</label>{{ edit_form.full_name(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ edit_form.username.label.text }}</label>{{ edit_form.username(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ edit_form.email.label.text }}</label>{{ edit_form.email(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ edit_form.role.label.text }}</label>{{ edit_form.role(class='form-select') }}</div>
+            <div class="mb-3"><label class="form-label">{{ edit_form.organization_name.label.text }}</label>{{ edit_form.organization_name(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ edit_form.parent_admin_id.label.text }}</label>{{ edit_form.parent_admin_id(class='form-select') }}</div>
+            <div class="form-check mb-3">{{ edit_form.is_active(class='form-check-input') }} <label class="form-check-label">{{ edit_form.is_active.label.text }}</label></div>
+            <div class="d-flex gap-2">{{ edit_form.submit(class='btn btn-primary') }}<a href="{{ url_for('superadmin.admins_list') }}" class="btn btn-outline-light">Cancel</a></div>
+          </form>
+          {% elif password_admin %}
+          <form method="post" action="{{ url_for('superadmin.admins_password', admin_id=password_admin.id) }}">
+            {{ password_form.hidden_tag() }}
+            <div class="mb-3"><label class="form-label">{{ password_form.new_password.label.text }}</label>{{ password_form.new_password(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ password_form.confirm_password.label.text }}</label>{{ password_form.confirm_password(class='form-control') }}</div>
+            <div class="d-flex gap-2">{{ password_form.submit(class='btn btn-primary') }}<a href="{{ url_for('superadmin.admins_list') }}" class="btn btn-outline-light">Cancel</a></div>
+          </form>
+          {% else %}
+          <form method="post" action="{{ url_for('superadmin.admins_create') }}">
+            {{ create_form.hidden_tag() }}
+            <div class="mb-3"><label class="form-label">{{ create_form.full_name.label.text }}</label>{{ create_form.full_name(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.username.label.text }}</label>{{ create_form.username(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.email.label.text }}</label>{{ create_form.email(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.role.label.text }}</label>{{ create_form.role(class='form-select') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.organization_name.label.text }}</label>{{ create_form.organization_name(class='form-control', placeholder='Example: Redcliffe International') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.parent_admin_id.label.text }}</label>{{ create_form.parent_admin_id(class='form-select') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.password.label.text }}</label>{{ create_form.password(class='form-control') }}</div>
+            <div class="mb-3"><label class="form-label">{{ create_form.confirm_password.label.text }}</label>{{ create_form.confirm_password(class='form-control') }}</div>
+            <div class="form-check mb-3">{{ create_form.is_active(class='form-check-input') }} <label class="form-check-label">{{ create_form.is_active.label.text }}</label></div>
+            {{ create_form.submit(class='btn btn-primary w-100') }}
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <form class="row g-3" method="get">
+            <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Search admin, institute, email" value="{{ q or '' }}"></div>
+            <div class="col-md-3">
+              <select name="role" class="form-select">
+                <option value="">All staff roles</option>
+                {% for code,label in [('ADMIN','Admin'),('SUB_ADMIN','Sub Admin'),('TEACHER','Teacher'),('SEO','SEO'),('SUPPORT','Support'),('ACCOUNTS','Accounts')] %}
+                <option value="{{ code }}" {% if role_filter==code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select name="parent_admin_id" class="form-select">
+                {% for id,label in parent_admin_choices %}
+                <option value="{{ id }}" {% if parent_admin_id==id %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2 d-grid"><button class="btn btn-outline-light">Search</button></div>
+          </form>
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent"><h5 class="mb-0">Management Directory</h5></div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>Name</th><th>Role</th><th>Institute</th><th>Reports To</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+              <tbody>
+                {% for admin in admins %}
+                <tr>
+                  <td><div class="fw-semibold">{{ admin.full_name }}</div><div class="small text-muted">{{ admin.email }}</div></td>
+                  <td>{{ admin.role_code }}</td>
+                  <td>{{ admin.organization_name or '—' }}</td>
+                  <td>{{ admin.organization.full_name if admin.organization else '—' }}</td>
+                  <td><span class="badge {% if admin.is_active %}bg-success{% else %}bg-secondary{% endif %}">{{ 'Active' if admin.is_active else 'Inactive' }}</span></td>
+                  <td class="text-end"><div class="d-flex gap-2 justify-content-end flex-wrap"><a href="{{ url_for('superadmin.admins_edit', admin_id=admin.id) }}" class="btn btn-sm btn-outline-light">Edit</a><a href="{{ url_for('superadmin.admins_password', admin_id=admin.id) }}" class="btn btn-sm btn-outline-light">Password</a><a href="{{ url_for('superadmin.admin_permissions', admin_id=admin.id) }}" class="btn btn-sm btn-outline-light">Permissions</a><form method="post" action="{{ url_for('superadmin.admins_delete', admin_id=admin.id) }}" onsubmit="return confirm('Delete this user?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-danger">Delete</button></form></div></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-muted">No matching staff found.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

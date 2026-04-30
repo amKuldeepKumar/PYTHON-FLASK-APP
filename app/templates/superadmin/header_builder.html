@@ -1,0 +1,131 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Header Builder • SuperAdmin{% endblock %}
+{% block page_title %}Header Builder{% endblock %}
+{% block content %}
+<div class="card card-dark">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <h5>Header Controls</h5>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="header_sticky_enabled" value="1" {% if theme.header_sticky_enabled %}checked{% endif %}>
+            <label class="form-check-label">Sticky header</label>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="header_transparent_enabled" value="1" {% if theme.header_transparent_enabled %}checked{% endif %}>
+            <label class="form-check-label">Transparent header</label>
+          </div>
+
+          <div class="form-check mb-3">
+            {{ form.header_announcement_enabled(class='form-check-input') }}
+            <label class="form-check-label">{{ form.header_announcement_enabled.label.text }}</label>
+          </div>
+
+          <label class="form-label">{{ form.header_announcement_text.label }}</label>
+          {{ form.header_announcement_text(class='form-control mb-3') }}
+
+          <label class="form-label">{{ form.site_logo_url.label }}</label>
+          {{ form.site_logo_url(class='form-control mb-3') }}
+
+          <label class="form-label">{{ form.header_cta_text.label }}</label>
+          {{ form.header_cta_text(class='form-control mb-3') }}
+
+          <label class="form-label">{{ form.header_cta_url.label }}</label>
+          {{ form.header_cta_url(class='form-control mb-3') }}
+
+          <label class="form-label">{{ form.header_links_json.label }}</label>
+          {{ form.header_links_json(class='form-control', rows='10') }}
+          <div class="form-text">Example: [{"label":"Home","url":"/"}]</div>
+        </div>
+
+        <div class="col-md-6">
+          <h5>Visual Effects</h5>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="alphabet_background_enabled" value="1" {% if theme.alphabet_background_enabled %}checked{% endif %}>
+            <label class="form-check-label">Enable alphabet / stars background</label>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="alphabet_trails_enabled" value="1" {% if theme.alphabet_trails_enabled %}checked{% endif %}>
+            <label class="form-check-label">Trails enabled</label>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="alphabet_outline_only" value="1" {% if theme.alphabet_outline_only %}checked{% endif %}>
+            <label class="form-check-label">Outline only (hollow letters)</label>
+          </div>
+
+          <label class="form-label">Motion mode</label>
+          <select class="form-select mb-3" name="alphabet_motion_mode">
+            <option value="float" {% if theme.alphabet_motion_mode == 'float' %}selected{% endif %}>Float down</option>
+            <option value="diagonal" {% if theme.alphabet_motion_mode == 'diagonal' %}selected{% endif %}>Diagonal</option>
+            <option value="drift" {% if theme.alphabet_motion_mode == 'drift' %}selected{% endif %}>Random drift</option>
+            <option value="shooting" {% if theme.alphabet_motion_mode == 'shooting' %}selected{% endif %}>Shooting stars</option>
+          </select>
+
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">Min size</label>
+              <input class="form-control" type="number" name="alphabet_min_size" value="{{ theme.alphabet_min_size }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Max size</label>
+              <input class="form-control" type="number" name="alphabet_max_size" value="{{ theme.alphabet_max_size }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Count</label>
+              <input class="form-control" type="number" name="alphabet_count" value="{{ theme.alphabet_count }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Opacity</label>
+              <input class="form-control" type="number" name="alphabet_opacity" value="{{ theme.alphabet_opacity }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Direction X</label>
+              <input class="form-control" type="number" name="alphabet_direction_x" value="{{ theme.alphabet_direction_x }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Direction Y</label>
+              <input class="form-control" type="number" name="alphabet_direction_y" value="{{ theme.alphabet_direction_y }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Tilt X</label>
+              <input class="form-control" type="number" name="alphabet_tilt_x" value="{{ theme.alphabet_tilt_x | default(18) }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Tilt Y</label>
+              <input class="form-control" type="number" name="alphabet_tilt_y" value="{{ theme.alphabet_tilt_y | default(12) }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Tilt Z</label>
+              <input class="form-control" type="number" name="alphabet_tilt_z" value="{{ theme.alphabet_tilt_z | default(30) }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Speed</label>
+              <input class="form-control" type="number" name="alphabet_speed" value="{{ theme.alphabet_speed }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Trail length</label>
+              <input class="form-control" type="number" name="alphabet_trail_length" value="{{ theme.alphabet_trail_length }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Outline color</label>
+              <input class="form-control form-control-color w-100" type="color" name="alphabet_outline_color" value="{{ theme.alphabet_outline_color if theme.alphabet_outline_color and theme.alphabet_outline_color.startswith('#') else '#ffffff' }}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        {{ form.submit(class='btn btn-primary') }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

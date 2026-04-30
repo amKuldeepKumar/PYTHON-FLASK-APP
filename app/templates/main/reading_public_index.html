@@ -1,0 +1,95 @@
+{% extends "layout/base.html" %}
+{% block title %}{{ meta_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <section class="mb-5 text-center">
+    <span class="badge bg-primary-subtle text-primary-emphasis mb-3">Public Reading Pages</span>
+    <h1 class="fw-bold mb-3">Topic-based reading pages for organic growth</h1>
+    <p class="text-muted mx-auto" style="max-width: 760px;">Browse free reading topics, discover SEO-friendly landing pages, and preview published practice passages before joining the full learning flow.</p>
+  </section>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label">Search topic or passage</label>
+          <input type="text" name="q" value="{{ current_query or '' }}" class="form-control" placeholder="History, travel, world war...">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Level</label>
+          <select name="level" class="form-select">
+            <option value="">All</option>
+            <option value="basic" {% if current_level == 'basic' %}selected{% endif %}>Basic</option>
+            <option value="intermediate" {% if current_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+            <option value="advanced" {% if current_level == 'advanced' %}selected{% endif %}>Advanced</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-select">
+            <option value="">All</option>
+            {% for cat in category_options %}
+              <option value="{{ cat|lower }}" {% if current_category == cat|lower %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1 d-grid">
+          <button class="btn btn-primary" type="submit">Go</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for row in topic_rows %}
+      <div class="col-md-6 col-xl-4">
+        <article class="card border-0 shadow-sm h-100">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+              <div>
+                <div class="small text-uppercase text-muted mb-1">{{ row.topic.category_label }} • {{ row.topic.level_label }}</div>
+                <h2 class="h5 fw-bold mb-1">{{ row.topic.title }}</h2>
+              </div>
+              <span class="badge text-bg-light">{{ row.passage_count }} passages</span>
+            </div>
+
+            <p class="text-muted small mb-3">{{ row.topic.description or (row.topic.title ~ ' reading practice pages for ' ~ row.topic.level_label ~ ' learners.') }}</p>
+
+            <div class="row g-2 text-center mb-3">
+              <div class="col-6">
+                <div class="border rounded p-2 h-100">
+                  <div class="fw-bold">{{ row.latest_passage.word_count }}</div>
+                  <div class="small text-muted">Latest words</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="border rounded p-2 h-100">
+                  <div class="fw-bold">{{ row.latest_passage.length_label }}</div>
+                  <div class="small text-muted">Length</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="small text-muted mb-3">Latest page: <strong>{{ row.latest_passage.title }}</strong></div>
+
+            <div class="mt-auto d-grid gap-2">
+              <a href="{{ row.topic_url }}" class="btn btn-primary">Open Topic Page</a>
+              <a href="{{ url_for('main.public_reading_passage', passage_id=row.latest_passage.id, slug=(row.latest_passage.title|lower|replace(' ', '-'))) }}" class="btn btn-outline-secondary">Preview Latest Passage</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    {% else %}
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body text-center py-5">
+            <h3 class="h5 fw-bold mb-2">No public reading pages found</h3>
+            <p class="text-muted mb-0">Try a different filter or publish more approved reading passages.</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

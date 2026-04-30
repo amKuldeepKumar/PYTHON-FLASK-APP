@@ -1,0 +1,49 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Coupons • Fluencify{% endblock %}
+{% block page_title %}Coupons{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div><div class="text-uppercase small text-secondary mb-1">Academy Pricing</div><h1 class="mb-2">Coupons</h1><p class="text-secondary mb-0">Create global or course-specific discount codes with validity windows and usage limits.</p></div>
+  <a href="{{ url_for('superadmin.courses') }}" class="btn btn-outline-light">Back to Courses</a>
+</div>
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card bg-dark border-secondary rounded-4"><div class="card-body p-4">
+      <h4 class="mb-3">Create Coupon</h4>
+      <form method="post">{{ form.hidden_tag() }}
+        <div class="row g-3">
+          <div class="col-md-6">{{ form.code.label(class='form-label') }}{{ form.code(class='form-control') }}</div>
+          <div class="col-md-6">{{ form.title.label(class='form-label') }}{{ form.title(class='form-control') }}</div>
+          <div class="col-12">{{ form.description.label(class='form-label') }}{{ form.description(class='form-control', rows='2') }}</div>
+          <div class="col-md-6">{{ form.discount_type.label(class='form-label') }}{{ form.discount_type(class='form-select') }}</div>
+          <div class="col-md-6">{{ form.discount_value.label(class='form-label') }}{{ form.discount_value(class='form-control') }}</div>
+          <div class="col-md-6">{{ form.min_order_amount.label(class='form-label') }}{{ form.min_order_amount(class='form-control') }}</div>
+          <div class="col-md-6">{{ form.course_id.label(class='form-label') }}{{ form.course_id(class='form-select') }}</div>
+          <div class="col-md-6">{{ form.valid_from.label(class='form-label') }}{{ form.valid_from(class='form-control') }}</div>
+          <div class="col-md-6">{{ form.valid_until.label(class='form-label') }}{{ form.valid_until(class='form-control') }}</div>
+          <div class="col-md-6">{{ form.usage_limit_total.label(class='form-label') }}{{ form.usage_limit_total(class='form-control') }}</div>
+          <div class="col-md-6">{{ form.usage_limit_per_user.label(class='form-label') }}{{ form.usage_limit_per_user(class='form-control') }}</div>
+          <div class="col-12"><div class="form-check form-switch">{{ form.is_active(class='form-check-input') }}{{ form.is_active.label(class='form-check-label ms-2') }}</div></div>
+          <div class="col-12"><button class="btn btn-success">Create Coupon</button></div>
+        </div>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card bg-dark border-secondary rounded-4"><div class="card-body p-4">
+      <h4 class="mb-3">All Coupons</h4>
+      <div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Code</th><th>Discount</th><th>Course</th><th>Validity</th><th>Status</th></tr></thead><tbody>
+      {% for c in coupons %}
+        <tr>
+          <td><div class="fw-bold">{{ c.code }}</div>{% if c.title %}<div class="small text-secondary">{{ c.title }}</div>{% endif %}</td>
+          <td>{{ c.discount_value }} {{ '%' if c.discount_type == 'percentage' else '' }}</td>
+          <td>{{ c.course.title if c.course else 'All courses' }}</td>
+          <td><div>{{ c.valid_from.strftime('%d %b %Y') if c.valid_from else 'Now' }}</div><div class="small text-secondary">to {{ c.valid_until.strftime('%d %b %Y') if c.valid_until else 'No expiry' }}</div></td>
+          <td><span class="badge {{ 'text-bg-success' if c.is_active else 'text-bg-secondary' }}">{{ 'Active' if c.is_active else 'Inactive' }}</span></td>
+        </tr>
+      {% else %}<tr><td colspan="5" class="text-secondary">No coupons created yet.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

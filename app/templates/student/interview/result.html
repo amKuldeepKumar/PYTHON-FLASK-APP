@@ -1,0 +1,67 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Interview Result • Fluencify{% endblock %}
+{% block page_title %}Interview Result{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/interview-prep.css') }}">{% endblock %}
+{% block content %}
+<div class="interview-shell">
+  <section class="card-surface result-top">
+    <div>
+      <div class="eyebrow">AI Final Review</div>
+      <h2>{{ interview_session.profile.title }}</h2>
+      <p class="mb-0 text-secondary">{{ feedback.ai_summary if feedback else 'Interview report not ready yet.' }}</p>
+    </div>
+    <div class="score-badge">{{ '%.1f'|format(feedback.overall_score if feedback else 0) }}/10</div>
+  </section>
+
+  <section class="result-grid">
+    <div class="card-surface metrics-grid">
+      <div class="stat-box"><span>Fluency</span><strong>{{ '%.1f'|format(feedback.fluency_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Grammar</span><strong>{{ '%.1f'|format(feedback.grammar_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Confidence</span><strong>{{ '%.1f'|format(feedback.confidence_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Relevance</span><strong>{{ '%.1f'|format(feedback.relevance_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Vocabulary</span><strong>{{ '%.1f'|format(feedback.vocabulary_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Professional Tone</span><strong>{{ '%.1f'|format(feedback.professional_tone_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Hesitation</span><strong>{{ '%.1f'|format(feedback.hesitation_score if feedback else 0) }}</strong></div>
+      <div class="stat-box"><span>Role Fit</span><strong>{{ '%.1f'|format(feedback.role_fit_score if feedback else 0) }}</strong></div>
+    </div>
+    <div class="card-surface">
+      <h3>Coach tips</h3>
+      <p class="mb-3">{{ feedback.coach_tips if feedback else 'Keep practicing interview flow.' }}</p>
+      <div class="hero-actions">
+        <form method="post" action="{{ url_for('student.course_interview_retry', course_id=course.id, session_id=interview_session.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-primary" type="submit">Retry Weak Questions</button>
+        </form>
+        <a class="btn btn-outline-light" href="{{ url_for('student.course_interview_start', course_id=course.id) }}">Start New Interview</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="result-grid">
+    <div class="card-surface">
+      <h3>Strengths</h3>
+      <ul class="clean-list">{% for item in (feedback.strengths if feedback else []) %}<li>{{ item }}</li>{% else %}<li>No strengths available yet.</li>{% endfor %}</ul>
+    </div>
+    <div class="card-surface">
+      <h3>Weak areas</h3>
+      <ul class="clean-list">{% for item in (feedback.weaknesses if feedback else []) %}<li>{{ item }}</li>{% else %}<li>No weak areas available yet.</li>{% endfor %}</ul>
+    </div>
+  </section>
+
+  <section class="card-surface">
+    <h3>Turn-by-turn review</h3>
+    <div class="turn-list">
+      {% for turn in turns %}
+        <article class="turn-card">
+          <div class="small text-uppercase text-secondary mb-2">Turn {{ turn.turn_no }} • {{ turn.question_type|replace('_', ' ')|title }}</div>
+          <h4>{{ turn.ai_question_text }}</h4>
+          <p><strong>Your answer:</strong> {{ turn.student_answer_text or 'No answer captured.' }}</p>
+          {% if turn.turn_score is not none %}<p><strong>Score:</strong> {{ '%.1f'|format(turn.turn_score) }}/10</p>{% endif %}
+          {% if turn.turn_feedback %}<p><strong>Feedback:</strong> {{ turn.turn_feedback }}</p>{% endif %}
+          {% if turn.improved_answer %}<p><strong>Improved answer:</strong> {{ turn.improved_answer }}</p>{% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

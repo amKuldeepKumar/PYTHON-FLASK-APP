@@ -1,0 +1,180 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Review Dashboard • Fluencify{% endblock %}
+{% block page_title %}Unified Review Dashboard{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+{% endblock %}
+{% block content %}
+<div class="sa-studio">
+<section class="sa-hero-panel">
+  <div class="sa-hero-grid">
+    <div>
+      <div class="sa-kicker">Phase 6 Review Flow</div>
+      <h1 class="sa-title">Publish, review, approve, and reopen content from one cleaner dashboard</h1>
+      <p class="sa-copy">Use one review surface for speaking, reading, listening, and writing instead of jumping between isolated queues. This page is the editorial command point for readiness and publication quality.</p>
+      <div class="sa-action-row">
+        <a class="btn btn-primary" href="{{ url_for('superadmin.review_dashboard') }}">Refresh</a>
+        <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.courses') }}">Courses</a>
+      </div>
+    </div>
+    <div class="sa-stat-grid">
+      {% for key, label in [('all','All'),('review','In Review'),('published','Published')] %}
+      <div class="sa-stat-card">
+        <div class="sa-stat-label">{{ label }}</div>
+        <div class="sa-stat-value">{{ counts.get(key, 0) }}</div>
+        <div class="sa-stat-note">Current content volume in this state.</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="sa-stat-grid">
+  {% for key, label in [('all','All'),('review','In Review'),('draft','Draft'),('approved','Approved'),('published','Published'),('rejected','Rejected')] %}
+  <a class="sa-stat-card text-decoration-none" href="{{ url_for('superadmin.review_dashboard', module=module, state=key) }}">
+    <div class="sa-stat-label">{{ label }}</div>
+    <div class="sa-stat-value">{{ counts.get(key, 0) }}</div>
+    <div class="sa-stat-note">Open filtered list</div>
+  </a>
+  {% endfor %}
+</div>
+
+<section class="sa-panel">
+  <form method="get" class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Module</label>
+      <select name="module" class="form-select">
+        {% for value, label in [('all','All Modules'),('speaking','Speaking'),('reading','Reading'),('listening','Listening'),('writing','Writing')] %}
+        <option value="{{ value }}" {% if module == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">State</label>
+      <select name="state" class="form-select">
+        {% for value, label in [('all','All States'),('review','Review'),('draft','Draft'),('approved','Approved'),('published','Published'),('rejected','Rejected')] %}
+        <option value="{{ value }}" {% if state == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+      <button class="btn btn-primary" type="submit">Apply Filter</button>
+      <div class="small text-secondary align-self-center">Not ready: {{ counts.get('not_ready', 0) }}</div>
+    </div>
+  </form>
+</section>
+
+<form method="post" action="{{ url_for('superadmin.review_dashboard_bulk') }}" class="sa-table-panel p-4">
+  <div class="row g-3 align-items-end mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Bulk action</label>
+      <select name="bulk_action" class="form-select">
+        <option value="submit_review">Move to review</option>
+        <option value="approve">Approve</option>
+        <option value="publish">Publish</option>
+        <option value="reject">Reject</option>
+        <option value="unpublish">Unpublish</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Review note</label>
+      <input type="text" name="bulk_note" class="form-control" placeholder="Optional reviewer note for all selected items">
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-success w-100" type="submit">Run Bulk Action</button>
+    </div>
+  </div>
+
+  <div class="sa-table-wrap table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th><input type="checkbox" onclick="document.querySelectorAll('.row-check').forEach(el => el.checked = this.checked)"></th>
+          <th>Module</th>
+          <th>Title</th>
+          <th>Course</th>
+          <th>Status</th>
+          <th>Ready</th>
+          <th>Count</th>
+          <th>Note</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td><input class="row-check" type="checkbox" name="selected_items" value="{{ row.item_type }}:{{ row.item_id }}"></td>
+          <td>{{ row.module_label }}</td>
+          <td>
+            <div class="fw-semibold">{{ row.title }}</div>
+            {% if row.reviewed_by %}<div class="small text-secondary">By {{ row.reviewed_by }}</div>{% endif %}
+          </td>
+          <td>{{ row.course_title or '—' }}</td>
+          <td><span class="badge text-bg-{% if row.state == 'published' %}success{% elif row.state == 'approved' %}info{% elif row.state == 'review' %}warning{% elif row.state == 'rejected' %}danger{% else %}secondary{% endif %}">{{ row.state.replace('_', ' ').title() }}</span></td>
+          <td>
+            {% if row.is_ready %}
+            <span class="badge text-bg-success">Ready</span>
+            {% else %}
+            <span class="badge text-bg-danger">Blocked</span>
+            <div class="small text-secondary mt-1">{{ row.readiness_note }}</div>
+            {% endif %}
+          </td>
+          <td>{{ row.question_count }}</td>
+          <td><div class="small text-secondary" style="max-width:220px;">{{ row.note or row.readiness_note }}</div></td>
+          <td class="text-end">
+            <div class="d-flex gap-2 justify-content-end flex-wrap">
+              {% if row.edit_url %}<a class="btn btn-sm btn-outline-light" href="{{ row.edit_url }}">Edit</a>{% endif %}
+              {% if row.source_url %}<a class="btn btn-sm btn-outline-light" href="{{ row.source_url }}">Open</a>{% endif %}
+              <button type="button" class="btn btn-sm btn-warning" onclick="openActionModal('{{ row.item_type }}','{{ row.item_id }}','submit_review')">Review</button>
+              {% if can_publish %}
+              <button type="button" class="btn btn-sm btn-info" onclick="openActionModal('{{ row.item_type }}','{{ row.item_id }}','approve')">Approve</button>
+              <button type="button" class="btn btn-sm btn-success" onclick="openActionModal('{{ row.item_type }}','{{ row.item_id }}','publish')">Publish</button>
+              <button type="button" class="btn btn-sm btn-danger" onclick="openActionModal('{{ row.item_type }}','{{ row.item_id }}','reject')">Reject</button>
+              <button type="button" class="btn btn-sm btn-outline-light" onclick="openActionModal('{{ row.item_type }}','{{ row.item_id }}','unpublish')">Unpublish</button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="text-center text-secondary py-5">No content matched the current filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<div class="modal fade" id="reviewActionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content sa-modal-panel" method="post" action="{{ url_for('superadmin.review_dashboard_action') }}">
+      <div class="modal-header">
+        <h5 class="modal-title">Review action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="item_type" id="modalItemType">
+        <input type="hidden" name="item_id" id="modalItemId">
+        <input type="hidden" name="action" id="modalAction">
+        <div class="mb-3">
+          <label class="form-label">Reviewer note</label>
+          <textarea class="form-control" name="note" rows="4" placeholder="Optional note for audit trail and review history"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+
+<script>
+function openActionModal(itemType, itemId, action) {
+  document.getElementById('modalItemType').value = itemType;
+  document.getElementById('modalItemId').value = itemId;
+  document.getElementById('modalAction').value = action;
+  const modal = new bootstrap.Modal(document.getElementById('reviewActionModal'));
+  modal.show();
+}
+</script>
+{% endblock %}

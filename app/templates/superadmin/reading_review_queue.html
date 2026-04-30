@@ -1,0 +1,127 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Reading Review Queue • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Reading Review Queue{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+  <div>
+    <h3 class="mb-1">Phase 7E — Admin Review & Quality Control</h3>
+    <div class="text-secondary small">Reading content moves through draft → review → published. Only published passages become student-visible.</div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_passages') }}">Passages</a>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_questions') }}">Questions</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-xxl-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h4 class="mb-1">Passage Review Queue</h4>
+            <div class="small text-secondary">Draft: {{ counts.draft_passages }} • Review: {{ counts.review_passages }} • Approved: {{ counts.approved_passages }} • Rejected: {{ counts.rejected_passages }}</div>
+          </div>
+          <form method="get" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="question_status" value="{{ question_status }}">
+            <select name="passage_status" class="form-select form-select-sm" onchange="this.form.submit()">
+              {% for status in passage_statuses %}
+                <option value="{{ status }}" {% if status == passage_status %}selected{% endif %}>{{ status.replace('_',' ').title() }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+
+        {% if passages %}
+          <div class="d-flex flex-column gap-3">
+            {% for passage in passages %}
+              <div class="rounded-4 border p-3">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-2">
+                  <div>
+                    <div class="fw-semibold">{{ passage.title }}</div>
+                    <div class="small text-secondary">{{ passage.topic_title_snapshot }} • {{ passage.level_label }} • {{ passage.length_label }} • {{ passage.word_count }} words</div>
+                    <div class="small text-secondary">Status: {{ passage.workflow_label }}{% if passage.reviewed_at %} • Reviewed {{ passage.reviewed_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}</div>
+                  </div>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge text-bg-primary">{{ passage.workflow_label }}</span>
+                    <span class="badge {% if passage.is_published %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ passage.publication_label }}</span>
+                  </div>
+                </div>
+                <div class="white-surface-box reading-content-text mb-2">{{ passage.content }}</div>
+                {% if passage.review_notes %}<div class="small text-secondary mb-2">Review note: {{ passage.review_notes }}</div>{% endif %}
+                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_passage_edit', passage_id=passage.id) }}">Edit</a>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_approve', passage_id=passage.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-success" type="submit">Approve</button>
+                  </form>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_reject', passage_id=passage.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rounded-4 border p-4 text-center text-secondary">No passages in this review state.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xxl-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h4 class="mb-1">Question Review Queue</h4>
+            <div class="small text-secondary">Draft: {{ counts.draft_questions }} • Review: {{ counts.review_questions }} • Approved: {{ counts.approved_questions }} • Rejected: {{ counts.rejected_questions }}</div>
+          </div>
+          <form method="get" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="passage_status" value="{{ passage_status }}">
+            <select name="question_status" class="form-select form-select-sm" onchange="this.form.submit()">
+              {% for status in question_statuses %}
+                <option value="{{ status }}" {% if status == question_status %}selected{% endif %}>{{ status.replace('_',' ').title() }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+
+        {% if questions %}
+          <div class="d-flex flex-column gap-3">
+            {% for question in questions %}
+              <div class="rounded-4 border p-3">
+                <div class="d-flex justify-content-between gap-3 flex-wrap mb-2">
+                  <div>
+                    <div class="fw-semibold">Q{{ question.display_order }} • {{ question.type_label }}</div>
+                    <div class="small text-secondary">{{ question.passage.title if question.passage else 'Passage removed' }} • {{ question.level_label }}</div>
+                    <div class="small text-secondary">Status: {{ question.workflow_label }}{% if question.reviewed_at %} • Reviewed {{ question.reviewed_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}</div>
+                  </div>
+                  <span class="badge text-bg-primary">{{ question.workflow_label }}</span>
+                </div>
+                <div class="white-surface-box mb-2">{{ question.question_text }}</div>
+                {% if question.review_notes %}<div class="small text-secondary mb-2">Review note: {{ question.review_notes }}</div>{% endif %}
+                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_question_edit', question_id=question.id) }}">Edit</a>
+                  <form method="post" action="{{ url_for('superadmin.reading_question_approve', question_id=question.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-success" type="submit">Approve</button>
+                  </form>
+                  <form method="post" action="{{ url_for('superadmin.reading_question_reject', question_id=question.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rounded-4 border p-4 text-center text-secondary">No questions in this review state.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

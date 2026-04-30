@@ -1,0 +1,165 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}AI Rule Panel • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}AI Rule Panel{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-ai-rule-panel.css') }}">{% endblock %}
+{% block content %}
+<div class="container-fluid py-4 ai-rule-page">
+  <section class="card border-0 shadow-sm mb-4 ai-rule-hero">
+    <div class="card-body p-4 p-xl-5">
+      <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+        <div>
+          <div class="ai-kicker">Phase 14 • Superadmin AI Rule Panel</div>
+          <h1 class="ai-title mb-2">Full AI control</h1>
+          <p class="text-secondary mb-0">Edit one rule set, preview the real prompt, test sample input, and review recent rule usage.</p>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric-box"><div class="metric-label">Tracks</div><div class="metric-value">4</div></div>
+          <div class="metric-box"><div class="metric-label">Active Rules</div><div class="metric-value">{{ rules|selectattr('is_enabled')|list|length }}</div></div>
+          <div class="metric-box"><div class="metric-label">Covered Tasks</div><div class="metric-value">{{ task_rows|length }}</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-xl-4">
+      <section class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Rule Tracks</h2>
+          <div class="track-stack">
+            {% for rule in rules %}
+            <a class="track-card {% if rule.track_key == selected_track %}is-active{% endif %}" href="{{ url_for('superadmin.ai_rule_panel', track=rule.track_key) }}">
+              <div>
+                <div class="track-title">{{ rule.track_key|title }}</div>
+                <div class="track-meta">Strictness {{ rule.strictness }}/5 • Min length {{ rule.min_length }}</div>
+              </div>
+              <span class="badge {% if rule.is_enabled %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if rule.is_enabled else 'Disabled' }}</span>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Tasks using this rule</h2>
+          <div class="mini-stack">
+            {% for row in task_rows %}
+            <div class="mini-card">
+              <div class="fw-semibold">{{ row.task_key }}</div>
+              <div class="small text-secondary">Track: {{ row.track_key|title }}</div>
+            </div>
+            {% else %}
+            <div class="text-secondary small">No tasks mapped yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Settings help</h2>
+          <div class="mini-stack">
+            {% for item in docs_cards %}
+            <div class="mini-card">
+              <div class="fw-semibold mb-1">{{ item.title }}</div>
+              <div class="small text-secondary">{{ item.body }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-xl-8">
+      <section class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+              <h2 class="h4 mb-1">{{ selected_track|title }} AI rules</h2>
+              <p class="text-secondary mb-0">Stronger enforcement, better clarity, and safer fallback from one place.</p>
+            </div>
+          </div>
+          <form method="post" class="row g-3">
+            <input type="hidden" name="track_key" value="{{ current_rule.track_key }}">
+            <div class="col-12 d-flex flex-wrap gap-3">
+              <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="is_enabled" name="is_enabled" {% if current_rule.is_enabled %}checked{% endif %}><label class="form-check-label" for="is_enabled">Enable rules</label></div>
+              <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="require_explanations" name="require_explanations" {% if current_rule.require_explanations %}checked{% endif %}><label class="form-check-label" for="require_explanations">Require explanations</label></div>
+              <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="off_topic_block" name="off_topic_block" {% if current_rule.off_topic_block %}checked{% endif %}><label class="form-check-label" for="off_topic_block">Block off-topic</label></div>
+            </div>
+            <div class="col-md-6"><label class="form-label">Strictness</label><input class="form-control" type="number" min="1" max="5" name="strictness" value="{{ current_rule.strictness }}"></div>
+            <div class="col-md-6"><label class="form-label">Minimum length</label><input class="form-control" type="number" min="0" name="min_length" value="{{ current_rule.min_length }}"></div>
+            <div class="col-12"><label class="form-label">Core rules</label><textarea class="form-control" rows="4" name="rule_text">{{ current_rule.rule_text }}</textarea></div>
+            <div class="col-12"><label class="form-label">Guardrails</label><textarea class="form-control" rows="3" name="guardrails_text">{{ current_rule.guardrails_text or '' }}</textarea></div>
+            <div class="col-12"><label class="form-label">Scoring notes</label><textarea class="form-control" rows="3" name="scoring_notes">{{ current_rule.scoring_notes or '' }}</textarea></div>
+            <div class="col-12"><label class="form-label">Output format</label><textarea class="form-control" rows="3" name="output_format">{{ current_rule.output_format or '' }}</textarea></div>
+            <div class="col-12 d-flex flex-wrap gap-2">
+              <button class="btn btn-primary" type="submit" name="action" value="save">Save rules</button>
+              <button class="btn btn-outline-secondary" type="submit" name="action" value="reset">Reset default</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <section class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <h2 class="h5 mb-3">Live prompt preview</h2>
+              <div class="small text-secondary mb-2">Shows the exact prompt block after the active rule is injected.</div>
+              <div class="small text-secondary mb-1">Prompt</div>
+              <pre class="preview-box">{{ preview_result.prompt }}</pre>
+              <div class="small text-secondary mb-1 mt-3">Output</div>
+              <pre class="preview-box preview-box-sm">{{ preview_result.output|tojson(indent=2) }}</pre>
+            </div>
+          </section>
+        </div>
+        <div class="col-lg-6">
+          <section class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <h2 class="h5 mb-3">Test this rule</h2>
+              <form method="post" class="row g-3">
+                <input type="hidden" name="track_key" value="{{ current_rule.track_key }}">
+                <div class="col-12"><label class="form-label">Sample prompt</label><input class="form-control" name="sample_prompt" value="{{ test_payload.sample_prompt if test_payload and test_payload.sample_prompt is defined else '' }}"></div>
+                <div class="col-12"><label class="form-label">Sample input</label><textarea class="form-control" rows="5" name="sample_input">{{ request.form.get('sample_input', '') }}</textarea></div>
+                {% if selected_track == 'speaking' %}<div class="col-md-6"><label class="form-label">Duration seconds</label><input class="form-control" type="number" min="0" name="sample_duration" value="{{ request.form.get('sample_duration', 35) }}"></div>{% endif %}
+                {% if selected_track == 'reading' %}<div class="col-md-6"><label class="form-label">Expected answer</label><input class="form-control" name="sample_expected" value="{{ request.form.get('sample_expected', '') }}"></div>{% endif %}
+                <div class="col-12 d-flex gap-2"><button class="btn btn-dark" type="submit" name="action" value="test">Run test</button></div>
+              </form>
+              {% if test_result %}
+              <div class="small text-secondary mt-3 mb-1">Test result</div>
+              <pre class="preview-box preview-box-sm">{{ test_result.output|tojson(indent=2) }}</pre>
+              {% endif %}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Recent rule usage</h2>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead><tr><th>Time</th><th>Task</th><th>Track</th><th>Strictness</th><th>Status</th><th>Message</th></tr></thead>
+              <tbody>
+                {% for row in rule_usage_logs %}
+                <tr>
+                  <td class="small">{{ row.timestamp or '—' }}</td>
+                  <td><code>{{ row.task_key }}</code></td>
+                  <td>{{ row.track_key|title if row.track_key else '—' }}</td>
+                  <td>{{ row.strictness or 0 }}</td>
+                  <td><span class="badge {% if row.ok %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ 'OK' if row.ok else 'Fallback' }}</span></td>
+                  <td class="small text-secondary">{{ row.message or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-secondary">No rule usage logs yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

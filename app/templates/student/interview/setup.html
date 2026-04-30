@@ -1,0 +1,77 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Interview Setup • Fluencify{% endblock %}
+{% block page_title %}Interview Setup{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/interview-prep.css') }}">{% endblock %}
+{% block content %}
+<div class="interview-shell">
+  <form class="card-surface setup-form" method="post" action="{{ url_for('student.course_interview_start', course_id=course.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Step 1</div>
+        <h2 class="mb-1">Tell AI what interview you want to prepare for</h2>
+        <p class="text-secondary mb-0">AI will use this setup to decide question types, English level, pressure, follow-up depth, and coaching prompts.</p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <label><span>Interview purpose</span>
+        <select name="interview_purpose" required>
+          <option value="job">Job Interview</option>
+          <option value="hr">HR Interview</option>
+          <option value="technical">Technical Interview</option>
+          <option value="visa">Visa Interview</option>
+          <option value="university">University Interview</option>
+          <option value="embassy">Embassy Interview</option>
+          <option value="mock">General Mock Interview</option>
+        </select>
+      </label>
+      <label><span>Target role / goal</span><input type="text" name="target_role" placeholder="Software Engineer / USA Student Visa / MBA Admission" required></label>
+      <label><span>Industry</span><input type="text" name="industry" placeholder="IT / Healthcare / Hospitality"></label>
+      <label><span>Company / institution</span><input type="text" name="company_name" placeholder="Optional"></label>
+      <label><span>Target country</span><input type="text" name="country_target" placeholder="Optional"></label>
+      <label><span>English level</span>
+        <select name="english_level">
+          <option value="basic">Basic</option>
+          <option value="intermediate" selected>Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </label>
+      <label><span>Difficulty</span>
+        <select name="difficulty_level">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </label>
+      <label><span>Interviewer style</span>
+        <select name="interview_style">
+          <option value="friendly">Friendly</option>
+          <option value="realistic" selected>Realistic</option>
+          <option value="strict">Strict</option>
+          <option value="pressure">Pressure</option>
+        </select>
+      </label>
+      <label><span>Focus area</span>
+        <select name="focus_area">
+          <option value="mixed" selected>Mixed</option>
+          <option value="fluency">Fluency</option>
+          <option value="confidence">Confidence</option>
+          <option value="grammar">Grammar</option>
+          <option value="role_specific">Role-specific</option>
+          <option value="technical">Technical</option>
+        </select>
+      </label>
+    </div>
+
+    <label><span>Resume highlights</span><textarea name="resume_summary" rows="4" placeholder="Add your background, experience, education, projects, achievements."></textarea></label>
+    <label><span>Job description / purpose details</span><textarea name="job_description" rows="4" placeholder="Paste job description, university goal, visa purpose, or specific expectations."></textarea></label>
+    <label><span>Extra notes for AI</span><textarea name="extra_notes" rows="3" placeholder="Mention weak areas, pressure points, or things you want AI to focus on."></textarea></label>
+
+    <div class="hero-actions">
+      <button class="btn btn-primary" type="submit">Start AI Interview</button>
+      <a class="btn btn-outline-light" href="{{ url_for('student.course_interview_home', course_id=course.id) }}">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-labelledby="title desc">
+  <title id="title">Bird</title>
+  <desc id="desc">A yellow bird for nursery practice.</desc>
+  <rect width="320" height="240" rx="28" fill="#fefce8"/>
+  <path d="M72 172h180" stroke="#92400e" stroke-width="10" stroke-linecap="round"/>
+  <ellipse cx="162" cy="122" rx="58" ry="42" fill="#facc15"/>
+  <circle cx="210" cy="110" r="26" fill="#fde047"/>
+  <path d="M230 112h24l-18 12z" fill="#f97316"/>
+  <path d="M146 126c-16-18-38-26-60-22 18 10 28 24 34 42z" fill="#eab308"/>
+  <circle cx="216" cy="104" r="5" fill="#111827"/>
+  <g stroke="#a16207" stroke-width="4" stroke-linecap="round">
+    <path d="M158 164v20"/>
+    <path d="M176 164v20"/>
+  </g>
+</svg>

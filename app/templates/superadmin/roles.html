@@ -1,0 +1,64 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Roles • Fluencify{% endblock %}
+{% block page_title %}Roles{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 sa-studio">
+  <section class="sa-hero-panel">
+    <div class="sa-hero-grid">
+      <div>
+        <div class="sa-kicker">Roles and Access</div>
+        <h1 class="sa-title">Review what each platform role can actually do</h1>
+        <p class="sa-copy">This view keeps the RBAC map readable for SuperAdmin, so you can quickly spot empty roles, permission-heavy roles, and where operational access still needs refinement.</p>
+        <div class="sa-pill-row">
+          <span class="sa-pill">{{ role_rows|length }} system roles</span>
+          <span class="sa-pill">{{ role_rows|selectattr('permissions')|list|length }} roles with mapped permissions</span>
+          <span class="sa-pill">RBAC seeded and visible</span>
+        </div>
+      </div>
+      <div class="sa-stat-grid">
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Roles</div>
+          <div class="sa-stat-value">{{ role_rows|length }}</div>
+          <div class="sa-stat-note">Platform roles currently visible in RBAC.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Mapped</div>
+          <div class="sa-stat-value">{{ role_rows|selectattr('permissions')|list|length }}</div>
+          <div class="sa-stat-note">Roles with at least one assigned permission.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Empty Roles</div>
+          <div class="sa-stat-value">{{ role_rows|rejectattr('permissions')|list|length }}</div>
+          <div class="sa-stat-note">Roles still needing explicit permission design.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sa-grid">
+    {% for row in role_rows %}
+        <div class="sa-grid-card sa-role-card">
+            <div>
+              <h5 class="fw-bold mb-1">{{ row.role.code }}</h5>
+              <div class="small text-muted">Permissions assigned to this role</div>
+            </div>
+            {% if row.permissions %}
+              <div class="d-flex flex-wrap gap-2">
+                {% for perm in row.permissions %}
+                  <span class="sa-code-chip">{{ perm }}</span>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="sa-empty">No permissions listed.</div>
+            {% endif %}
+        </div>
+    {% else %}
+      <div class="sa-empty">No roles found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

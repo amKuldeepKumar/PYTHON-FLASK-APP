@@ -1,0 +1,210 @@
+
+/* Phase 18 — Final Stability + Theme Pass */
+:root {
+  --phase18-radius-sm: 14px;
+  --phase18-radius-md: 20px;
+  --phase18-radius-lg: 28px;
+  --phase18-shadow-md: 0 16px 40px color-mix(in srgb, var(--shadow) 16%, transparent);
+  --phase18-shadow-lg: 0 24px 56px color-mix(in srgb, var(--shadow) 22%, transparent);
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-underline-offset: .18em;
+}
+
+.card,
+.modal-content,
+.dropdown-menu,
+.offcanvas,
+.alert,
+.list-group-item,
+.accordion-item,
+.table-card,
+.form-card,
+.portal-card,
+.analytics-card,
+.course-library-card,
+.reading-topic-card,
+.topic-card,
+.voice-card,
+.metric-panel,
+.writing-task-card,
+.listening-lesson-card {
+  border-radius: var(--phase18-radius-md) !important;
+}
+
+.card:hover,
+.portal-card:hover,
+.analytics-card:hover,
+.course-library-card:hover,
+.reading-topic-card:hover,
+.topic-card:hover,
+.voice-card:hover,
+.metric-panel:hover {
+  box-shadow: var(--phase18-shadow-lg) !important;
+}
+
+.btn {
+  border-radius: 999px !important;
+  min-height: 44px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  box-shadow: none;
+}
+
+.btn-lg {
+  min-height: 52px;
+}
+
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-info,
+.btn-dark,
+.btn-secondary,
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-danger:hover,
+.btn-outline-info:hover,
+.btn-outline-dark:hover,
+.btn-outline-secondary:hover {
+  box-shadow: var(--phase18-shadow-md);
+}
+
+.btn:focus,
+.btn:active,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.accordion-button:focus,
+.page-link:focus {
+  box-shadow: 0 0 0 .24rem color-mix(in srgb, var(--primary) 18%, transparent) !important;
+}
+
+.form-control,
+.form-select,
+.input-group-text,
+.form-check-input {
+  border-radius: var(--phase18-radius-sm) !important;
+}
+
+.table,
+.table > :not(caption) > * > * {
+  color: var(--text) !important;
+}
+
+.table thead th {
+  border-bottom-width: 1px;
+  color: var(--muted) !important;
+  font-size: .82rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.badge,
+.pill,
+.chip,
+.tag-chip,
+.status-pill,
+.course-pill,
+.meta-pill {
+  border-radius: 999px !important;
+}
+
+.progress,
+.progress-stacked {
+  border-radius: 999px !important;
+  overflow: hidden;
+  min-height: 10px;
+}
+
+.empty-state,
+.blank-state,
+.zero-state {
+  padding: 1.5rem;
+  border-radius: var(--phase18-radius-md);
+  border: 1px dashed var(--border);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+}
+
+.dashboard-theme .topbar,
+.public-theme .site-navbar,
+.public-theme footer {
+  backdrop-filter: blur(18px);
+}
+
+.dashboard-theme .menu-link,
+.dashboard-theme .menu-parent,
+.dashboard-theme .menu-child,
+.public-theme .site-navbar .nav-link,
+.public-theme .site-navbar .btn {
+  transition: transform .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.dashboard-theme .menu-link:hover,
+.dashboard-theme .menu-parent:hover,
+.dashboard-theme .menu-child:hover,
+.public-theme .site-navbar .nav-link:hover,
+.public-theme .site-navbar .btn:hover,
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-theme .topbar-profile-avatar,
+.dashboard-theme .sidebar-user-avatar,
+.profile-photo-preview img,
+.avatar,
+.avatar-circle {
+  box-shadow: var(--phase18-shadow-md);
+}
+
+.flash-shell .alert,
+.alert {
+  border-width: 1px;
+}
+
+code,
+pre,
+.kbd,
+kbd {
+  border-radius: 12px;
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-theme .topbar-inner,
+  .public-theme .site-navbar .container {
+    gap: .85rem;
+  }
+
+  .card,
+  .portal-card,
+  .analytics-card,
+  .course-library-card,
+  .reading-topic-card,
+  .topic-card,
+  .voice-card,
+  .metric-panel {
+    border-radius: 22px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .btn,
+  .public-theme .site-navbar .nav-link,
+  .public-theme .site-navbar .btn {
+    min-height: 42px;
+    padding-inline: .95rem !important;
+  }
+
+  .dashboard-content-wrap,
+  .public-theme main {
+    padding-inline: .35rem;
+  }
+}

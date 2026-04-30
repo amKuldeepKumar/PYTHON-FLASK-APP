@@ -1,0 +1,85 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Writing Practice • Fluencify{% endblock %}
+{% block page_title %}Writing Practice{% endblock %}
+{% block content %}
+<div class="student-track-shell track-writing">
+  <section class="track-hero">
+    <div class="track-section-head mb-0">
+      <div>
+        <div class="track-kicker">Phase 13 • Writing workspace</div>
+        <h2 class="mt-3 mb-2">{{ course.title }}</h2>
+        <div class="track-hero-copy">Course-linked writing topics, tasks, submissions, and AI feedback now use one cleaner student flow.</div>
+      </div>
+      <div class="track-action-row">
+        <a class="track-btn-secondary" href="{{ url_for('student.course_detail', course_id=course.id) }}">Back to Course</a>
+        <a class="track-btn-ghost" href="{{ url_for('student.course_writing_history', course_id=course.id) }}">Submission History</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="track-panel p-4">
+    <div class="track-section-head">
+      <div>
+        <div class="track-section-kicker">AI Intelligence</div>
+        <h3 class="track-section-title">Adaptive writing guidance</h3>
+        <div class="track-muted mt-2">{{ intelligence_track.action }} {{ intelligence_track.reason }} Tutor tip: {{ intelligence_track.tutor_tip }}</div>
+      </div>
+      <div class="track-pill-row">
+        <span class="track-pill">Current {{ intelligence_track.current_band }}</span>
+        <span class="track-pill">Recommended {{ intelligence_track.recommended_band }}</span>
+        <span class="track-pill">Confidence {{ intelligence_track.confidence }}%</span>
+        <a class="track-btn-secondary" href="{{ url_for('student.ai_intelligence') }}">Open AI Plan</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="track-stat-grid">
+    <article class="track-stat"><div class="track-stat-label">Topics</div><div class="track-stat-value">{{ topics|length }}</div></article>
+    <article class="track-stat"><div class="track-stat-label">Tasks</div><div class="track-stat-value">{{ tasks|length }}</div></article>
+    <article class="track-stat"><div class="track-stat-label">Recent submissions</div><div class="track-stat-value">{{ recent_submissions|length }}</div></article>
+    <article class="track-stat"><div class="track-stat-label">Track</div><div class="track-stat-value fs-3">Writing</div></article>
+  </section>
+
+  <section class="track-panel p-4">
+    <div class="track-section-head">
+      <div>
+        <div class="track-section-kicker">Writing tasks</div>
+        <h3 class="track-section-title">Available practice</h3>
+      </div>
+    </div>
+    <div class="track-card-grid">
+      {% for task in tasks %}
+        <article class="track-item-card">
+          <div class="track-item-subtitle">{{ task.topic_title_snapshot }}</div>
+          <div class="track-item-title">{{ task.title }}</div>
+          <div class="track-meta mb-2">{{ task.type_label }} • {{ task.level|title }} • Min {{ task.min_words }} words</div>
+          <p class="track-muted mb-3">{{ task.instructions[:170] }}{% if task.instructions|length > 170 %}…{% endif %}</p>
+          <a class="track-btn-primary" href="{{ url_for('student.course_writing_task', course_id=course.id, task_id=task.id) }}">Open Task</a>
+        </article>
+      {% else %}
+        <div class="track-empty">No writing tasks are available yet for this course.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="track-panel p-4">
+    <div class="track-section-head">
+      <div>
+        <div class="track-section-kicker">Recent AI feedback</div>
+        <h3 class="track-section-title">Latest evaluated submissions</h3>
+      </div>
+    </div>
+    <div class="track-card-grid">
+      {% for row in recent_submissions %}
+        <article class="track-item-card">
+          <div class="track-item-title">{{ row.task.title if row.task else 'Task removed' }}</div>
+          <div class="track-meta mb-3">{{ row.word_count }} words • Score {{ '%.1f'|format(row.score or 0) }}/10</div>
+          <a class="track-btn-secondary" href="{{ url_for('student.course_writing_result', course_id=course.id, submission_id=row.id) }}">Open AI Feedback</a>
+        </article>
+      {% else %}
+        <div class="track-empty">No AI writing feedback yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

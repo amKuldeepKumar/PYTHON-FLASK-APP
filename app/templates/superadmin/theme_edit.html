@@ -1,0 +1,230 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Theme • SuperAdmin{% endblock %}
+{% block page_title %}Edit Theme{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-theme-edit.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="sa-studio">
+<section class="sa-hero-panel">
+  <div class="sa-hero-grid">
+    <div>
+      <div class="sa-kicker">Theme Studio</div>
+      <h1 class="sa-title">Edit the live design system with more confidence</h1>
+      <p class="sa-copy">Use this editor to control colors, surfaces, spacing, typography, effects, and the visual personality of the whole platform from one preset.</p>
+      <div class="sa-pill-row">
+        <span class="sa-pill">{{ theme.name }}</span>
+        <span class="sa-pill">{{ presets|length }} built-in presets</span>
+        <span class="sa-pill">Theme tokens live</span>
+      </div>
+    </div>
+    <div class="d-flex justify-content-xl-end align-items-start">
+      <a href="{{ url_for('theme.manage_themes') }}" class="btn btn-outline-light">Back to Themes</a>
+    </div>
+  </div>
+</section>
+
+<form method="POST" action="{{ url_for('theme.update_theme', theme_id=theme.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="card card-dark mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Built-in Futuristic Presets</h5>
+      <div class="row g-3">
+        {% for preset in presets %}
+          <div class="col-md-6 col-xl-3">
+            <div class="theme-preset-card border rounded-4 p-3 h-100">
+              <div class="fw-semibold mb-2">{{ preset.name }}</div>
+              <div class="small text-muted mb-3">{{ preset.key }}</div>
+              <button class="btn btn-sm btn-outline-info w-100" type="button" onclick="applyPreset('{{ preset.key }}')">
+                Apply Preset
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-dark mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Basic</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Theme Name</label>
+          <input type="text" name="name" class="form-control" value="{{ builder.name }}" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Radius</label>
+          <input type="text" name="radius" class="form-control" value="{{ builder.radius }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Primary Color</label>
+          <input type="color" name="primary" class="form-control form-control-color w-100" value="{{ builder.primary }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Body Font Family</label>
+          <select name="font_family" class="form-select">
+            <option value="Segoe UI, Arial, Helvetica, sans-serif" {{ 'selected' if builder.font_family == 'Segoe UI, Arial, Helvetica, sans-serif' else '' }}>Segoe UI / Clean Professional</option>
+            <option value="Bahnschrift, Segoe UI, Arial, Helvetica, sans-serif" {{ 'selected' if builder.font_family == 'Bahnschrift, Segoe UI, Arial, Helvetica, sans-serif' else '' }}>Bahnschrift / Strong Modern</option>
+            <option value="Trebuchet MS, Segoe UI, Arial, sans-serif" {{ 'selected' if builder.font_family == 'Trebuchet MS, Segoe UI, Arial, sans-serif' else '' }}>Trebuchet / Friendly Web</option>
+            <option value="Verdana, Segoe UI, Arial, sans-serif" {{ 'selected' if builder.font_family == 'Verdana, Segoe UI, Arial, sans-serif' else '' }}>Verdana / High Readability</option>
+            <option value="Georgia, Times New Roman, serif" {{ 'selected' if builder.font_family == 'Georgia, Times New Roman, serif' else '' }}>Georgia / Editorial</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Heading Font Family</label>
+          <select name="heading_font_family" class="form-select">
+            <option value="Bahnschrift, Segoe UI, Arial, Helvetica, sans-serif" {{ 'selected' if builder.heading_font_family == 'Bahnschrift, Segoe UI, Arial, Helvetica, sans-serif' else '' }}>Bahnschrift / Professional Display</option>
+            <option value="Trebuchet MS, Segoe UI, Arial, sans-serif" {{ 'selected' if builder.heading_font_family == 'Trebuchet MS, Segoe UI, Arial, sans-serif' else '' }}>Trebuchet / Web Display</option>
+            <option value="Segoe UI Semibold, Segoe UI, Arial, sans-serif" {{ 'selected' if builder.heading_font_family == 'Segoe UI Semibold, Segoe UI, Arial, sans-serif' else '' }}>Segoe UI Semibold / Corporate</option>
+            <option value="Georgia, Times New Roman, serif" {{ 'selected' if builder.heading_font_family == 'Georgia, Times New Roman, serif' else '' }}>Georgia / Editorial Heading</option>
+            <option value="Cambria, Georgia, serif" {{ 'selected' if builder.heading_font_family == 'Cambria, Georgia, serif' else '' }}>Cambria / Formal</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Accent Font Family</label>
+          <select name="accent_font_family" class="form-select">
+            <option value="Consolas, Cascadia Mono, SFMono-Regular, Menlo, monospace" {{ 'selected' if builder.accent_font_family == 'Consolas, Cascadia Mono, SFMono-Regular, Menlo, monospace' else '' }}>Consolas / Professional Mono</option>
+            <option value="Cascadia Mono, Consolas, SFMono-Regular, Menlo, monospace" {{ 'selected' if builder.accent_font_family == 'Cascadia Mono, Consolas, SFMono-Regular, Menlo, monospace' else '' }}>Cascadia Mono / Modern Code</option>
+            <option value="Courier New, Consolas, monospace" {{ 'selected' if builder.accent_font_family == 'Courier New, Consolas, monospace' else '' }}>Courier New / Classic Mono</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-dark mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Core Colors</h5>
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Background</label>
+          <input type="color" name="bg" class="form-control form-control-color w-100" value="{{ builder.bg }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Surface</label>
+          <input type="color" name="surface" class="form-control form-control-color w-100" value="{{ builder.surface }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Surface 2</label>
+          <input type="color" name="surface_2" class="form-control form-control-color w-100" value="{{ builder.surface_2 }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Border</label>
+          <input type="text" name="border" class="form-control" value="{{ builder.border }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Text</label>
+          <input type="text" name="text" class="form-control" value="{{ builder.text }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Muted Text</label>
+          <input type="text" name="muted" class="form-control" value="{{ builder.muted }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Heading Text</label>
+          <input type="text" name="heading_text" class="form-control" value="{{ builder.heading_text }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Shadow</label>
+          <input type="text" name="shadow" class="form-control" value="{{ builder.shadow }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Input Background</label>
+          <input type="text" name="input_bg" class="form-control" value="{{ builder.input_bg }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Input Border</label>
+          <input type="text" name="input_border" class="form-control" value="{{ builder.input_border }}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-dark mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Futuristic Background Engine</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Background Mode</label>
+          <select name="background_mode" class="form-select">
+            <option value="solid" {{ 'selected' if builder.background_mode == 'solid' else '' }}>Solid</option>
+            <option value="gradient" {{ 'selected' if builder.background_mode == 'gradient' else '' }}>Gradient</option>
+            <option value="fluid" {{ 'selected' if builder.background_mode == 'fluid' else '' }}>Fluid</option>
+            <option value="image" {{ 'selected' if builder.background_mode == 'image' else '' }}>Image</option>
+            <option value="parallax" {{ 'selected' if builder.background_mode == 'parallax' else '' }}>Parallax</option>
+          </select>
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Background Image URL</label>
+          <input type="text" name="background_image_url" class="form-control" value="{{ builder.background_image_url }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Gradient Start</label>
+          <input type="color" name="gradient_start" class="form-control form-control-color w-100" value="{{ builder.gradient_start }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Gradient End</label>
+          <input type="color" name="gradient_end" class="form-control form-control-color w-100" value="{{ builder.gradient_end }}">
+        </div>
+        <div class="col-md-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="parallax_enabled" value="1" id="parallax_enabled" {{ 'checked' if builder.parallax_enabled else '' }}><label class="form-check-label" for="parallax_enabled">Parallax</label></div></div>
+        <div class="col-md-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="fluid_enabled" value="1" id="fluid_enabled" {{ 'checked' if builder.fluid_enabled else '' }}><label class="form-check-label" for="fluid_enabled">Fluid</label></div></div>
+        <div class="col-md-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="noise_overlay_enabled" value="1" id="noise_overlay_enabled" {{ 'checked' if builder.noise_overlay_enabled else '' }}><label class="form-check-label" for="noise_overlay_enabled">Noise</label></div></div>
+        <div class="col-md-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="alphabet_background_enabled" value="1" id="alphabet_background_enabled" {{ 'checked' if builder.alphabet_background_enabled else '' }}><label class="form-check-label" for="alphabet_background_enabled">3D Alphabet Background</label></div></div>
+        <div class="col-md-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="alphabet_trails_enabled" value="1" id="alphabet_trails_enabled" {{ 'checked' if builder.alphabet_trails_enabled else '' }}><label class="form-check-label" for="alphabet_trails_enabled">Color Trails</label></div></div>
+        <div class="col-md-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="alphabet_outline_only" value="1" id="alphabet_outline_only" {{ 'checked' if builder.alphabet_outline_only else '' }}><label class="form-check-label" for="alphabet_outline_only">Outline only</label></div></div>
+        <div class="col-md-3"><label class="form-label">Outline Color</label><input type="color" name="alphabet_outline_color" class="form-control form-control-color w-100" value="{{ builder.alphabet_outline_color if builder.alphabet_outline_color and builder.alphabet_outline_color.startswith('#') else '#ffffff' }}"></div>
+        <div class="col-md-3"><label class="form-label">Rotation Depth</label><input type="range" name="alphabet_rotation_depth" class="form-range" min="0" max="100" value="{{ builder.alphabet_rotation_depth | default(60) }}"><div class="small text-muted">Controls 3D tilt and spin feel.</div></div>
+        <div class="col-md-3"><label class="form-label">Alphabet Speed</label><input type="range" name="alphabet_speed" class="form-range" min="30" max="180" value="{{ builder.alphabet_speed | default(100) }}"><div class="small text-muted">Lower is calmer, higher is faster.</div></div>
+        <div class="col-md-3"><label class="form-label">Min Size</label><input type="number" name="alphabet_min_size" class="form-control" min="8" max="180" value="{{ builder.alphabet_min_size | default(18) }}"></div>
+        <div class="col-md-3"><label class="form-label">Max Size</label><input type="number" name="alphabet_max_size" class="form-control" min="16" max="260" value="{{ builder.alphabet_max_size | default(66) }}"></div>
+        <div class="col-md-3"><label class="form-label">Letter Count</label><input type="number" name="alphabet_count" class="form-control" min="1" max="180" value="{{ builder.alphabet_count | default(64) }}"></div>
+        <div class="col-md-3"><label class="form-label">Opacity</label><input type="number" name="alphabet_opacity" class="form-control" min="0" max="100" value="{{ builder.alphabet_opacity | default(82) }}"></div>
+        <div class="col-md-3"><label class="form-label">Direction X</label><input type="number" name="alphabet_direction_x" class="form-control" min="-200" max="200" value="{{ builder.alphabet_direction_x | default(0) }}"></div>
+        <div class="col-md-3"><label class="form-label">Direction Y</label><input type="number" name="alphabet_direction_y" class="form-control" min="-200" max="200" value="{{ builder.alphabet_direction_y | default(100) }}"></div>
+        <div class="col-md-3"><label class="form-label">Tilt X</label><input type="number" name="alphabet_tilt_x" class="form-control" min="0" max="100" value="{{ builder.alphabet_tilt_x | default(18) }}"></div>
+        <div class="col-md-3"><label class="form-label">Tilt Y</label><input type="number" name="alphabet_tilt_y" class="form-control" min="0" max="100" value="{{ builder.alphabet_tilt_y | default(12) }}"></div>
+        <div class="col-md-3"><label class="form-label">Tilt Z</label><input type="number" name="alphabet_tilt_z" class="form-control" min="0" max="100" value="{{ builder.alphabet_tilt_z | default(30) }}"></div>
+        <div class="col-md-3"><label class="form-label">Trail Length</label><input type="number" name="alphabet_trail_length" class="form-control" min="0" max="30" value="{{ builder.alphabet_trail_length | default(14) }}"></div>
+        <div class="col-md-4">
+          <label class="form-label">Motion Mode</label>
+          <select name="alphabet_motion_mode" class="form-select">
+            <option value="float" {{ 'selected' if builder.alphabet_motion_mode == 'float' else '' }}>Float</option>
+            <option value="diagonal" {{ 'selected' if builder.alphabet_motion_mode == 'diagonal' else '' }}>Diagonal</option>
+            <option value="drift" {{ 'selected' if builder.alphabet_motion_mode == 'drift' else '' }}>Drift</option>
+            <option value="shooting" {{ 'selected' if builder.alphabet_motion_mode == 'shooting' else '' }}>Shooting</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-dark mb-4"><div class="card-body"><h5 class="mb-3">Fluid Colors</h5><div class="row g-3"><div class="col-md-4"><label class="form-label">Fluid Color 1</label><input type="color" name="fluid_color_1" class="form-control form-control-color w-100" value="{{ builder.fluid_color_1 }}"></div><div class="col-md-4"><label class="form-label">Fluid Color 2</label><input type="color" name="fluid_color_2" class="form-control form-control-color w-100" value="{{ builder.fluid_color_2 }}"></div><div class="col-md-4"><label class="form-label">Fluid Color 3</label><input type="color" name="fluid_color_3" class="form-control form-control-color w-100" value="{{ builder.fluid_color_3 }}"></div></div></div></div>
+
+  <div class="card card-dark mb-4"><div class="card-body"><h5 class="mb-3">Futuristic Effects</h5><div class="row g-3"><div class="col-md-3"><label class="form-label">Glass Level</label><select name="glass_level" class="form-select"><option value="off" {{ 'selected' if builder.glass_level == 'off' else '' }}>Off</option><option value="low" {{ 'selected' if builder.glass_level == 'low' else '' }}>Low</option><option value="medium" {{ 'selected' if builder.glass_level == 'medium' else '' }}>Medium</option><option value="high" {{ 'selected' if builder.glass_level == 'high' else '' }}>High</option></select></div><div class="col-md-3"><label class="form-label">Glow Intensity</label><input type="range" name="glow_intensity" class="form-range" min="0" max="100" value="{{ builder.glow_intensity }}"></div><div class="col-md-3"><label class="form-label">Blur Strength</label><input type="range" name="blur_strength" class="form-range" min="0" max="100" value="{{ builder.blur_strength }}"></div><div class="col-md-3"><label class="form-label">Hover Style</label><select name="hover_style" class="form-select"><option value="subtle" {{ 'selected' if builder.hover_style == 'subtle' else '' }}>Subtle</option><option value="lift" {{ 'selected' if builder.hover_style == 'lift' else '' }}>Lift</option><option value="glow" {{ 'selected' if builder.hover_style == 'glow' else '' }}>Glow</option><option value="slide" {{ 'selected' if builder.hover_style == 'slide' else '' }}>Slide</option></select></div></div></div></div>
+
+  <div class="card card-dark mb-4"><div class="card-body"><h5 class="mb-3">Icons, Buttons, Cards, Tables</h5><div class="row g-3"><div class="col-md-3"><label class="form-label">Icon Style</label><select name="icon_style" class="form-select"><option value="bootstrap" {{ 'selected' if builder.icon_style == 'bootstrap' else '' }}>Bootstrap</option><option value="futuristic-outline" {{ 'selected' if builder.icon_style == 'futuristic-outline' else '' }}>Futuristic Outline</option><option value="futuristic-filled" {{ 'selected' if builder.icon_style == 'futuristic-filled' else '' }}>Futuristic Filled</option><option value="neon" {{ 'selected' if builder.icon_style == 'neon' else '' }}>Neon</option></select></div><div class="col-md-3"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="icon_glow" value="1" id="icon_glow" {{ 'checked' if builder.icon_glow else '' }}><label class="form-check-label" for="icon_glow">Enable Icon Glow</label></div></div><div class="col-md-3"><label class="form-label">Button Shape</label><select name="button_shape" class="form-select"><option value="rounded" {{ 'selected' if builder.button_shape == 'rounded' else '' }}>Rounded</option><option value="pill" {{ 'selected' if builder.button_shape == 'pill' else '' }}>Pill</option><option value="sharp" {{ 'selected' if builder.button_shape == 'sharp' else '' }}>Sharp</option><option value="glass" {{ 'selected' if builder.button_shape == 'glass' else '' }}>Glass</option></select></div><div class="col-md-3"><label class="form-label">Button Radius</label><input type="text" name="button_radius" class="form-control" value="{{ builder.button_radius }}"></div><div class="col-md-6"><label class="form-label">Card Style</label><input type="text" name="card_style" class="form-control" value="{{ builder.card_style }}"></div><div class="col-md-6"><label class="form-label">Table Style</label><input type="text" name="table_style" class="form-control" value="{{ builder.table_style }}"></div></div></div></div>
+
+  <div class="card card-dark mb-4"><div class="card-body"><h5 class="mb-3">Badge Colors</h5><div class="row g-3"><div class="col-md-4"><label class="form-label">Badge Background</label><input type="text" name="badge_bg" class="form-control" value="{{ builder.badge_bg }}"></div><div class="col-md-4"><label class="form-label">Badge Text</label><input type="text" name="badge_text" class="form-control" value="{{ builder.badge_text }}"></div><div class="col-md-4"><label class="form-label">Badge Border</label><input type="text" name="badge_border" class="form-control" value="{{ builder.badge_border }}"></div></div></div></div>
+
+  <div class="card card-dark mb-4"><div class="card-body"><h5 class="mb-3">CSS Overrides</h5><textarea name="css_overrides" class="form-control" rows="10" placeholder="Optional custom CSS...">{{ builder.css_overrides or '' }}</textarea></div></div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary">Save Changes</button>
+    <a href="{{ url_for('theme.manage_themes') }}" class="btn btn-outline-light">Cancel</a>
+  </div>
+</form>
+
+<div id="themePresetPayload" data-presets="{{ presets | tojson | forceescape }}"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/superadmin-theme-edit.js') }}"></script>
+{% endblock %}

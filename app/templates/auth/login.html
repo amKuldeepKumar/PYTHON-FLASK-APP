@@ -1,0 +1,71 @@
+{% extends "layout/auth_base.html" %}
+{% block title %}Sign In • Fluencify{% endblock %}
+
+{% block content %}
+<div class="text-center mb-3">
+  <div class="mb-2 theme-icon-xl"><i class="bi bi-mortarboard-fill"></i></div>
+  <h3 class="fw-bold mb-1 theme-inline-primary">Welcome to Fluencify</h3>
+  <div class="small theme-inline-muted">
+    Need an account? <a href="{{ url_for('auth.register') }}">Sign Up</a>
+  </div>
+</div>
+
+<h5 class="fw-bold mb-3">Sign in</h5>
+
+<div id="authLoginPayload" data-ai-voice-payload="{{ (ai_voice_payload or {}) | tojson | forceescape }}"></div>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+  <input type="hidden" name="next" value="{{ next_url or '' }}">
+
+  <div class="mb-3 input-icon-group">
+    <label class="form-label small theme-inline-muted">Username or Email</label>
+    <i class="bi bi-person input-icon-left"></i>
+    {{ form.username_or_email(class="form-control auth-input", placeholder="Username or email") }}
+  </div>
+
+  <div class="mb-3 input-icon-group password-field-wrap">
+    <label class="form-label small theme-inline-muted">Password</label>
+    <i class="bi bi-key input-icon-left"></i>
+    {{ form.password(class="form-control auth-input", placeholder="••••••••", id="loginPassword") }}
+    <button
+      type="button"
+      class="input-toggle-btn"
+      data-password-toggle="#loginPassword"
+      data-password-icon="#toggleLoginPasswordIcon"
+      aria-label="Show password"
+      aria-pressed="false"
+    >
+      <i class="bi bi-eye-slash" id="toggleLoginPasswordIcon"></i>
+    </button>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="small text-muted">Student / Admin / SuperAdmin</span>
+    <a class="small" href="{{ url_for('auth.reset_request') }}">Forgot Password?</a>
+  </div>
+
+  <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill">Sign In</button>
+</form>
+
+{% if dev_login_accounts %}
+  <div class="mt-4 p-3 rounded-4 border bg-light-subtle">
+    <div class="fw-semibold mb-2">Local Dev Accounts</div>
+    <div class="small text-muted mb-2">These demo accounts are available only in the local development environment.</div>
+    <div class="d-grid gap-2">
+      {% for account in dev_login_accounts %}
+        <div class="small">
+          <strong>{{ account.role.title() }}</strong>:
+          {{ account.username }} / {{ account.password }}
+          <span class="text-muted">({{ account.email }})</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/auth-login.js') }}"></script>
+{% endblock %}

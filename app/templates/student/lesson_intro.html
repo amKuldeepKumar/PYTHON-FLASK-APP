@@ -1,0 +1,41 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}{{ lesson.title }} • Start Lesson{% endblock %}
+{% block page_title %}Lesson Introduction{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 lesson-shell">
+  <div class="row justify-content-center">
+    <div class="col-xl-9">
+      <div class="track-hero mb-4">
+        <div class="lesson-kicker">Lesson Start</div>
+        <h1 class="fw-bold mt-3 mb-2">{{ lesson.title }}</h1>
+        <p class="track-muted mb-0">{{ lesson.explanation_text or 'This lesson will guide the student through structured questions, answer attempts, and progress updates.' }}</p>
+      </div>
+
+      <div class="track-stat-grid mb-4">
+        <article class="track-stat"><div class="track-stat-label">Course</div><div class="track-stat-value fs-3">{{ course.title }}</div></article>
+        <article class="track-stat"><div class="track-stat-label">Questions</div><div class="track-stat-value">{{ question_count }}</div></article>
+        <article class="track-stat"><div class="track-stat-label">Minutes</div><div class="track-stat-value">{{ lesson.estimated_minutes }}</div></article>
+        <article class="track-stat"><div class="track-stat-label">Mode</div><div class="track-stat-value fs-3">{{ lesson.lesson_type|title }}</div></article>
+      </div>
+
+      <div class="track-panel p-4 mb-4">
+        <div class="track-section-kicker">Lesson guide</div>
+        <h3 class="track-section-title">How this lesson works</h3>
+        <div class="track-muted mt-2 mb-3">You can type or speak your answer, check it before final submission, skip a question for later, and return to it after the remaining questions.</div>
+        <ul class="track-help-list mb-0 ps-3">
+          <li>Answer in your own words.</li>
+          <li>Use the hint as support, not as a full shortcut.</li>
+          <li>Checked answers are previews. Final progress updates happen on submit.</li>
+        </ul>
+      </div>
+
+      <form method="post" action="{{ url_for('student.lesson_intro_start', lesson_id=lesson.id) }}" class="track-footer-actions">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="track-btn-primary">Start Lesson</button>
+        <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="track-btn-secondary">Back to Course</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

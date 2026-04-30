@@ -1,0 +1,212 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Reading Session • Fluencify{% endblock %}
+{% block page_title %}Reading Session{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-reading-session.css') }}">{% endblock %}
+
+{% block content %}
+<div class="reading-shell" id="readingSessionApp" data-autosave-url="{{ url_for('student.course_reading_autosave', course_id=course.id, passage_id=passage.id) if course else url_for('student.reading_autosave', passage_id=passage.id) }}" data-word-support-url="{{ url_for('student.reading_word_support', passage_id=passage.id) }}" data-target-language-label="{{ reading_support_language[1] }}" data-total-questions="{{ question_rows|length }}" data-initial-elapsed="{{ saved_elapsed or 0 }}" data-timer-seconds="{{ timer_seconds }}">
+  <section class="reading-topbar">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+      <div>
+        <div class="small text-uppercase text-secondary mb-1">{{ course.title if course else passage.topic_title_snapshot }} • {{ passage.level_label }} • {{ passage.length_label }}</div>
+        <h2 class="h3 mb-1">{{ passage.title }}</h2>
+        <div class="small text-secondary">{{ passage.word_count }} words • auto-save every few seconds</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <span class="badge text-bg-primary">Published</span>
+        <span class="badge text-bg-success" id="autosaveBadge">Draft ready</span>
+        <span class="badge text-bg-dark" id="timerBadge">00:00</span>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center small mb-2">
+      <span>Progress</span>
+      <span><span id="answeredCount">0</span>/{{ question_rows|length }} answered</span>
+    </div>
+    <div class="reading-progress"><div class="reading-progress-bar" id="readingProgressBar"></div></div>
+  </section>
+
+  <div class="mobile-toggle">
+    <button type="button" class="btn btn-outline-light btn-sm" data-view="passage">View Passage</button>
+    <button type="button" class="btn btn-outline-light btn-sm" data-view="questions">View Questions</button>
+  </div>
+
+  <form method="post" action="{{ url_for('student.course_reading_submit', course_id=course.id, passage_id=passage.id) if course else url_for('student.reading_submit', passage_id=passage.id) }}" id="readingSubmitForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="elapsed_seconds" id="elapsedSecondsInput" value="{{ saved_elapsed or 0 }}">
+
+    <div class="reading-grid">
+      <section class="reading-panel passages" id="passagePanel">
+        <div class="reading-panel-body">
+          <div class="reading-panel-toolbar mb-3">
+  <div>
+    <h3 class="h5 mb-1">Passage</h3>
+    <div class="reading-instruction">
+      <span class="dot"></span>
+      <span>Double-click any word to open instant meaning, synonym, and translation support in the assistant below.</span>
+    </div>
+  </div>
+  <div class="surface-tools">
+    <button type="button" class="surface-tool-btn" id="toggleHelperBtn" aria-expanded="true">Hide Assistant</button>
+    <a class="surface-tool-btn" href="{{ url_for('student.course_reading_home', course_id=course.id) if course else url_for('student.my_courses') }}">Back to Reading</a>
+  </div>
+</div>
+          <div class="reading-surface-wrap">
+            <div class="reading-surface" id="readingSurface">{{ passage.content }}</div>
+          </div>
+
+          <section class="word-support-card word-support-card-pro mt-4" id="wordSupportCard">
+  <div class="helper-toolbar helper-toolbar-pro">
+    <div class="helper-title-block">
+      <div class="helper-kicker">AI WORD SUPPORT</div>
+      <h3 class="helper-main-title mb-1">Vocabulary Assistant</h3>
+      <div class="helper-subtitle">Double-click any word in the passage to instantly view meaning, synonym, and translation.</div>
+    </div>
+
+<div class="helper-actions helper-actions-pro">
+  <span class="helper-language-pill" id="wordSupportLanguageBadge">{{ reading_support_language[1] }}</span>
+  <button type="button" class="surface-tool-btn helper-collapse-btn" id="collapseHelperBtn" aria-expanded="true">Collapse</button>
+</div>
+
+  <div class="helper-status helper-status-pro">
+    <div id="wordSupportEmpty" class="helper-empty helper-empty-pro">
+      <div class="helper-empty-icon">📘</div>
+      <div>
+        <div class="helper-empty-title">No word selected yet</div>
+        <div class="helper-empty-text">Double-click a word above to load clean vocabulary support here.</div>
+      </div>
+    </div>
+
+    <div id="wordSupportLoading" class="helper-loading-pro d-none">
+      Loading word support...
+    </div>
+
+    <div id="wordSupportError" class="alert alert-danger d-none mb-0"></div>
+  </div>
+
+  <div id="wordSupportBody" class="word-support-content d-none">
+    <div class="word-support-topbar">
+      <div>
+        <div class="word-support-selected-label">Selected word</div>
+        <div class="fw-semibold fs-4" id="wordSupportTitle">Selected word</div>
+        <div class="small text-secondary" id="wordSupportMeta"></div>
+      </div>
+
+      <div class="helper-actions" id="helperModeToggles">
+        <button type="button" class="helper-chip is-active" data-helper-tab="meaning">Meaning</button>
+        <button type="button" class="helper-chip" data-helper-tab="synonym">Synonym</button>
+        <button type="button" class="helper-chip" data-helper-tab="translation">Translation</button>
+      </div>
+    </div>
+
+    <div class="word-support-grid word-support-grid-pro">
+      <div class="word-support-item support-panel is-visible" data-helper-panel="meaning">
+        <div class="support-label">Meaning</div>
+        <div class="word-support-value" id="wordMeaningValue">—</div>
+      </div>
+
+      <div class="word-support-item support-panel" data-helper-panel="synonym">
+        <div class="support-label">Synonym</div>
+        <div class="word-support-value" id="wordSynonymValue">—</div>
+      </div>
+
+      <div class="word-support-item support-panel" data-helper-panel="translation">
+        <div class="support-label">Translation</div>
+        <div class="word-support-value" id="wordTranslationValue">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <section class="reading-panel questions" id="questionPanel">
+        <div class="reading-panel-body d-grid gap-3">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h3 class="h5 mb-0">Questions</h3>
+              <div class="small text-secondary">Answer and auto-save stays active.</div>
+            </div>
+            <button type="submit" class="btn-surface-primary">Submit Answers</button>
+          </div>
+
+          {% for question in question_rows %}
+            <div class="question-card">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                  <div class="fw-semibold">Q{{ loop.index }} • {{ question.type_label }}</div>
+                  <div class="small text-secondary">Answer and it will auto-save.</div>
+                </div>
+              </div>
+              <div class="mb-3">{{ question.text }}</div>
+
+              {% if question.type == 'mcq' %}
+                <div class="d-grid gap-2">
+                  {% for option in question.options %}
+                    <label class="form-check rounded-4 border px-3 py-2">
+                      <input class="form-check-input reading-answer-input" type="radio" name="answer_{{ question.id }}" value="{{ option }}" {% if question.answer == option %}checked{% endif %}>
+                      <span class="form-check-label">{{ option }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+              {% elif question.type == 'true_false' %}
+                <div class="d-flex gap-3 flex-wrap">
+                  {% for option in ['True', 'False'] %}
+                    <label class="form-check rounded-4 border px-3 py-2">
+                      <input class="form-check-input reading-answer-input" type="radio" name="answer_{{ question.id }}" value="{{ option }}" {% if question.answer|lower == option|lower %}checked{% endif %}>
+                      <span class="form-check-label">{{ option }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <input class="form-control reading-answer-input" type="text" name="answer_{{ question.id }}" value="{{ question.answer }}" placeholder="Type your answer here">
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </form>
+
+  {% if reading_result %}
+    {% set score = reading_result.score %}
+    <section class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+          <div>
+            <span class="badge text-bg-success mb-2">Submitted</span>
+            <h3 class="mb-1">Reading result</h3>
+            <div class="text-secondary small">Last submitted answer set for this passage.</div>
+          </div>
+          <div class="text-end">
+            <div class="display-6 fw-bold mb-1">{{ score.accuracy }}%</div>
+            <div class="small text-secondary">Accuracy</div>
+          </div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6 col-xl"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary">Correct</div><div class="fw-semibold fs-4">{{ score.correct }}</div></div></div>
+          <div class="col-md-6 col-xl"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary">Incorrect</div><div class="fw-semibold fs-4">{{ score.incorrect }}</div></div></div>
+          <div class="col-md-6 col-xl"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary">Total</div><div class="fw-semibold fs-4">{{ score.total }}</div></div></div>
+          <div class="col-md-6 col-xl"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary">Time</div><div class="fw-semibold fs-4">{{ '%02d:%02d'|format((reading_result.elapsed_seconds // 60), (reading_result.elapsed_seconds % 60)) }}</div></div></div>
+          <div class="col-md-6 col-xl"><div class="border rounded-4 p-3 h-100"><div class="small text-secondary">Reading speed</div><div class="fw-semibold fs-4">{{ reading_result.reading_speed_wpm or 0 }}</div><div class="small text-secondary">WPM</div></div></div>
+        </div>
+        <div class="small text-secondary mb-3">Errors tracked: <strong>{{ reading_result.errors_count if reading_result.errors_count is defined else score.incorrect }}</strong></div>
+        <div class="d-grid gap-3">
+          {% for row in score.checked_rows %}
+            <div class="border rounded-4 p-3 {% if row.is_correct %}border-success{% else %}border-warning{% endif %}">
+              <div class="d-flex justify-content-between gap-3 flex-wrap mb-2">
+                <div class="fw-semibold">Question {{ loop.index }}</div>
+                <span class="badge {% if row.is_correct %}text-bg-success{% else %}text-bg-warning text-dark{% endif %}">{{ 'Correct' if row.is_correct else 'Review' }}</span>
+              </div>
+              <div class="small mb-1">Your answer: <strong>{{ row.your_answer or '—' }}</strong></div>
+              <div class="small mb-1">Correct answer: <strong>{{ row.correct_answer or '—' }}</strong></div>
+              {% if row.explanation %}<div class="small text-secondary">{{ row.explanation }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='shared/js/reading_session.js') }}"></script>
+
+{% endblock %}

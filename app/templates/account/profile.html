@@ -1,0 +1,139 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Profile - Fluencify{% endblock %}
+{% block page_title %}Profile{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/account-profile.css') }}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid profile-shell" id="profileShell" data-teacher-catalog="{{ teacher_catalog|tojson|forceescape }}">
+  <div class="profile-top">
+    <div>
+      <h1 class="h4 mb-1">Your Learning Profile</h1>
+      <div class="meta small">Keep your learner details accurate for personalization, support visibility, and certificate generation.</div>
+    </div>
+    <div class="profile-badge">Completion {{ completion }}%</div>
+  </div>
+
+  {% if onboarding %}
+    <div class="alert alert-info">Complete your profile once to unlock your personalized AI student dashboard.</div>
+  {% endif %}
+
+  {% if next_steps and completion < 100 %}
+    <div class="hint-panel">
+      <div class="fw-semibold mb-2">Recommended next steps</div>
+      <ul>
+        {% for s in next_steps %}
+          <li>{{ s }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div class="card profile-card border-0">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" id="profileForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="camera_image" id="cameraImageField">
+        <input type="hidden" name="remove_avatar" id="removeAvatarField" value="0">
+
+        <div class="profile-photo-card mb-4">
+          <div class="profile-photo-preview">
+            <img id="avatarPreview" src="{{ current_user.avatar_url or url_for('static', filename='shared/img/avatar-placeholder.svg') }}" alt="Profile photo" onerror="this.src='{{ url_for('static', filename='shared/img/avatar-placeholder.svg') }}'">
+          </div>
+          <div class="profile-photo-actions">
+            <div class="fw-semibold mb-1">Profile Photo</div>
+            <div class="desc small mb-3">Shown on your dashboard, profile, and learning cards.</div>
+            <div class="d-flex flex-wrap gap-2">
+              <label class="btn btn-outline-light btn-sm mb-0">Upload from Device<input type="file" class="d-none" id="avatarFileInput" name="avatar_file" accept="image/png,image/jpeg,image/jpg,image/webp"></label>
+              <button type="button" class="btn btn-outline-light btn-sm" id="openCameraBtn">Take Photo</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" id="removePhotoBtn">Remove Photo</button>
+            </div>
+            <div class="small text-secondary mt-2">Allowed: JPG, PNG, WEBP. Max 4 MB.</div>
+          </div>
+        </div>
+
+        <div id="cameraWrap" class="camera-wrap d-none mb-4">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <canvas id="cameraCanvas" class="d-none"></canvas>
+          <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-primary btn-sm" id="capturePhotoBtn">Capture</button>
+            <button type="button" class="btn btn-outline-light btn-sm" id="closeCameraBtn">Close Camera</button>
+          </div>
+        </div>
+
+        <div class="selection-panel">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <div class="section-label mb-1">Learning support selection</div>
+              <div class="fw-semibold">Choose your institute and teacher from approved records only.</div>
+              <div class="selection-copy mt-1">This keeps your dashboard, certificates, and reporting linked to the correct institute, admin, and teacher.</div>
+            </div>
+            <span class="badge rounded-pill text-bg-dark">No manual typing</span>
+          </div>
+          <div class="selection-grid">
+            <div>
+              <label class="form-label">Institute</label>
+              {{ form.organization_id(class="form-select", id="organizationSelect") }}
+              <div class="form-text">Choose your institute or stay as an independent learner.</div>
+            </div>
+            <div>
+              <label class="form-label">Teacher</label>
+              {{ form.teacher_id(class="form-select", id="teacherSelect") }}
+              <div class="form-text">Teacher list updates based on the selected institute.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ownership-preview">
+          <div class="ownership-box">
+            <div class="section-label mb-1">Institute</div>
+            <strong id="selectedInstituteLabel">{{ current_user.organization_name or 'Independent Learner' }}</strong>
+            <div class="sub">Your learner record will remain attached to this institute.</div>
+          </div>
+          <div class="ownership-box">
+            <div class="section-label mb-1">Teacher</div>
+            <strong id="selectedTeacherLabel">{{ current_user.assigned_teacher.full_name if current_user.assigned_teacher else 'Not assigned yet' }}</strong>
+            <div class="sub">Your classroom and performance view can be connected here.</div>
+          </div>
+          <div class="ownership-box">
+            <div class="section-label mb-1">Admin visibility</div>
+            <strong id="selectedAdminLabel">{{ current_user.organization.full_name if current_user.organization else 'Fluencify Support Team' }}</strong>
+            <div class="sub">This is who can view and manage your learning inside the platform.</div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label">First Name</label>{{ form.first_name(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">Last Name</label>{{ form.last_name(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">Father Name</label>{{ form.father_name(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">Phone</label>{{ form.phone(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">Gender</label>{{ form.gender(class="form-select") }}</div>
+          <div class="col-md-4"><label class="form-label">Date of Birth</label>{{ form.date_of_birth(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">Country</label>{{ form.country(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">State</label>{{ form.state(class="form-control") }}</div>
+          <div class="col-md-4"><label class="form-label">City</label>{{ form.city(class="form-control") }}</div>
+          <div class="col-12"><label class="form-label">Full Address</label>{{ form.address(class="form-control", rows="3", placeholder="House number, street, area, landmark") }}</div>
+          <div class="col-md-6"><label class="form-label">Native Language</label>{{ form.native_language(class="form-select") }}<div class="form-text">This language will be used for translation support on the student side.</div></div>
+          <div class="col-md-6"><label class="form-label">Preferred Study Time</label>{{ form.preferred_study_time(class="form-select") }}</div>
+          <div class="col-md-4"><label class="form-label">Target Exam</label>{{ form.target_exam(class="form-select") }}</div>
+          <div class="col-md-4"><label class="form-label">Current Level</label>{{ form.current_level(class="form-select") }}</div>
+          <div class="col-md-4"><label class="form-label">Target Score</label>{{ form.target_score(class="form-control") }}</div>
+          <div class="col-md-6"><label class="form-label">Bio</label>{{ form.bio(class="form-control", rows="3") }}</div>
+          <div class="col-md-6"><label class="form-label">Study Goal</label>{{ form.study_goal(class="form-control", rows="3") }}</div>
+        </div>
+
+        <div class="btn-cluster">
+          {{ form.submit(class="btn btn-primary") }}
+          <a class="btn btn-outline-light" href="{{ url_for('account.preferences') }}">Voice & Preferences</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/profile-photo.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/account-profile.js') }}"></script>
+{% endblock %}

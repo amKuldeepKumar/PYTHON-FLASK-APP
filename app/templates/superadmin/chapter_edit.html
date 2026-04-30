@@ -1,0 +1,60 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Chapter • Fluencify{% endblock %}
+{% block page_title %}Edit Chapter{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h1 class="mb-2">Edit Chapter</h1>
+    <p class="text-secondary mb-0">Update the chapter title, lesson mapping, description, and order.</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.lesson_detail', lesson_id=chapter.lesson.id) }}">Review lesson</a>
+    <a class="btn btn-outline-primary" href="{{ url_for('superadmin.chapters_index') }}">Back to chapters</a>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+  <div class="card-body p-4 p-lg-5">
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="small text-uppercase text-secondary fw-semibold mb-1">Category</div>
+        <div class="fw-semibold">{{ (course.track_type or 'speaking')|replace('_', ' ')|title }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="small text-uppercase text-secondary fw-semibold mb-1">Course</div>
+        <div class="fw-semibold">{{ course.title }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="small text-uppercase text-secondary fw-semibold mb-1">Current lesson</div>
+        <div class="fw-semibold">{{ lesson.title }}</div>
+      </div>
+    </div>
+
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="form-label">Lesson</label>
+          {{ form.lesson_id(class_='form-select') }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Sort Order</label>
+          {{ form.sort_order(class_='form-control') }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Chapter Title</label>
+          {{ form.title(class_='form-control', placeholder='Enter chapter title') }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          {{ form.description(class_='form-control', rows='5', placeholder='Optional chapter description') }}
+        </div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap mt-4">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.chapters_index') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

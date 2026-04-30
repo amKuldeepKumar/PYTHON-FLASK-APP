@@ -1,0 +1,128 @@
+{% extends "layout/dashboard_base.html" %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-languages.css') }}">{% endblock %}
+
+{% block title %}Languages • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Languages{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Add or Update Language</h5>
+        <form method="post">
+          {{ form.hidden_tag() }}
+          <div class="mb-3">{{ form.code.label(class="form-label") }}{{ form.code(class="form-control", placeholder="en") }}<div class="form-text">Required. Use a short unique code like <strong>en</strong>, <strong>hi</strong>, <strong>pa</strong>, <strong>fr</strong>.</div></div>
+          <div class="mb-3">{{ form.name.label(class="form-label") }}{{ form.name(class="form-control", placeholder="English") }}<div class="form-text">Required. This is the English/system display name.</div></div>
+          <div class="mb-3">{{ form.native_name.label(class="form-label") }}{{ form.native_name(class="form-control", placeholder="English") }}<div class="form-text">Optional but recommended. Use the language's own script, for example हिन्दी or ਪੰਜਾਬੀ.</div></div>
+          <div class="mb-3">{{ form.direction.label(class="form-label") }}{{ form.direction(class="form-select") }}<div class="form-text">Choose <strong>LTR</strong> for most languages and <strong>RTL</strong> for Arabic, Urdu, Hebrew, etc.</div></div>
+          <div class="form-check form-switch mb-3">{{ form.is_enabled(class="form-check-input") }} {{ form.is_enabled.label(class="form-check-label") }}</div>
+          {{ form.submit(class="btn btn-primary w-100") }}
+        </form>
+
+        <div class="language-format-card mt-4">
+          <h6 class="fw-bold mb-2">Required format to add a new language</h6>
+          <div class="small text-secondary mb-3">To add a new language from this panel, keep these values ready before saving.</div>
+          <div class="mb-2"><span class="code-sample">1. Code: en</span><span class="code-sample">2. Name: English</span><span class="code-sample">3. Native: English</span><span class="code-sample">4. Direction: LTR/RTL</span></div>
+          <div class="small">
+            <strong>Minimum required:</strong> Language Code + Language Name + Direction.<br>
+            <strong>Recommended:</strong> add Native Name too, so learners see the correct script in selectors.
+          </div>
+          <hr class="my-3">
+          <div class="small text-secondary mb-2">Example records</div>
+          <div class="small">
+            <div><strong>Punjabi</strong> → code: <code>pa</code>, native: <code>ਪੰਜਾਬੀ</code>, direction: <code>LTR</code></div>
+            <div><strong>Arabic</strong> → code: <code>ar</code>, native: <code>العربية</code>, direction: <code>RTL</code></div>
+            <div><strong>French</strong> → code: <code>fr</code>, native: <code>Français</code>, direction: <code>LTR</code></div>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <form method="post">
+          {{ import_form.hidden_tag() }}
+          <div class="small text-secondary mb-3">Import the default language registry directly into the database and enable all imported languages.</div>
+          {{ import_form.submit(class="btn btn-outline-light w-100") }}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-3">
+          <div>
+            <h5 class="fw-bold mb-1">Language Registry</h5>
+            <div class="small text-secondary">These records are stored in the database and used across preferences, course builders, and page language selectors.</div>
+          </div>
+          <span class="badge language-result-badge">
+            {% if search_query %}
+              {{ filtered_languages }} result{{ '' if filtered_languages == 1 else 's' }} of {{ total_languages }}
+            {% else %}
+              {{ total_languages }} records
+            {% endif %}
+          </span>
+        </div>
+
+        <form method="get" class="language-search-row mb-3">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-lg-8">
+              <input type="text" name="q" value="{{ search_query or '' }}" class="form-control" placeholder="Search by code, name, native name, direction, or status">
+            </div>
+            <div class="col-6 col-lg-2 d-grid">
+              <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Search</button>
+            </div>
+            <div class="col-6 col-lg-2 d-grid">
+              <a href="{{ url_for('superadmin.languages_index') }}" class="btn btn-outline-light">Clear</a>
+            </div>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Native</th>
+                <th>Direction</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for language in languages %}
+              <tr>
+                <td><span class="badge text-bg-dark">{{ language.code }}</span></td>
+                <td class="fw-semibold">{{ language.name }}</td>
+                <td>{{ language.native_name or '—' }}</td>
+                <td>{{ language.direction|upper }}</td>
+                <td>
+                  {% if language.is_enabled %}
+                    <span class="badge text-bg-success">Enabled</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Disabled</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <form method="post" action="{{ url_for('superadmin.languages_toggle', language_id=language.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-light">{{ 'Disable' if language.is_enabled else 'Enable' }}</button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="6" class="text-center text-secondary py-4">No languages found for this search.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

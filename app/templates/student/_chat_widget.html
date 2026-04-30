@@ -1,0 +1,79 @@
+<div
+  id="studentChatWidget"
+  class="student-chat-widget"
+  data-fetch-url="{{ url_for('student.chat_widget') }}"
+  data-post-url="{{ url_for('student.chat_widget_post_message') }}"
+  data-initial-course-id="{{ student_chat_widget.active_course_id or '' }}"
+  data-csrf-token="{{ csrf_token() }}"
+>
+  <button type="button" class="student-chat-toggle" id="studentChatToggle" aria-label="Open student chat">
+    <i class="bi bi-chat-dots-fill"></i>
+    <span>Student Chat</span>
+  </button>
+
+  <section class="student-chat-panel" id="studentChatPanel" aria-hidden="true">
+    <div class="student-chat-header">
+      <div>
+        <div class="student-chat-kicker">Safe Student Room</div>
+        <div class="student-chat-title">Course Community</div>
+      </div>
+      <button type="button" class="student-chat-close" id="studentChatClose" aria-label="Close chat">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="student-chat-body">
+      <label class="form-label small text-secondary mb-1" for="studentChatCourseSelect">Course room</label>
+      <select class="form-select form-select-sm mb-2" id="studentChatCourseSelect" {% if not student_chat_widget.courses %}disabled{% endif %}>
+        {% for course in student_chat_widget.courses %}
+          <option value="{{ course.id }}" {% if course.id == student_chat_widget.active_course_id %}selected{% endif %}>{{ course.title }}</option>
+        {% else %}
+          <option value="">No unlocked course room yet</option>
+        {% endfor %}
+      </select>
+
+      <div class="student-chat-notice" id="studentChatNotice">
+        {% if student_chat_widget.courses %}
+          {{ student_chat_widget.moderation_notice }}
+        {% else %}
+          Course enrollment is required before sending messages.
+        {% endif %}
+      </div>
+
+      <div class="student-chat-messages" id="studentChatMessages">
+        {% for message in student_chat_widget.messages %}
+          <article class="student-chat-message {% if message.is_self %}is-self{% endif %}">
+            <div class="student-chat-message-head">
+              <strong>{{ message.sender_name }}</strong>
+              <span>{{ message.created_at }}</span>
+            </div>
+            <div>{{ message.body }}</div>
+          </article>
+        {% else %}
+          <div class="student-chat-empty">No messages yet. Start with one kind course-related message.</div>
+        {% endfor %}
+      </div>
+
+      <form id="studentChatForm" class="student-chat-form">
+        <textarea
+          class="form-control"
+          id="studentChatBody"
+          rows="3"
+          maxlength="600"
+          placeholder="Ask a safe course question or share a helpful learning tip."
+          {% if not student_chat_widget.courses %}disabled{% endif %}
+        ></textarea>
+        <div class="student-chat-form-row">
+          <div class="student-chat-help">
+            {% if student_chat_widget.courses %}
+              Only enrolled students can use this room.
+            {% else %}
+              No unlocked course room yet.
+            {% endif %}
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm" {% if not student_chat_widget.courses %}disabled{% endif %}>Send</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

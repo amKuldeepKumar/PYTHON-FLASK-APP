@@ -1,0 +1,85 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Security - Fluencify{% endblock %}
+{% block page_title %}Security{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h1 class="h4 mb-3">Account Security</h1>
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-6 password-field-wrap">
+                <label class="form-label">Current password</label>
+                {{ form.current_password(class="form-control", id="currentPassword") }}
+                <button
+                  type="button"
+                  class="input-toggle-btn"
+                  data-password-toggle="#currentPassword"
+                  data-password-icon="#currentPasswordIcon"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                >
+                  <i class="bi bi-eye-slash" id="currentPasswordIcon"></i>
+                </button>
+              </div>
+              <div class="col-md-6"></div>
+              <div class="col-md-6 password-field-wrap">
+                <label class="form-label">New password</label>
+                {{ form.new_password(class="form-control", id="newPassword") }}
+                <button
+                  type="button"
+                  class="input-toggle-btn"
+                  data-password-toggle="#newPassword"
+                  data-password-icon="#newPasswordIcon"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                >
+                  <i class="bi bi-eye-slash" id="newPasswordIcon"></i>
+                </button>
+              </div>
+              <div class="col-md-6 password-field-wrap">
+                <label class="form-label">Confirm new password</label>
+                {{ form.confirm_password(class="form-control", id="confirmNewPassword") }}
+                <button
+                  type="button"
+                  class="input-toggle-btn"
+                  data-password-toggle="#confirmNewPassword"
+                  data-password-icon="#confirmNewPasswordIcon"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                >
+                  <i class="bi bi-eye-slash" id="confirmNewPasswordIcon"></i>
+                </button>
+              </div>
+            </div>
+            <div class="mt-4">{{ form.submit(class="btn btn-primary") }}</div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h3 class="h6">Current Protection</h3>
+          <p class="mb-2">Global OTP mode: <strong>{{ policy.otp_mode }}</strong></p>
+          <p class="mb-2">OTP status for offline work: <strong>{{ 'Enabled' if otp_enabled else 'Disabled' }}</strong></p>
+          <p class="mb-0 small text-muted">Only SuperAdmin can turn OTP on or off from the Security Center.</p>
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="h6">Device Sessions</h3>
+          <p class="small text-secondary mb-3">Review active devices and revoke sessions you no longer trust.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-light btn-sm" href="{{ url_for('account.sessions') }}">Manage Sessions</a>
+            <a class="btn btn-outline-light btn-sm" href="{{ url_for('account.login_history') }}">Login History</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

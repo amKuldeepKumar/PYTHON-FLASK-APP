@@ -1,0 +1,58 @@
+
+/* Theme font bridge.
+   Place the licensed font files in /app/static/fonts/theme using these exact filenames.
+   The theme system will then switch fonts automatically per preset. */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Devanagari&family=Noto+Sans+Gujarati&family=Noto+Sans+Tamil&family=Noto+Sans+Telugu&family=Noto+Sans+Kannada&family=Noto+Sans+Malayalam&family=Noto+Sans+Arabic&family=Noto+Sans+Hebrew&family=Noto+Sans+Thai&family=Noto+Sans+SC&family=Noto+Sans+JP&family=Noto+Sans+KR&display=swap');
+
+@font-face {
+  font-family: 'Futuristic Armour';
+  src: local('Futuristic Armour'), url('/static/fonts/theme/Futuristic Armour.otf') format('opentype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lacheyard Script';
+  src: local('Lacheyard Script'), url('/static/fonts/theme/LacheyardScript_PERSONAL_USE_ONLY.otf') format('opentype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Robota';
+  src: local('Robota'), url('/static/fonts/theme/Robota-NonCommercial.otf') format('opentype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Valentime';
+  src: local('Valentime'), url('/static/fonts/theme/Valentime.otf') format('opentype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bernadette';
+  src: local('Bernadette'), url('/static/fonts/theme/bernadette.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Hello Valentina';
+  src: local('Hello Valentina'), url('/static/fonts/theme/Hello Valentina.ttf') format('truetype');
+  font-display: swap;
+}
+/* 🌍 GLOBAL DEFAULT */
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+/* 🇮🇳 INDIAN LANGUAGES */
+.lang-pa { font-family: 'Noto Sans Gurmukhi', sans-serif; }
+.lang-hi { font-family: 'Noto Sans Devanagari', sans-serif; }
+.lang-gu { font-family: 'Noto Sans Gujarati', sans-serif; }
+.lang-ta { font-family: 'Noto Sans Tamil', sans-serif; }
+.lang-te { font-family: 'Noto Sans Telugu', sans-serif; }
+.lang-kn { font-family: 'Noto Sans Kannada', sans-serif; }
+.lang-ml { font-family: 'Noto Sans Malayalam', sans-serif; }
+
+/* 🌍 GLOBAL SCRIPTS */
+.lang-ar { font-family: 'Noto Sans Arabic', sans-serif; }
+.lang-he { font-family: 'Noto Sans Hebrew', sans-serif; }
+.lang-zh { font-family: 'Noto Sans SC', sans-serif; }
+.lang-ja { font-family: 'Noto Sans JP', sans-serif; }
+.lang-ko { font-family: 'Noto Sans KR', sans-serif; }
+.lang-th { font-family: 'Noto Sans Thai', sans-serif; }

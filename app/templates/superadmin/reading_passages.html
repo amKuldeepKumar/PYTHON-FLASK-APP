@@ -1,0 +1,169 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Reading Passages • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Reading Passages{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xxl-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <div>
+            <h4 class="mb-1">Generate / Create Passage</h4>{% if selected_course %}<div class="small text-secondary mt-1">Selected course: {{ selected_course.title if selected_course else 'All reading courses' }}</div>{% endif %}
+            <div class="text-secondary small">Phase 4 + 6 — AI or manual passage creation with draft → review → published control.</div>
+          </div>
+          <div class="d-flex gap-2">{% if selected_course %}<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.course_detail', course_id=selected_course.id) }}">Back to Course</a><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.reading_passages') }}">Clear Course Filter</a>{% endif %}<a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_topics', course_id=selected_course_id) if selected_course_id else url_for('superadmin.reading_topics') }}">Reading Topics</a></div>
+        </div>
+
+        <form method="get" class="row g-3 mb-3"><div class="col-12"><label class="form-label">Select Reading Course</label><select class="form-select" name="course_id" onchange="this.form.submit()"><option value="">All reading passages</option>{% for course in course_rows %}<option value="{{ course.id }}" {% if selected_course_id == course.id %}selected{% endif %}>{{ course.title }}</option>{% endfor %}</select></div></form><form method="post" class="row g-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-12">
+            <label class="form-label">Topic</label>
+            <select class="form-select" name="topic_id" required>
+              <option value="">Select topic</option>
+              {% for topic in topics %}
+                <option value="{{ topic.id }}" {% if selected_topic and selected_topic.id == topic.id %}selected{% endif %}>{{ topic.title }} • {{ topic.level_label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Target word count</label>
+            <input class="form-control" type="number" min="80" max="500" name="target_words" placeholder="160">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Student level</label>
+            <select class="form-select" name="level" required>
+              {% for level in level_choices %}
+                <option value="{{ level }}" {% if (selected_topic and selected_topic.level == level) or (not selected_topic and loop.first) %}selected{% endif %}>{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Length</label>
+            <select class="form-select" name="length_mode" required>
+              {% for length_mode in length_choices %}
+                <option value="{{ length_mode }}" {% if length_mode == 'medium' %}selected{% endif %}>{{ length_mode.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Linked course</label>
+            <select class="form-select" name="course_id">
+              <option value="0">No linked course</option>
+              {% for course in course_rows %}
+                <option value="{{ course.id }}" {% if selected_topic and selected_topic.course_id == course.id %}selected{% endif %}>{{ course.title }} • {{ course.track_type|replace('_', ' ')|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Course level number</label>
+            <input class="form-control" type="number" name="course_level_number" min="1" placeholder="1" value="{{ selected_topic.course_level_number if selected_topic and selected_topic.course_level_number else '' }}">
+          </div>
+
+          <div class="col-12">
+            <div class="rounded-4 border p-3 reading-panel-soft">
+              <div class="small text-secondary mb-1">Current passage provider</div>
+              {% if default_provider %}
+                <div class="fw-semibold">{{ default_provider.name }}</div>
+                <div class="small text-secondary">{{ default_provider.provider_label }} • {{ 'Enabled' if default_provider.is_enabled else 'Disabled' }}</div>
+              {% else %}
+                <div class="fw-semibold">No provider configured</div>
+                <div class="small text-secondary">Set up the registry first so the dynamic engine has a default provider.</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12"><label class="form-label">Creation mode</label><select class="form-select" name="mode"><option value="ai" selected>AI generate</option><option value="manual">Manual create</option></select></div>
+          <div class="col-12"><label class="form-label">Manual title</label><input class="form-control" name="manual_title" placeholder="Optional manual passage title"></div>
+          <div class="col-12"><label class="form-label">Manual content</label><textarea class="form-control" name="manual_content" rows="7" placeholder="Paste or write a full reading passage for manual creation."></textarea></div>
+          <div class="col-12 d-grid">
+            <button type="submit" class="btn btn-primary">Save Passage</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xxl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
+          <div>
+            <h4 class="mb-1">Generated Passage Library</h4>
+            <div class="text-secondary small">Stored passages stay linked to the topic and course, ready for question generation and student reading sessions.</div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('superadmin.reading_api_registry', kind='passage') }}">Provider Setup</a>
+            {% if selected_topic %}
+              <a class="btn btn-outline-primary btn-sm" href="{{ url_for('superadmin.reading_passages') }}">Clear Filter</a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if selected_topic %}
+          <div class="alert alert-info py-2 mb-3">Showing passages for <strong>{{ selected_topic.title }}</strong>.</div>
+        {% endif %}
+
+        {% if passages %}
+          <div class="d-flex flex-column gap-3">
+            {% for passage in passages %}
+              <div class="rounded-4 border p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
+                  <div>
+                    <div class="fw-semibold">{{ passage.title }}</div>
+                    <div class="small text-secondary">{{ passage.topic_title_snapshot }} • {{ passage.level_label }} • {{ passage.length_label }} • {{ passage.word_count }} words{% if passage.course %} • {{ passage.course.title }}{% endif %}{% if passage.course_level_number %} • Course Level {{ passage.course_level_number }}{% endif %}</div>
+                    <div class="small text-secondary">Provider: {{ passage.provider_name_snapshot or 'System mock' }} • {{ passage.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                  </div>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge {% if passage.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ 'Active' if passage.is_active else 'Inactive' }}</span>
+                    <span class="badge text-bg-primary">{{ passage.workflow_label }}</span>
+                    <span class="badge {% if passage.is_published %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ passage.publication_label }}</span>
+                  </div>
+                </div>
+
+                <p class="mb-3">{{ passage.content }}</p>
+
+                {% if passage.generation_notes %}
+                  <div class="small text-secondary mb-3">{{ passage.generation_notes }}</div>
+                {% endif %}
+
+                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                  <a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.reading_passage_edit', passage_id=passage.id) }}">Edit</a>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_submit_review', passage_id=passage.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-primary" type="submit">Move to Review</button></form><form method="post" action="{{ url_for('superadmin.reading_passage_approve', passage_id=passage.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-success" type="submit">Approve</button></form>
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_questions', passage_id=passage.id, course_id=selected_course_id) }}">Generate Questions</a>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_publish', passage_id=passage.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm {% if passage.is_published %}btn-outline-secondary{% else %}btn-outline-success{% endif %}" type="submit">{% if passage.is_published %}Unpublish{% else %}Publish{% endif %}</button>
+                  </form>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_regenerate', passage_id=passage.id) }}" onsubmit="return confirm('Regenerate this passage? A fresh passage will be created and the current one will be archived.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-info" type="submit">Regenerate</button>
+                  </form>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_toggle', passage_id=passage.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm {% if passage.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" type="submit">{% if passage.is_active %}Disable{% else %}Enable{% endif %}</button>
+                  </form>
+                  <form method="post" action="{{ url_for('superadmin.reading_passage_delete', passage_id=passage.id) }}" onsubmit="return confirm('Delete this passage?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rounded-4 border p-4 text-center">
+            <div class="fw-semibold mb-1">No passages generated yet</div>
+            <div class="text-secondary small">Use the form on the left to generate the first passage from a SuperAdmin topic.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

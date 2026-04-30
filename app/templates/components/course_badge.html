@@ -1,0 +1,6 @@
+{% if badge and badge.title %}
+  <div class="course-badge course-badge--{{ badge.template or 'gradient' }} badge-anim-{{ badge.animation or 'none' }}">
+    <div class="course-badge__title">{{ badge.title }}</div>
+    {% if badge.subtitle %}<div class="course-badge__subtitle">{{ badge.subtitle }}</div>{% endif %}
+  </div>
+{% endif %}

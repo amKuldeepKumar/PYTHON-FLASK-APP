@@ -1,0 +1,421 @@
+{% extends "layout/dashboard_base.html" %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-course-detail.css') }}">{% endblock %}
+{% block title %}Course Content Manager • Fluencify{% endblock %}
+{% block page_title %}Course Content Manager{% endblock %}
+{% block content %}
+{% set track = (course.track_type or 'speaking')|replace('spoken','speaking') %}
+<div class="course-manager-page">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <div class="text-uppercase small text-secondary mb-1">Phase 3 • Superadmin Course Manager</div>
+      <h1 class="mb-2">{{ course.title }}</h1>
+      <p class="text-secondary mb-0">One clean control panel for course health, content counts, publish readiness, and quick module routing.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('superadmin.courses') }}" class="btn btn-outline-light">Back to Courses</a>
+      <a href="{{ url_for('superadmin.course_image_qa', course_id=course.id) }}" class="btn btn-outline-light">Image QA Review</a>
+      {% if course.slug == 'nursery-image-practice' or 'nursery' in (course.title or '')|lower %}
+        <a href="{{ url_for('superadmin.nursery_studio') }}" class="btn btn-outline-light">Open Nursery Studio</a>
+      {% endif %}
+      {% if preview_route %}<a href="{{ preview_route }}" class="btn btn-outline-primary">Open Student Preview</a>{% endif %}
+    </div>
+  </div>
+
+  <div class="stats-grid mb-4">
+    <div class="stat-box"><div class="text-secondary small">Track</div><div class="value">{{ track|title }}</div></div>
+    <div class="stat-box"><div class="text-secondary small">Course Health</div><div class="value">{{ course_health.percent }}%</div></div>
+    <div class="stat-box"><div class="text-secondary small">Topics / Lessons</div><div class="value">{{ linked_topic_count }}</div></div>
+    <div class="stat-box"><div class="text-secondary small">Prompts / Questions</div><div class="value">{{ total_prompt_like_items }}</div></div>
+  </div>
+
+  <div class="course-manager-layout">
+    <aside class="course-control-sidebar">
+      <div class="soft sidebar-panel p-3 mb-3">
+        <div class="sidebar-heading">Course Control Panel</div>
+        <div class="sidebar-mini">{{ course.language_code|upper }} • {{ course.difficulty|default('basic', true)|title }} • {{ track|title }}</div>
+        <div class="control-list mt-3">
+          <a class="control-link {% if active_tab=='overview' %}active{% endif %}" href="{{ quick_links.overview }}">Overview</a>
+          <a class="control-link {% if active_tab=='topics' %}active{% endif %}" href="{{ quick_links.topics }}">Topics</a>
+          <a class="control-link {% if active_tab=='ai-content' %}active{% endif %}" href="{{ quick_links.ai_content }}">AI Content</a>
+          <a class="control-link {% if active_tab=='questions-prompts' %}active{% endif %}" href="{{ quick_links.questions_prompts }}">Questions / Prompts</a>
+          <a class="control-link {% if active_tab=='settings' %}active{% endif %}" href="{{ quick_links.settings }}">Settings</a>
+          <a class="control-link {% if active_tab=='preview' %}active{% endif %}" href="{{ quick_links.preview }}">Preview</a>
+        </div>
+      </div>
+
+      <div class="soft sidebar-panel p-3 mb-3">
+        <div class="sidebar-heading">Publish Readiness</div>
+        <div class="readiness-row mt-2">
+          <span class="readiness-badge {{ 'is-ready' if publish_readiness.ready else 'is-missing' }}">{{ 'Ready' if publish_readiness.ready else 'Not Ready' }}</span>
+          <span class="mini text-secondary">{{ course.status|title }}</span>
+        </div>
+        <div class="fw-semibold mt-3">{{ publish_readiness.summary }}</div>
+        <div class="sidebar-mini mt-1">{{ publish_readiness.detail }}</div>
+        <div class="mini mt-3">Published: <strong>{{ 'Yes' if course.is_published else 'No' }}</strong></div>
+      </div>
+
+      <div class="soft sidebar-panel p-3 mb-3">
+        <div class="sidebar-heading">Missing Content Alerts</div>
+        {% if missing_content_alerts %}
+          <ul class="alert-list mt-3 mb-0">
+            {% for alert in missing_content_alerts %}
+              <li>{{ alert }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="sidebar-mini mt-3">No missing-content alert right now. All module buckets have content.</div>
+        {% endif %}
+      </div>
+
+      <div class="soft sidebar-panel p-3">
+        <div class="sidebar-heading">Quick Module Links</div>
+        <div class="quick-links-grid mt-3">
+          <a href="{{ quick_links.speaking }}" class="quick-link-chip">Speaking</a>
+          <a href="{{ quick_links.reading }}" class="quick-link-chip">Reading</a>
+          <a href="{{ quick_links.writing }}" class="quick-link-chip">Writing</a>
+          <a href="{{ quick_links.listening }}" class="quick-link-chip">Listening</a>
+          <a href="{{ quick_links.review_dashboard }}" class="quick-link-chip">Review Dashboard</a>
+        </div>
+      </div>
+    </aside>
+
+    <section class="manager-shell p-4">
+      <div class="track-status-grid mb-4">
+        {% for item in track_status_cards %}
+          <div class="track-status-card {{ 'is-ready' if item.ready else 'is-missing' }}">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div>
+                <div class="track-status-title">{{ item.label }}</div>
+                <div class="track-status-meta">{{ '✔ Complete' if item.ready else '❌ Missing' }}</div>
+              </div>
+              <span class="status-pill">{{ item.primary_count }} {{ item.primary_label }}</span>
+            </div>
+            <div class="track-count-line">{{ item.secondary_count }} {{ item.secondary_label }}</div>
+            <div class="d-flex gap-2 flex-wrap mt-3">
+              <a href="{{ item.manager_url }}" class="btn btn-sm btn-outline-primary">Open {{ item.label }}</a>
+              <a href="{{ item.secondary_url }}" class="btn btn-sm btn-outline-light">{{ item.secondary_cta }}</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if active_tab=='overview' %}
+        <div class="row g-3">
+          <div class="col-xl-8">
+            <div class="soft p-4 h-100">
+              <div class="section-label">Course Health View</div>
+              <h4 class="mb-2">Admin overview</h4>
+              <div class="muted mb-3">{{ course.description or 'No description yet.' }}</div>
+              <div class="health-progress mb-3">
+                <div class="health-progress-bar" style="width: {{ course_health.percent }}%;"></div>
+              </div>
+              <div class="sidebar-mini mb-4">{{ course_health.ready_modules }} of {{ course_health.total_modules }} module buckets have content.</div>
+              <div class="overview-grid">
+                <div class="overview-card"><div class="label">Language</div><div class="value">{{ course.language_code|upper }}</div></div>
+                <div class="overview-card"><div class="label">Difficulty</div><div class="value">{{ course.difficulty|default('basic', true)|title }}</div></div>
+                <div class="overview-card"><div class="label">Status</div><div class="value">{{ course.status|title }}</div></div>
+                <div class="overview-card"><div class="label">Enrollments</div><div class="value">{{ metrics.enrollments }}</div></div>
+                <div class="overview-card"><div class="label">Speaking Topics</div><div class="value">{{ linked_speaking_topics|length }}</div></div>
+                <div class="overview-card"><div class="label">Reading Topics</div><div class="value">{{ linked_reading_topics|length }}</div></div>
+                <div class="overview-card"><div class="label">Reading Passages</div><div class="value">{{ linked_reading_passages|length }}</div></div>
+                <div class="overview-card"><div class="label">Writing Tasks</div><div class="value">{{ linked_writing_tasks|length }}</div></div>
+                <div class="overview-card"><div class="label">Listening Topics</div><div class="value">{{ linked_listening_lessons|length }}</div></div>
+                <div class="overview-card"><div class="label">Listening Questions</div><div class="value">{{ linked_listening_question_count }}</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-4">
+            <div class="soft p-4 h-100">
+              <div class="section-label">Quick Actions</div>
+              <h4 class="mb-3">Open module managers</h4>
+              <div class="d-grid gap-2">
+                <a class="btn btn-outline-primary" href="{{ quick_links.speaking }}">Speaking Manager</a>
+                <a class="btn btn-outline-primary" href="{{ quick_links.reading }}">Reading Manager</a>
+                <a class="btn btn-outline-primary" href="{{ quick_links.writing }}">Writing Manager</a>
+                <a class="btn btn-outline-primary" href="{{ quick_links.listening }}">Listening Manager</a>
+                <a class="btn btn-outline-light" href="{{ quick_links.review_dashboard }}">Unified Review Dashboard</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% elif active_tab=='topics' %}
+        <div class="row g-3">
+          {% if track=='reading' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Reading Topics</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.reading_topics', course_id=course.id) }}">Open Topic Manager</a></div>
+            <div class="col-12"><div class="soft p-3">{% for topic in linked_reading_topics %}<div class="d-flex justify-content-between border-bottom py-2"><div><strong>{{ topic.title }}</strong><div class="muted small">{{ topic.level_label if topic.level_label is defined else topic.level|title }}{% if topic.category %} • {{ topic.category }}{% endif %}</div></div><div class="muted">{% if topic.is_active %}Active{% else %}Inactive{% endif %}</div></div>{% else %}<div class="muted">No reading topics linked yet.</div>{% endfor %}</div></div>
+          {% elif track=='writing' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Writing Topics</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.writing_topics', course_id=course.id) }}">Open Topic Manager</a></div>
+            <div class="col-12"><div class="soft p-3">{% for topic in linked_writing_topics %}<div class="d-flex justify-content-between border-bottom py-2"><div><strong>{{ topic.title }}</strong><div class="muted small">{{ topic.level_label if topic.level_label is defined else topic.level|title }}{% if topic.category %} • {{ topic.category }}{% endif %}</div></div><div class="muted">{% if topic.is_active %}Active{% else %}Inactive{% endif %}</div></div>{% else %}<div class="muted">No writing topics linked yet.</div>{% endfor %}</div></div>
+          {% elif track=='speaking' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Speaking Topics</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.course_speaking_manager', course_id=course.id) }}">Open Topic Manager</a></div>
+            <div class="col-12"><div class="soft p-3">{% for topic in linked_speaking_topics %}<div class="d-flex justify-content-between border-bottom py-2"><div><strong>{{ topic.title }}</strong><div class="muted small">{{ topic.level|title }} • {{ topic.active_prompt_count }} prompts</div></div><div class="muted">{% if topic.is_active %}Active{% else %}Inactive{% endif %}</div></div>{% else %}<div class="muted">No speaking topics linked yet.</div>{% endfor %}</div></div>
+          {% elif track=='listening' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Listening Topics</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.listening_topics', course_id=course.id) }}">Open Topic Manager</a></div>
+            <div class="col-12"><div class="soft p-3">{% for lesson in linked_listening_lessons %}<div class="d-flex justify-content-between border-bottom py-2"><div><strong>{{ lesson.title }}</strong><div class="muted small">{{ lesson.workflow_status|default('draft', true)|title }} • {{ lesson.estimated_minutes or 0 }} mins</div></div><div class="muted">{% if lesson.is_published %}Published{% else %}Hidden{% endif %}</div></div>{% else %}<div class="muted">No listening topics linked yet.</div>{% endfor %}</div></div>
+          {% else %}
+            <div class="col-12"><div class="soft p-4">No dedicated {{ track|title }} topic manager exists yet in this build.</div></div>
+          {% endif %}
+        </div>
+      {% elif active_tab=='ai-content' %}
+        <div class="row g-3">
+          {% if track=='reading' %}
+            <div class="col-lg-4"><div class="soft p-4 track-card"><h4>Reading AI Flow</h4><div class="muted mini mb-3">Correct order: topic → passage → review/edit → approve/publish → questions.</div><div class="d-grid gap-2"><a class="btn btn-outline-primary" href="{{ url_for('superadmin.reading_topics', course_id=course.id) }}">1. Manage Topics</a><a class="btn btn-outline-light" href="{{ url_for('superadmin.reading_passages', course_id=course.id) }}">2. Generate Passage</a><a class="btn btn-outline-light" href="{{ url_for('superadmin.reading_questions', course_id=course.id) }}">3. Generate Questions</a></div></div></div>
+            <div class="col-lg-8"><div class="soft p-4"><h4 class="mb-3">Recent Passages</h4>{% for passage in linked_reading_passages[:10] %}<div class="border-bottom py-3"><div class="d-flex justify-content-between gap-2 flex-wrap"><div><strong>{{ passage.title }}</strong><div class="muted mini">{{ passage.topic_title_snapshot }} • {{ passage.word_count }} words • {{ passage.status_label }} • {{ passage.publication_label }}</div></div><div class="d-flex gap-2"><a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.reading_passage_edit', passage_id=passage.id) }}">Edit</a><a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.reading_questions', passage_id=passage.id, course_id=course.id) }}">Questions</a></div></div><div class="reading-text mini mt-2">{{ passage.content[:280] }}{% if passage.content|length > 280 %}…{% endif %}</div></div>{% else %}<div class="muted">No passages generated yet for this course.</div>{% endfor %}</div></div>
+          {% elif track=='writing' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Writing Tasks</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.writing_tasks', course_id=course.id) }}">Open Task Manager</a></div>
+            <div class="col-12"><div class="soft p-4">{% for task in linked_writing_tasks %}<div class="border-bottom py-3"><div class="d-flex justify-content-between gap-2 flex-wrap"><div><strong>{{ task.title }}</strong><div class="muted mini">{{ task.topic_title_snapshot }} • {{ task.type_label }} • min {{ task.min_words }} words</div></div><a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.writing_task_edit', task_id=task.id) }}">Edit</a></div><div class="reading-text mini mt-2">{{ task.instructions[:280] }}{% if task.instructions|length > 280 %}…{% endif %}</div></div>{% else %}<div class="muted">No writing tasks created yet for this course.</div>{% endfor %}</div></div>
+          {% elif track=='speaking' %}
+            <div class="col-12"><div class="soft p-4">Speaking AI content is prompt-based. Use the topic manager and prompt manager from this course.</div></div>
+          {% elif track=='listening' %}
+            <div class="col-lg-4"><div class="soft p-4 track-card"><h4>Listening AI Flow</h4><div class="muted mini mb-3">Correct order: topic → script → audio → review → questions → publish.</div><div class="d-grid gap-2"><a class="btn btn-outline-primary" href="{{ url_for('superadmin.listening_topics', course_id=course.id) }}">1. Manage Topics</a><a class="btn btn-outline-light" href="{{ url_for('superadmin.listening_questions', course_id=course.id) }}">2. Manage Questions</a><a class="btn btn-outline-light" href="{{ url_for('superadmin.listening_review_queue') }}">3. Review Queue</a></div></div></div>
+            <div class="col-lg-8"><div class="soft p-4"><h4 class="mb-3">Listening Topics</h4>{% for lesson in linked_listening_lessons[:10] %}<div class="border-bottom py-3"><div class="d-flex justify-content-between gap-2 flex-wrap"><div><strong>{{ lesson.title }}</strong><div class="muted mini">{{ lesson.workflow_status|default('draft', true)|title }} • {{ lesson.estimated_minutes or 0 }} mins</div></div><div class="d-flex gap-2"><a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.listening_topic_edit', lesson_id=lesson.id) }}">Edit</a><a class="btn btn-sm btn-outline-primary" href="{{ url_for('superadmin.listening_questions', course_id=course.id) }}">Questions</a></div></div><div class="reading-text mini mt-2">{{ (lesson.explanation_text or '')[:280] }}{% if (lesson.explanation_text or '')|length > 280 %}…{% endif %}</div></div>{% else %}<div class="muted">No listening AI content generated yet for this course.</div>{% endfor %}</div></div>
+          {% else %}
+            <div class="col-12"><div class="soft p-4">No AI content flow exists yet for {{ track|title }} in this build.</div></div>
+          {% endif %}
+        </div>
+      {% elif active_tab=='questions-prompts' %}
+        <div class="row g-3">
+          {% if track=='reading' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Reading Questions</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.reading_questions', course_id=course.id) }}">Open Question Generator</a></div>
+            <div class="col-12"><div class="soft p-4">{% for group in reading_question_groups.values() %}<div class="border-bottom py-3"><div class="d-flex justify-content-between gap-2 flex-wrap"><div><strong>{{ group['passage'].title if group['passage'] else 'Passage removed' }}</strong><div class="muted mini">{{ group['items']|length }} questions</div></div></div>{% for item in group['items'][:5] %}<div class="mini mt-2">• {{ item.type_label }} — {{ item.question_text }}</div>{% endfor %}</div>{% else %}<div class="muted">No generated reading questions yet.</div>{% endfor %}</div></div>
+          {% elif track=='writing' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Writing Tasks</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.writing_tasks', course_id=course.id) }}">Open Task Manager</a></div>
+            <div class="col-12"><div class="soft p-4">{% for task in linked_writing_tasks %}<div class="border-bottom py-2"><strong>{{ task.title }}</strong><div class="muted mini">{{ task.type_label }} • min {{ task.min_words }} words</div></div>{% else %}<div class="muted">No writing tasks available because no writing topics are linked yet.</div>{% endfor %}</div></div>
+          {% elif track=='speaking' and question_rows %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h4 class="mb-0">Lesson Questions</h4>
+                <div class="muted mini">This course uses the standard LMS lesson hierarchy, so image questions stay here instead of using the prompt manager.</div>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                {% if lessons %}
+                  <a class="btn btn-outline-light" href="{{ url_for('superadmin.lesson_detail', lesson_id=lessons[0].id) }}">Open Lesson Builder</a>
+                {% endif %}
+                <a class="btn btn-outline-primary" href="{{ url_for('superadmin.questions_index') }}">All Questions</a>
+              </div>
+            </div>
+
+            <div class="col-xl-5">
+              <div class="soft p-4 h-100">
+                <h5 class="mb-3">Bulk Upload Questions</h5>
+                <form method="post" enctype="multipart/form-data">
+                  {{ upload_form.hidden_tag() }}
+                  <input type="hidden" name="action" value="upload_questions">
+                  <div class="mb-3">
+                    <label class="form-label">{{ upload_form.lesson_id.label.text }}</label>
+                    {{ upload_form.lesson_id(class="form-select") }}
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{{ upload_form.auto_split_size.label.text }}</label>
+                    {{ upload_form.auto_split_size(class="form-control") }}
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{{ upload_form.upload.label.text }}</label>
+                    {{ upload_form.upload(class="form-control") }}
+                  </div>
+                  <div class="muted mini mb-3">CSV supports `prompt`, `image_url`, `answer`, `hint`, and `expected_keywords`. Duplicate prompts and broken local image paths are blocked before import.</div>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-primary flex-grow-1">Import Questions</button>
+                    <a class="btn btn-outline-light" href="{{ url_for('superadmin.question_upload_template') }}">CSV Template</a>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="col-xl-7">
+              <div class="soft p-4 h-100">
+                <h5 class="mb-3">Add Single Question</h5>
+                <form method="post">
+                  {{ question_form.hidden_tag() }}
+                  <input type="hidden" name="action" value="add_question">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">{{ question_form.subsection_id.label.text }}</label>
+                      {{ question_form.subsection_id(class="form-select") }}
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">{{ question_form.title.label.text }}</label>
+                      {{ question_form.title(class="form-control") }}
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">{{ question_form.image_url.label.text }}</label>
+                      {{ question_form.image_url(class="form-control", placeholder="/static/uploads/questions/nursery/apple.svg") }}
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">{{ question_form.prompt.label.text }}</label>
+                      {{ question_form.prompt(class="form-control", rows="4") }}
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">{{ question_form.prompt_type.label.text }}</label>
+                      {{ question_form.prompt_type(class="form-select") }}
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">{{ question_form.language_code.label.text }}</label>
+                      {{ question_form.language_code(class="form-select") }}
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">{{ question_form.hint_text.label.text }}</label>
+                      {{ question_form.hint_text(class="form-control", rows="2") }}
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">{{ question_form.model_answer.label.text }}</label>
+                      {{ question_form.model_answer(class="form-control", rows="3") }}
+                    </div>
+                    <div class="col-md-8">
+                      <label class="form-label">{{ question_form.expected_keywords.label.text }}</label>
+                      {{ question_form.expected_keywords(class="form-control") }}
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                      <div class="form-check">
+                        {{ question_form.is_active(class="form-check-input") }}
+                        {{ question_form.is_active.label(class="form-check-label ms-2") }}
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn btn-success mt-3">Save Question</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="soft p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                  <h5 class="mb-0">Current Lesson Questions</h5>
+                  <span class="status-pill">{{ question_rows|length }} total</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-dark align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Lesson</th>
+                        <th>Chapter</th>
+                        <th>Subsection</th>
+                        <th>Image</th>
+                        <th>Prompt</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in question_rows[:20] %}
+                        <tr>
+                          <td>{{ item.subsection.chapter.lesson.title }}</td>
+                          <td>{{ item.subsection.chapter.title }}</td>
+                          <td>{{ item.subsection.title }}</td>
+                          <td>{% if item.image_url %}<span class="badge text-bg-success">Image</span>{% else %}<span class="badge text-bg-secondary">Text</span>{% endif %}</td>
+                          <td>{{ item.prompt[:120] }}{% if item.prompt|length > 120 %}…{% endif %}</td>
+                          <td class="text-end"><a class="btn btn-sm btn-outline-light" href="{{ url_for('superadmin.question_detail', question_id=item.id) }}">Edit</a></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% if question_rows|length > 20 %}
+                  <div class="muted mini mt-3">Showing the first 20 questions here. Open All Questions for the full list.</div>
+                {% endif %}
+              </div>
+            </div>
+          {% elif track=='speaking' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Speaking Prompts</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.course_speaking_prompts_manager', course_id=course.id) }}">Open Prompt Manager</a></div>
+            <div class="col-12"><div class="soft p-4">{% for topic in linked_speaking_topics %}<div class="border-bottom py-2"><strong>{{ topic.title }}</strong><div class="muted mini">{{ topic.active_prompt_count }} active prompts</div></div>{% else %}<div class="muted">No speaking prompts available because no speaking topics are linked yet.</div>{% endfor %}</div></div>
+          {% elif track=='listening' %}
+            <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2"><h4 class="mb-0">Listening Questions</h4><a class="btn btn-outline-primary" href="{{ url_for('superadmin.listening_questions', course_id=course.id) }}">Open Question Manager</a></div>
+            <div class="col-12"><div class="soft p-4">{% if linked_listening_question_count %}<div class="mb-2"><strong>{{ linked_listening_question_count }}</strong> listening questions are linked to this course.</div>{% endif %}{% for lesson in linked_listening_lessons %}<div class="border-bottom py-2"><strong>{{ lesson.title }}</strong><div class="muted mini">Use the listening question manager to edit the linked answer set.</div></div>{% else %}<div class="muted">No listening questions available because no listening topics are linked yet.</div>{% endfor %}</div></div>
+          {% else %}
+            <div class="col-12"><div class="soft p-4">No question/prompt manager exists yet for {{ track|title }} in this build.</div></div>
+          {% endif %}
+        </div>
+      {% elif active_tab=='settings' %}
+        <div class="soft settings-shell p-4" id="course-settings">
+          <div class="settings-header d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+            <div>
+              <h4 class="mb-1">Course Settings</h4>
+              <p class="muted mb-0">Edit title, pricing, language, publish status, and access rules from one clean control panel.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="settings-chip">Track: {{ track|title }}</span>
+              <span class="settings-chip">{{ 'Published' if course.is_published else 'Draft' }}</span>
+              <form method="post" onsubmit="return confirm('Delete this course and all linked content?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="delete_course">
+                <button class="btn btn-outline-danger">Delete Course</button>
+              </form>
+            </div>
+          </div>
+
+          <form method="post" novalidate class="course-settings-form">
+            <input type="hidden" name="action" value="save_course">
+            {{ course_form.hidden_tag() }}
+
+            <div class="settings-section mb-4">
+              <div class="settings-section-title">Basic Details</div>
+              <div class="row g-3">
+                <div class="col-md-6">{{ course_form.title.label(class='form-label') }}{{ course_form.title(class='form-control') }}</div>
+                <div class="col-md-6">{{ course_form.slug.label(class='form-label') }}{{ course_form.slug(class='form-control') }}</div>
+                <div class="col-12">{{ course_form.description.label(class='form-label') }}{{ course_form.description(class='form-control settings-textarea', rows='4') }}</div>
+              </div>
+            </div>
+
+            <div class="settings-section mb-4">
+              <div class="settings-section-title">AI Welcome Script</div>
+              <div class="row g-3">
+                <div class="col-12">
+                  {{ course_form.welcome_intro_script.label(class='form-label') }}
+                  {{ course_form.welcome_intro_script(class='form-control settings-textarea', rows='4', placeholder='Welcome to this course. You will practice speaking step by step and build clear everyday communication.') }}
+                  <div class="muted mini mt-1">This is used by the AI welcome screen right after a student enrolls.</div>
+                </div>
+                <div class="col-12">
+                  {{ course_form.learning_outcomes_script.label(class='form-label') }}
+                  {{ course_form.learning_outcomes_script(class='form-control settings-textarea', rows='4', placeholder='In this course you will learn vocabulary, sentence building, picture responses, and confidence in short answers.') }}
+                  <div class="muted mini mt-1">Use this for the “what you are going to learn” part of the welcome speech.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section mb-4">
+              <div class="settings-section-title">Course Identity</div>
+              <div class="row g-3">
+                <div class="col-md-3">{{ course_form.language_code.label(class='form-label') }}{{ course_form.language_code(class='form-select') }}</div>
+                <div class="col-md-3">{{ course_form.track_type.label(class='form-label') }}{{ course_form.track_type(class='form-select') }}</div>
+                <div class="col-md-3">{{ course_form.difficulty.label(class='form-label') }}{{ course_form.difficulty(class='form-select') }}</div>
+                <div class="col-md-3">{{ course_form.currency_code.label(class='form-label') }}{{ course_form.currency_code(class='form-select') }}</div>
+                <div class="col-md-3">{{ course_form.max_level.label(class='form-label') }}{{ course_form.max_level(class='form-control', min='1') }}</div>
+              </div>
+            </div>
+
+            <div class="settings-section mb-4">
+              <div class="settings-section-title">Full Course Pricing</div>
+              <div class="row g-3">
+                <div class="col-md-4">{{ course_form.access_type.label(class='form-label') }}{{ course_form.access_type(class='form-select') }}</div>
+                <div class="col-md-4">{{ course_form.base_price.label(class='form-label') }}{{ course_form.base_price(class='form-control', step='0.01') }}</div>
+                <div class="col-md-4">{{ course_form.sale_price.label(class='form-label') }}{{ course_form.sale_price(class='form-control', step='0.01') }}</div>
+              </div>
+            </div>
+
+            <div class="settings-section mb-4">
+              <div class="settings-section-title">Single Level Pricing</div>
+              <div class="row g-3">
+                <div class="col-md-3">{{ course_form.level_access_type.label(class='form-label') }}{{ course_form.level_access_type(class='form-select') }}</div>
+                <div class="col-md-3">{{ course_form.level_price.label(class='form-label') }}{{ course_form.level_price(class='form-control', step='0.01') }}</div>
+                <div class="col-md-3">{{ course_form.level_sale_price.label(class='form-label') }}{{ course_form.level_sale_price(class='form-control', step='0.01') }}</div>
+                <div class="col-md-3 d-flex align-items-end"><div class="form-check form-switch settings-switch">{{ course_form.allow_level_purchase(class='form-check-input') }}{{ course_form.allow_level_purchase.label(class='form-check-label ms-2') }}</div></div>
+              </div>
+            </div>
+
+            <div class="settings-section mb-2">
+              <div class="settings-section-title">Visibility & Access</div>
+              <div class="settings-switch-grid">
+                <div class="settings-switch-card"><div class="form-check form-switch settings-switch">{{ course_form.is_published(class='form-check-input') }}{{ course_form.is_published.label(class='form-check-label ms-2') }}</div><div class="muted mini">Show this course to students across the platform.</div></div>
+                <div class="settings-switch-card"><div class="form-check form-switch settings-switch">{{ course_form.is_premium(class='form-check-input') }}{{ course_form.is_premium.label(class='form-check-label ms-2') }}</div><div class="muted mini">Mark this course as premium content.</div></div>
+              </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 flex-wrap mt-4"><button class="btn btn-success px-4">Update Course</button></div>
+          </form>
+        </div>
+      {% elif active_tab=='preview' %}
+        <div class="soft p-4"><h4 class="mb-3">Superadmin Student Preview</h4><div class="muted mb-3">Use this preview before checking the real student library.</div>{% if preview_route %}<a href="{{ preview_route }}" class="btn btn-outline-primary">Open Real Student Page</a>{% else %}<div class="muted">Preview route not available.</div>{% endif %}</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

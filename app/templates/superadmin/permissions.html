@@ -1,0 +1,64 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Permissions • Fluencify{% endblock %}
+{% block page_title %}Permissions{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-studio.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 sa-studio">
+  <section class="sa-hero-panel">
+    <div class="sa-hero-grid">
+      <div>
+        <div class="sa-kicker">RBAC Catalog</div>
+        <h1 class="sa-title">Keep the permission system transparent and audit-friendly</h1>
+        <p class="sa-copy">SuperAdmin should be able to scan permission codes quickly, understand what exists, and map new operational roles without digging through backend code first.</p>
+        <div class="sa-pill-row">
+          <span class="sa-pill">{{ perms|length }} permission codes</span>
+          <span class="sa-pill">Role mapping ready</span>
+        </div>
+      </div>
+      <div class="sa-stat-grid">
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Permissions</div>
+          <div class="sa-stat-value">{{ perms|length }}</div>
+          <div class="sa-stat-note">Total available permission codes in the system.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Scope</div>
+          <div class="sa-stat-value">RBAC</div>
+          <div class="sa-stat-note">These codes drive the role and access layer.</div>
+        </div>
+        <div class="sa-stat-card">
+          <div class="sa-stat-label">Visibility</div>
+          <div class="sa-stat-value">Live</div>
+          <div class="sa-stat-note">Permission inventory is visible only to higher-access roles.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sa-table-panel">
+      <div class="sa-table-wrap table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for perm in perms %}
+              <tr>
+                <td><span class="sa-code-chip">{{ perm.code }}</span></td>
+                <td>{{ perm.name if perm.name is defined else perm.code }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="2" class="text-muted py-4">No permissions available.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+  </section>
+</div>
+{% endblock %}

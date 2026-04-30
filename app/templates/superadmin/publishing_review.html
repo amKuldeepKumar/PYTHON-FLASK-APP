@@ -1,0 +1,227 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Publishing Review Dashboard • Fluencify{% endblock %}
+{% block page_title %}Publishing Review Dashboard{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-publishing-review.css') }}">
+{% endblock %}
+{% block content %}
+<div class="publishing-review-page">
+  <div class="section-head publishing-head mb-4">
+    <div>
+      <div class="text-uppercase small text-secondary mb-1">Phase 6 • Post-publish monitoring</div>
+      <h1 class="mb-2">Superadmin Publishing Review Dashboard</h1>
+      <p class="text-secondary mb-0">Track recently published courses, student participation, engagement health, and follow-up actions from one screen.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-light" href="{{ url_for('superadmin.courses') }}">Open Courses</a>
+      <a class="btn btn-primary" href="{{ url_for('superadmin.publishing_review_dashboard') }}">Refresh</a>
+    </div>
+  </div>
+
+  <div class="review-summary-grid mb-4">
+    <div class="review-summary-card">
+      <div class="summary-label">Total published courses</div>
+      <div class="summary-value">{{ summary.total_published }}</div>
+    </div>
+    <div class="review-summary-card">
+      <div class="summary-label">Published in last 7 days</div>
+      <div class="summary-value">{{ summary.published_recent }}</div>
+    </div>
+    <div class="review-summary-card">
+      <div class="summary-label">Total enrolled students</div>
+      <div class="summary-value">{{ summary.total_enrolled }}</div>
+    </div>
+    <div class="review-summary-card">
+      <div class="summary-label">Active students</div>
+      <div class="summary-value">{{ summary.active_students }}</div>
+    </div>
+    <div class="review-summary-card warning">
+      <div class="summary-label">Low engagement courses</div>
+      <div class="summary-value">{{ summary.low_engagement }}</div>
+    </div>
+    <div class="review-summary-card danger">
+      <div class="summary-label">Zero enrollment courses</div>
+      <div class="summary-value">{{ summary.zero_enrollment }}</div>
+    </div>
+  </div>
+
+  <div class="admin-studio-card p-4 mb-4">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label">Track</label>
+        <select class="form-select" name="track">
+          {% for value, label in filter_options.tracks %}
+          <option value="{{ value }}" {% if filters.track == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Engagement</label>
+        <select class="form-select" name="engagement">
+          {% for value, label in filter_options.engagement %}
+          <option value="{{ value }}" {% if filters.engagement == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Access</label>
+        <select class="form-select" name="access">
+          {% for value, label in filter_options.access %}
+          <option value="{{ value }}" {% if filters.access == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Visibility</label>
+        <select class="form-select" name="status">
+          {% for value, label in filter_options.statuses %}
+          <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Search course</label>
+        <div class="input-group">
+          <input class="form-control" type="search" name="q" value="{{ filters.q }}" placeholder="Course title or description">
+          <button class="btn btn-primary" type="submit">Apply</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-8">
+      <div class="admin-studio-card p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+          <div>
+            <h2 class="h4 mb-1">Recently published courses</h2>
+            <p class="text-secondary mb-0">Review enrollment, participation, and health for every published course.</p>
+          </div>
+          <span class="badge text-bg-light border">{{ rows|length }} courses</span>
+        </div>
+        <div class="table-responsive publishing-review-table-wrap">
+          <table class="table align-middle publishing-review-table mb-0">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Published</th>
+                <th>Participation</th>
+                <th>Health</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ row.title }}</div>
+                  <div class="d-flex flex-wrap gap-2 mt-2 small">
+                    <span class="badge text-bg-light border">{{ row.track_label }}</span>
+                    <span class="badge text-bg-light border">{{ row.difficulty }}</span>
+                    <span class="badge text-bg-light border">{{ row.content.label }}</span>
+                  </div>
+                  <div class="small text-secondary mt-2">{{ row.content.note }}</div>
+                </td>
+                <td>
+                  <div class="fw-semibold">{{ row.published_at.strftime('%d %b %Y') if row.published_at else '—' }}</div>
+                  <div class="small text-secondary">{{ row.published_at.strftime('%I:%M %p') if row.published_at else '—' }}</div>
+                  <div class="small text-secondary mt-1">By {{ row.published_by }}</div>
+                </td>
+                <td>
+                  <div class="participation-metrics">
+                    <div><strong>{{ row.activity.enrolled_count }}</strong> enrolled</div>
+                    <div><strong>{{ row.activity.started_count }}</strong> started</div>
+                    <div><strong>{{ row.activity.active_count }}</strong> active</div>
+                    <div><strong>{{ row.activity.average_completion }}%</strong> avg completion</div>
+                  </div>
+                  <div class="progress mt-2" role="progressbar" aria-valuenow="{{ row.activity.active_ratio }}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: {{ row.activity.active_ratio }}%"></div>
+                  </div>
+                  <div class="small text-secondary mt-2">
+                    {{ row.activity.last_activity_at.strftime('%d %b %Y, %I:%M %p') if row.activity.last_activity_at else 'No student activity yet' }}
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex flex-column gap-2 align-items-start">
+                    <span class="badge text-bg-{{ row.activity.engagement_tone }}">{{ row.activity.engagement }}</span>
+                    <span class="badge text-bg-{{ row.health_tone }}">{{ row.health_label }}</span>
+                    <div class="small text-secondary">Avg score: {{ '%.1f'|format(row.activity.average_score) }}</div>
+                  </div>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex flex-column gap-2 align-items-stretch publishing-actions">
+                    <a class="btn btn-sm btn-outline-light" href="{{ row.open_url }}">Open course</a>
+                    <a class="btn btn-sm btn-outline-light" href="{{ row.review_url }}">Review content</a>
+                    <form method="post" action="{{ url_for('superadmin.publishing_review_dashboard', **request.args.to_dict()) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="course_id" value="{{ row.course_id }}">
+                      <input type="hidden" name="action" value="unpublish">
+                      <button class="btn btn-sm btn-outline-warning w-100" type="submit">Unpublish</button>
+                    </form>
+                    <form method="post" action="{{ url_for('superadmin.publishing_review_dashboard', **request.args.to_dict()) }}" onsubmit="return confirm('Archive this course from the publishing dashboard?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="course_id" value="{{ row.course_id }}">
+                      <input type="hidden" name="action" value="archive">
+                      <button class="btn btn-sm btn-outline-danger w-100" type="submit">Archive</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-secondary py-5">No courses matched the current filters.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="admin-studio-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+          <div>
+            <h2 class="h5 mb-1">Alerts</h2>
+            <p class="text-secondary mb-0">Courses that need superadmin attention.</p>
+          </div>
+          <span class="badge text-bg-light border">{{ alerts|length }}</span>
+        </div>
+        <div class="alert-stack">
+          {% for alert in alerts %}
+          <a class="alert-item tone-{{ alert.tone }}" href="{{ alert.open_url }}">
+            <div class="alert-title">{{ alert.course_title }}</div>
+            <div class="alert-message">{{ alert.message }}</div>
+          </a>
+          {% else %}
+          <div class="empty-soft-state">No alerts right now.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="admin-studio-card p-4">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+          <div>
+            <h2 class="h5 mb-1">Publishing timeline</h2>
+            <p class="text-secondary mb-0">Recent publish and review activity.</p>
+          </div>
+        </div>
+        <div class="timeline-stack">
+          {% for item in timeline_rows %}
+          <a class="timeline-item" href="{{ item.open_url }}">
+            <div class="timeline-dot"></div>
+            <div>
+              <div class="timeline-title">{{ item.course_title }}</div>
+              <div class="timeline-meta">{{ item.track_label }} • {{ item.action }}</div>
+              <div class="timeline-meta">{{ item.timestamp.strftime('%d %b %Y, %I:%M %p') if item.timestamp else '—' }} • {{ item.actor_name }}</div>
+            </div>
+          </a>
+          {% else %}
+          <div class="empty-soft-state">No publish history available yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

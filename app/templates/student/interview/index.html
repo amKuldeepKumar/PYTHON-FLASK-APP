@@ -1,0 +1,171 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Interview Preparation • Fluencify{% endblock %}
+{% block page_title %}Interview Preparation{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/interview-prep.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="interview-shell">
+  <section class="interview-hero card-surface">
+    <div>
+      <div class="eyebrow">AI-Controlled Interview Room</div>
+      <h2>{{ course.title }}</h2>
+      <p>Select what kind of interview you want to prepare for. AI will adjust the question difficulty, English level, and follow-up style based on your choice.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-box"><span>Recent sessions</span><strong>{{ recent_sessions|length }}</strong></div>
+      <div class="stat-box"><span>Mode</span><strong>Live 1-to-1</strong></div>
+      <div class="stat-box"><span>Pause handling</span><strong>Active</strong></div>
+      <div class="stat-box"><span>Answer time limit</span><strong>None</strong></div>
+    </div>
+  </section>
+
+  <section class="card-surface">
+    <div class="section-head">
+      <h3>Interview Setup</h3>
+      <a class="btn btn-outline-light" href="{{ url_for('student.course_detail', course_id=course.id) }}">Back to Course</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('student.course_interview_start', course_id=course.id) }}" class="interview-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Interview Purpose</label>
+          <select name="interview_purpose" class="form-select" required>
+            <option value="">Select interview purpose</option>
+            <option value="hr">HR Interview</option>
+            <option value="job">Job Interview</option>
+            <option value="visa">Visa Interview</option>
+            <option value="university">University Interview</option>
+            <option value="technical">Technical Interview</option>
+            <option value="embassy">Embassy Interview</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Target Role / Purpose</label>
+          <input type="text" name="target_role" class="form-control" placeholder="Software Engineer / USA Student Visa / MBA Admission">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">English Level</label>
+          <select name="english_level" class="form-select" required>
+            <option value="basic">Basic</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Difficulty Level</label>
+          <select name="difficulty_level" class="form-select" required>
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Interview Style</label>
+          <select name="interview_style" class="form-select" required>
+            <option value="friendly">Friendly</option>
+            <option value="realistic" selected>Realistic</option>
+            <option value="strict">Strict</option>
+            <option value="pressure">Pressure</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Focus Area</label>
+          <select name="focus_area" class="form-select">
+            <option value="mixed" selected>Mixed</option>
+            <option value="fluency">Fluency</option>
+            <option value="confidence">Confidence</option>
+            <option value="grammar">Grammar</option>
+            <option value="role_specific">Role Specific</option>
+            <option value="technical">Technical</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Company / Country / Institution</label>
+          <input type="text" name="company_name" class="form-control" placeholder="Google / USA / University of Colorado">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Extra Notes</label>
+          <textarea name="extra_notes" class="form-control" rows="4" placeholder="Add your background, goals, or anything AI should know before starting the interview."></textarea>
+        </div>
+      </div>
+
+      <div class="hero-actions mt-4">
+        <button type="submit" class="btn btn-primary">Start AI Interview</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card-surface interview-grid">
+    <div>
+      <h3>How difficulty works</h3>
+      <ol class="flow-list">
+        <li><strong>Easy:</strong> short introduction questions, simple English, direct follow-ups.</li>
+        <li><strong>Medium:</strong> more natural interview questions, moderate follow-ups, clearer structure expected.</li>
+        <li><strong>Hard:</strong> deeper follow-ups, pressure questions, stronger grammar and confidence expected.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Latest setup</h3>
+      {% if latest_profile %}
+        <div class="setup-box">
+          <div><span>Purpose</span><strong>{{ latest_profile.interview_purpose|replace('_', ' ')|title }}</strong></div>
+          <div><span>Target</span><strong>{{ latest_profile.target_role or 'General interview' }}</strong></div>
+          <div><span>English</span><strong>{{ latest_profile.english_level|title }}</strong></div>
+          <div><span>Difficulty</span><strong>{{ latest_profile.difficulty_level|title }}</strong></div>
+        </div>
+      {% else %}
+        <p class="text-secondary mb-0">No saved interview profile yet. Fill the setup form above to start.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="card-surface">
+    <div class="section-head">
+      <h3>Recent interview sessions</h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Started</th>
+            <th>Persona</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in recent_sessions %}
+            <tr>
+              <td>{{ row.created_at.strftime('%d %b %Y %I:%M %p') if row.created_at else '-' }}</td>
+              <td>{{ (row.ai_persona or 'recruiter').replace('_', ' ')|title }}</td>
+              <td>{{ (row.status or 'active').replace('_', ' ')|title }}</td>
+              <td>{{ '%.1f'|format(row.final_score or 0) }}/10</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{{ url_for('student.course_interview_result', course_id=course.id, session_id=row.id) if row.is_completed else url_for('student.course_interview_session', course_id=course.id, session_id=row.id) }}">
+                  Open
+                </a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-secondary py-4">No AI interview sessions yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

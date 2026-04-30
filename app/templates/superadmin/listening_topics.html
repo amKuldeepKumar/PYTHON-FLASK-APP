@@ -1,0 +1,76 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Listening Topics • Fluencify{% endblock %}
+{% block page_title %}Listening Topics{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+    <div>
+      <div class="small text-uppercase text-muted">Phase 8</div>
+      <h2 class="mb-1">Listening Topic Manager</h2>
+      <div class="text-muted">Create a topic, generate an AI script, edit it, turn it into backend TTS audio, auto-generate written-answer questions, then send the lesson to review or publish.</div>
+    </div>
+    {% if selected_course %}<a class="btn btn-outline-primary" href="{{ url_for('superadmin.course_detail', course_id=selected_course.id) }}">Back to Course</a>{% endif %}
+  </div>
+
+  <div class="card shadow-sm border-0 mb-3"><div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Course</label>
+        <select class="form-select" name="course_id" onchange="this.form.submit()">
+          <option value="0">Select listening course</option>
+          {% for course in course_choices %}
+            <option value="{{ course.id }}" {% if selected_course_id == course.id %}selected{% endif %}>{{ course.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div></div>
+
+  {% if selected_course %}
+  <div class="card shadow-sm border-0 mb-4"><div class="card-body">
+    <h3 class="h5 mb-3">Create Listening Topic</h3>
+    <form method="post" class="row g-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="course_id" value="{{ selected_course.id }}">
+      <div class="col-md-5"><label class="form-label">Topic Title</label><input class="form-control" type="text" name="title" required></div>
+      <div class="col-md-3"><label class="form-label">Estimated Minutes</label><input class="form-control" type="number" name="estimated_minutes" min="1" value="{{ duration_hint or 3 }}"></div>
+      <div class="col-md-4"><label class="form-label">Workflow</label><select class="form-select" name="workflow_status"><option value="draft">Draft</option><option value="review" selected>Review</option><option value="published">Published</option></select></div>
+      <div class="col-md-4"><label class="form-label">Short Answer Questions</label><input class="form-control" type="number" name="short_answer_count" min="0" value="2"></div>
+      <div class="col-md-4"><label class="form-label">Fill in the Blank Questions</label><input class="form-control" type="number" name="fill_blank_count" min="0" value="1"></div>
+      <div class="col-md-4"><label class="form-label">True / False Questions</label><input class="form-control" type="number" name="true_false_count" min="0" value="1"></div>
+      <div class="col-12"><label class="form-label">Script / Audio Text</label><textarea class="form-control" rows="5" name="script_text" placeholder="Leave blank to auto-generate a level-based script. Basic ≈ 1.5–2.5 min, Intermediate ≈ 3–4 min, Advanced ≈ 4–5 min."></textarea></div>
+      <div class="col-12"><div class="small text-muted">The system can create the script automatically from the selected level and estimated duration. Superadmin can edit the script before generating TTS audio and publishing the topic.</div></div>
+      <div class="col-12 d-flex gap-2 flex-wrap"><button class="btn btn-primary" type="submit">Create Listening Topic</button><div class="small text-muted align-self-center">Best flow: Topic → AI Script → Admin Edit → TTS Audio → Auto Questions → Review → Publish</div></div>
+    </form>
+  </div></div>
+  {% endif %}
+
+  <div class="row g-3">
+    {% for lesson in lessons %}
+    <div class="col-12">
+      <div class="card shadow-sm border-0"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <div class="small text-uppercase text-muted mb-1">{{ lesson.course.title if lesson.course else 'Listening Course' }}</div>
+            <h3 class="h5 mb-1">{{ lesson.title }}</h3>
+            <div class="text-muted small">Status: {{ (lesson.workflow_status or 'draft').title() }} • Published: {{ 'Yes' if lesson.is_published else 'No' }} • Questions: {{ lesson.question_count }} • Script: {{ 'Ready' if lesson.explanation_tts_text or lesson.explanation_text else 'Missing' }} • TTS: {{ 'Ready' if lesson.audio_ready else 'Pending' }}</div>
+            <p class="mb-0 mt-2">{{ (lesson.explanation_tts_text or lesson.explanation_text or 'No script yet.')[:280] }}{% if (lesson.explanation_tts_text or lesson.explanation_text or '')|length > 280 %}…{% endif %}</p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-primary" href="{{ url_for('superadmin.listening_topic_edit', lesson_id=lesson.id) }}">Edit</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.listening_questions', course_id=lesson.course.id if lesson.course else 0, lesson_id=lesson.id) }}">Questions</a>
+            <form method="post" action="{{ url_for('superadmin.listening_topic_generate_draft', lesson_id=lesson.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-dark" type="submit">Generate Full Draft</button></form><form method="post" action="{{ url_for('superadmin.listening_topic_generate_script', lesson_id=lesson.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-dark" type="submit">AI Script</button></form><form method="post" action="{{ url_for('superadmin.listening_topic_generate_audio', lesson_id=lesson.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-primary" type="submit">TTS Audio</button></form>
+            <form method="post" action="{{ url_for('superadmin.listening_topic_submit_review', lesson_id=lesson.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-warning" type="submit">Send Review</button></form>
+            <form method="post" action="{{ url_for('superadmin.listening_topic_publish', lesson_id=lesson.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-success" type="submit">Publish</button></form>
+            <form method="post" action="{{ url_for('superadmin.listening_topic_toggle', lesson_id=lesson.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-info" type="submit">Toggle</button></form>
+            <form method="post" action="{{ url_for('superadmin.listening_topic_delete', lesson_id=lesson.id) }}" onsubmit="return confirm('Delete this listening topic?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger" type="submit">Delete</button></form>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    {% else %}
+    <div class="col-12"><div class="card border-0 shadow-sm"><div class="card-body text-muted">No listening topics found yet.</div></div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

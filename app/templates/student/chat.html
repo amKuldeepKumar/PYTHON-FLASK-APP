@@ -1,0 +1,67 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Community Chat - Fluencify{% endblock %}
+{% block page_title %}Community Chat{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row g-4">
+    <div class="col-xl-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">My Course Rooms</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for row in enrollments %}
+            <a class="list-group-item list-group-item-action {% if active_course and active_course.id == row.course.id %}active{% endif %}" href="{{ url_for('student.chat', course_id=row.course.id) }}">
+              <div class="fw-semibold">{{ row.course.title }}</div>
+              <div class="small {% if active_course and active_course.id == row.course.id %}text-white-50{% else %}text-muted{% endif %}">{{ row.course.track_type|title }}</div>
+            </a>
+          {% else %}
+            <div class="list-group-item text-muted">Enroll in a course to open community chat.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-9">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">{{ active_course.title if active_course else 'Community Chat' }}</h5>
+        </div>
+        <div class="card-body">
+          {% if active_course %}
+            <div class="alert alert-secondary">
+              Student chat is limited to enrolled students in this course. Abuse, drugs, weapons, illegal activity, and off-platform contact sharing are blocked automatically.
+            </div>
+            <div class="border rounded-4 p-3 mb-3" style="max-height: 480px; overflow-y: auto;">
+              {% for message in messages %}
+                <div class="mb-3 pb-3 border-bottom">
+                  <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                      <div class="fw-semibold">{{ message.sender.full_name if message.sender else message.sender_student_id }}</div>
+                      <div class="small text-muted">{{ message.created_at.strftime('%d %b %Y %I:%M %p') }}</div>
+                    </div>
+                  </div>
+                  <div class="mt-2">{{ message.body }}</div>
+                </div>
+              {% else %}
+                <div class="text-muted">No messages yet. Start the course conversation.</div>
+              {% endfor %}
+            </div>
+            <form method="post" action="{{ url_for('student.chat_post_message') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="course_id" value="{{ active_course.id }}">
+              <div class="mb-3">
+                <textarea class="form-control" name="body" rows="4" maxlength="600" placeholder="Write a kind, course-related message for your student community."></textarea>
+              </div>
+              <button class="btn btn-primary">Send message</button>
+            </form>
+          {% else %}
+            <div class="text-muted">You do not have an enrolled course room yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

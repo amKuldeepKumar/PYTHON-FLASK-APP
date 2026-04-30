@@ -1,0 +1,90 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Reading Preview • Fluencify{% endblock %}
+{% block page_title %}Student Preview • Reading{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-course-reading-preview.css') }}">{% endblock %}
+
+{% block content %}
+<div class="d-grid gap-4">
+  <section class="reading-hero p-4 p-lg-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-8">
+        <div class="small text-uppercase text-secondary mb-2">{{ course.title }}</div>
+        <h2 class="fw-bold mb-3">Student preview mode</h2>
+        <p class="text-secondary mb-4">This preview shows what a learner can see after passages and questions are active, approved, and published.</p>
+        <div class="d-flex gap-2 flex-wrap mb-3"><a class="btn btn-outline-light" href="{{ preview_back_url }}">Back to Course Manager</a></div>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="reading-chip">{{ total_passages }} live reading set{{ '' if total_passages == 1 else 's' }}</span>
+          <span class="reading-chip">{{ student_level|title }} level view</span>
+          <span class="reading-chip">Preview only</span>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="border rounded-4 p-4 h-100" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)!important;">
+          <div class="small text-secondary text-uppercase mb-2">Publishing rule</div>
+          <div class="fw-semibold mb-2">Students see only approved, active, and published passages with approved questions.</div>
+          <div class="small text-secondary mb-0">If nothing appears here, create topic → passage → questions → publish.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reading-topic-card p-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <div class="small text-secondary text-uppercase mb-1">Adaptive reading path</div>
+        <h4 class="mb-1">Current level: {{ personalization.current_level_label }}</h4>
+        <div class="text-secondary small">{{ personalization.message }}</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="reading-chip">Recent logs {{ personalization.recent_logs }}</span>
+        <span class="reading-chip">Avg accuracy {{ personalization.avg_accuracy }}%</span>
+        <span class="reading-chip">Recommended {{ personalization.recommended_level_label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-3">
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Sessions</div><div class="h4 mb-0">{{ analytics.sessions }}</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Avg accuracy</div><div class="h4 mb-0">{{ analytics.avg_accuracy }}%</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Reading speed</div><div class="h4 mb-0">{{ analytics.avg_speed_wpm }}</div><div class="small text-secondary">WPM</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Errors</div><div class="h4 mb-0">{{ analytics.total_errors }}</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Time spent</div><div class="h4 mb-0">{{ '%02d:%02d'|format((analytics.total_time_seconds // 60), (analytics.total_time_seconds % 60)) }}</div></div></div>
+    <div class="col-6 col-xl-2"><div class="reading-metric"><div class="small text-secondary">Best accuracy</div><div class="h4 mb-0">{{ analytics.best_accuracy }}%</div></div></div>
+  </section>
+
+  {% if rows %}
+    <div class="row g-4">
+      {% for row in rows %}
+        <div class="col-lg-6">
+          <div class="reading-topic-card p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+              <div>
+                <div class="small text-secondary text-uppercase mb-1">{{ row.passage.topic.category_label if row.passage.topic else 'General' }}</div>
+                <h4 class="mb-1">{{ row.passage.title }}</h4>
+                <div class="small text-secondary">{{ row.passage.topic_title_snapshot }} • {{ row.passage.level_label }} • {{ row.passage.length_label }} • {{ row.passage.word_count }} words</div>
+              </div>
+              <span class="badge text-bg-success">Live</span>
+            </div>
+            <p class="text-secondary small mb-3">{{ row.passage.content[:200] }}{% if row.passage.content|length > 200 %}...{% endif %}</p>
+            <div class="d-flex gap-2 flex-wrap mb-3">
+              <span class="reading-chip">{{ row.question_count }} questions</span>
+              <span class="reading-chip">MCQ {{ row.mcq_count }}</span>
+              <span class="reading-chip">Fill {{ row.fill_blank_count }}</span>
+              <span class="reading-chip">T/F {{ row.true_false_count }}</span>
+            </div>
+            <button class="btn btn-primary" type="button" disabled>Start Reading Session</button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-5 text-center">
+        <h3 class="fw-bold mb-2">No live reading set yet</h3>
+        <div class="text-secondary">Create reading topic → generate passage → generate questions → approve/publish, then this preview will populate.</div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Manage Lesson • Fluencify{% endblock %}
+{% block page_title %}Manage Lesson{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h1 class="mb-1">{{ lesson.title }}</h1>
+    <p class="text-secondary mb-0">{{ course.title }} / {{ lesson.level.title }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.lessons_index') }}">Back to Lessons</a>
+    <a class="btn btn-outline-info" href="{{ url_for('superadmin.course_detail', course_id=course.id) }}">Open Course Builder</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card bg-dark border-secondary rounded-4 h-100">
+      <div class="card-body p-4">
+        <h3 class="mb-3">Edit Lesson</h3>
+        <form method="post">
+          {{ lesson_form.hidden_tag() }}
+          <input type="hidden" name="action" value="save_lesson">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Level</label>
+              {{ lesson_form.level_id(class="form-select") }}
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Lesson Title</label>
+              {{ lesson_form.title(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Slug</label>
+              {{ lesson_form.slug(class="form-control") }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Type</label>
+              {{ lesson_form.lesson_type(class="form-select") }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Minutes</label>
+              {{ lesson_form.estimated_minutes(class="form-control") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Explanation</label>
+              {{ lesson_form.explanation_text(class="form-control", rows="5") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">TTS Text</label>
+              {{ lesson_form.explanation_tts_text(class="form-control", rows="3") }}
+            </div>
+            <div class="col-12 form-check mt-2 ms-2">
+              {{ lesson_form.is_published(class="form-check-input") }}
+              <label class="form-check-label" for="{{ lesson_form.is_published.id }}">Published</label>
+            </div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save Lesson</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card bg-dark border-secondary rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h3 class="mb-3">Direct Upload Questions</h3>
+        <form method="post" enctype="multipart/form-data">
+          {{ upload_form.hidden_tag() }}
+          <input type="hidden" name="action" value="upload_questions">
+          {{ upload_form.lesson_id(type="hidden") }}
+          <div class="mb-3">
+            <label class="form-label">Questions per auto chapter</label>
+            {{ upload_form.auto_split_size(class="form-control") }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">CSV / TXT File</label>
+            {{ upload_form.upload(class="form-control") }}
+          </div>
+          <div class="small text-secondary mb-3">CSV can include `title`, `prompt`, `image_url`, `answer`, `hint`, `expected_keywords`, and `prompt_type`. Use local paths like `/static/uploads/questions/nursery/apple.webp`.</div>
+          <div class="small text-secondary mb-3">Validation now blocks duplicate prompts and broken local image paths before import.</div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-outline-info">Upload Questions</button>
+            <a class="btn btn-outline-light" href="{{ url_for('superadmin.question_upload_template') }}">Download CSV Template</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card bg-dark border-danger rounded-4">
+      <div class="card-body p-4">
+        <h3 class="mb-3 text-danger">Delete Lesson</h3>
+        <p class="text-secondary">This removes the lesson and all linked chapters, subsections, questions, and progress records.</p>
+        <form method="post" onsubmit="return confirm('Delete this lesson permanently?');">
+          {{ delete_form.hidden_tag() }}
+          <input type="hidden" name="action" value="delete_lesson">
+          <button type="submit" class="btn btn-danger">Delete Lesson</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-dark border-secondary rounded-4 mt-4">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Questions in this Lesson</h3>
+      <span class="badge text-bg-secondary">{{ question_rows|length }} total</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Chapter</th>
+            <th>Subsection</th>
+            <th>Image</th>
+            <th>Prompt</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in question_rows %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ q.subsection.chapter.title }}</td>
+            <td>{{ q.subsection.title }}</td>
+            <td>{% if q.image_url %}<span class="badge text-bg-success">Image</span>{% else %}<span class="badge text-bg-secondary">Text</span>{% endif %}</td>
+            <td>{{ q.prompt[:120] }}{% if q.prompt|length > 120 %}…{% endif %}</td>
+            <td>{{ q.prompt_type|title }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-secondary">No questions in this lesson yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

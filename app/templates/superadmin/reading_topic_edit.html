@@ -1,0 +1,98 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Reading Topic • SuperAdmin • Fluencify{% endblock %}
+{% block page_title %}Edit Reading Topic{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Edit Topic</h4>
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('superadmin.reading_topics') }}">Back to Topics</a>
+        </div>
+
+        <form method="post" class="row g-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="col-md-6">
+            <label class="form-label">Topic code</label>
+            <input type="text" class="form-control" value="{{ topic.code }}" disabled>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Topic title</label>
+            <input type="text" class="form-control" name="title" value="{{ topic.title }}" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Level</label>
+            <select class="form-select" name="level" required>
+              {% for level in level_choices %}
+                <option value="{{ level }}" {% if topic.level == level %}selected{% endif %}>{{ level.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <input type="text" class="form-control" name="category" value="{{ topic.category or '' }}">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="4">{{ topic.description or '' }}</textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Linked course</label>
+            <select class="form-select" name="course_id">
+              <option value="0">No linked course</option>
+              {% for course in course_rows %}
+                <option value="{{ course.id }}" {% if topic.course_id == course.id %}selected{% endif %}>{{ course.title }} • {{ course.track_type|replace('_', ' ')|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Course level number</label>
+            <input type="number" class="form-control" name="course_level_number" min="1" value="{{ topic.course_level_number or '' }}" placeholder="1">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Display order</label>
+            <input type="number" class="form-control" name="display_order" min="0" value="{{ topic.display_order or 0 }}">
+          </div>
+
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_active" {% if topic.is_active %}checked{% endif %}>
+              <label class="form-check-label">Active</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('superadmin.reading_api_registry', kind='passage') }}" class="btn btn-outline-info">AI Provider Setup</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="mb-3">Topic Summary</h5>
+        <div class="mb-2"><strong>Code:</strong> {{ topic.code }}</div>
+        <div class="mb-2"><strong>Level:</strong> {{ topic.level_label }}</div>
+        <div class="mb-2"><strong>Category:</strong> {{ topic.category_label }}</div>
+        <div class="mb-2"><strong>Status:</strong> {{ 'Active' if topic.is_active else 'Inactive' }}</div>
+        <div class="mb-2"><strong>Linked course:</strong> {{ topic.course.title if topic.course else 'No linked course' }}</div>
+        <div class="mb-2"><strong>Course level:</strong> {{ topic.course_level_number or 'Not set' }}</div>
+        <div class="small text-secondary mt-3">This topic will be used by Phase 7C and 7D to generate reading passages and auto-build MCQ, fill in the blanks, and true/false questions.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

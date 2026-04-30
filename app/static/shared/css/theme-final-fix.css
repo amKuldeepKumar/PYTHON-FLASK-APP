@@ -1,0 +1,928 @@
+
+/* Final cross-project theme polish.
+   Loaded after every page stylesheet so light, dark, and colorful presets stay readable.
+   Focus: front pages, menus, cards, dashboards, calendars, theme screens, and learning modules. */
+
+:root {
+  --fx-panel: linear-gradient(180deg,
+    color-mix(in srgb, var(--surface) 98%, transparent),
+    color-mix(in srgb, var(--surface-2) 96%, transparent));
+  --fx-panel-strong: linear-gradient(160deg,
+    color-mix(in srgb, var(--surface) 97%, transparent),
+    color-mix(in srgb, var(--surface-2) 94%, transparent));
+  --fx-outline: color-mix(in srgb, var(--primary) 22%, var(--border));
+  --fx-shadow: 0 18px 48px color-mix(in srgb, var(--shadow) 22%, transparent);
+  --fx-shadow-lg: 0 24px 64px color-mix(in srgb, var(--shadow) 26%, transparent);
+}
+
+html, body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+body, p, div, span, li, td, th, label, input, select, textarea, button {
+  color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6,
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6,
+.topbar-page-title, .brand-title, .navbar-brand, .section-title, .hero-title, .page-title {
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.text-muted, .text-secondary, .small.text-muted, .small.text-secondary,
+.form-text, .lesson-help-text, .lesson-soft-text, .course-meta,
+.schedule-meta, .upcoming-meta, .grade-meta, .assignment-meta,
+.hero-subtitle, .welcome-voice-desc, .progress-sub,
+.calendar-weekdays span, .day-meta, .muted, .mini,
+.opacity-75, .opacity-50 {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+.text-white, .text-light, .text-black {
+  color: var(--text) !important;
+}
+
+/* ---------- Front pages / public menu ---------- */
+.public-theme .site-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1035;
+  padding: 1rem clamp(14px, 3vw, 28px) .25rem;
+  background: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.public-theme .site-navbar .container {
+  max-width: 1280px;
+  min-height: 74px;
+  gap: 1.5rem;
+  padding: .6rem clamp(18px, 2vw, 28px);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent) !important;
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--shadow) 16%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.public-theme .site-navbar .navbar-brand {
+  font-family: var(--heading-font-family) !important;
+  font-size: clamp(1.7rem, 2vw, 2.2rem);
+  letter-spacing: -.02em;
+}
+
+.public-theme .site-navbar .navbar-collapse {
+  background: transparent !important;
+}
+
+.public-theme .site-navbar .navbar-nav {
+  align-items: center;
+  gap: .3rem;
+  background: transparent !important;
+}
+
+.public-theme .site-navbar .nav-link,
+.public-theme .site-navbar .btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .72rem 1rem !important;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.public-theme .site-navbar .nav-link {
+  color: var(--text) !important;
+  background: transparent !important;
+}
+
+.public-theme .site-navbar .nav-link:hover,
+.public-theme .site-navbar .nav-link:focus,
+.public-theme .site-navbar .nav-link.active,
+.public-theme .site-navbar .nav-item.show > .nav-link {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important;
+  color: var(--heading-text, var(--text)) !important;
+  box-shadow: inset 0 0 0 1px var(--fx-outline);
+}
+
+.public-theme .site-navbar .dropdown-menu {
+  margin-top: .85rem;
+  min-width: 230px;
+  padding: .7rem;
+  border-radius: 22px;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--fx-shadow-lg);
+}
+
+.public-theme .site-navbar .dropdown-item {
+  border-radius: 14px;
+  padding: .78rem .92rem;
+  font-weight: 600;
+  color: var(--text) !important;
+}
+
+.public-theme .site-navbar .dropdown-item:hover,
+.public-theme .site-navbar .dropdown-item:focus,
+.public-theme .site-navbar .dropdown-item.active {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-2)) !important;
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.public-theme .cms-hero-banner {
+  padding: clamp(2rem, 5vw, 4rem) 0 1.6rem !important;
+  border-bottom: 1px solid var(--border);
+}
+
+.public-theme .cms-shell-section {
+  padding: clamp(1.1rem, 3vw, 2rem) 0 !important;
+  border-top: none !important;
+}
+
+.public-theme .cms-shell-section .row,
+.public-theme .cms-hero-banner .row {
+  align-items: stretch !important;
+}
+
+.public-theme .cms-shell-section .section-card,
+.public-theme .cms-hero-banner .section-card,
+.public-theme .cms-slide-card,
+.public-theme .cms-course-card,
+.public-theme .card {
+  background: var(--fx-panel) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 26px !important;
+  box-shadow: var(--fx-shadow) !important;
+}
+
+.public-theme .cms-shell-section .section-card {
+  padding: 1.4rem !important;
+}
+
+.public-theme .cms-course-card,
+.public-theme .cms-slide-card {
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+
+.public-theme .cms-course-card:hover,
+.public-theme .cms-slide-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: var(--fx-outline) !important;
+  box-shadow: var(--fx-shadow-lg) !important;
+}
+
+.public-theme footer {
+  background: color-mix(in srgb, var(--surface) 86%, transparent) !important;
+  color: var(--muted) !important;
+}
+
+/* ---------- Dashboard global polish ---------- */
+.dashboard-theme .main-shell,
+.dashboard-theme .topbar,
+.dashboard-theme .dashboard-content-wrap,
+.dashboard-theme .sidebar-shell {
+  background: transparent !important;
+}
+
+.dashboard-theme .topbar {
+  background: color-mix(in srgb, var(--surface) 90%, transparent) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.dashboard-theme .topbar-toggle,
+.dashboard-theme .topbar-icon,
+.dashboard-theme .topbar-profile,
+.dashboard-theme .sidebar-user,
+.dashboard-theme .menu-link,
+.dashboard-theme .menu-parent,
+.dashboard-theme .menu-child,
+.dashboard-theme .card,
+.dashboard-theme .portal-card,
+.dashboard-theme .glass-card,
+.dashboard-theme .analytics-hero,
+.dashboard-theme .analytics-card,
+.dashboard-theme .reading-hero,
+.dashboard-theme .reading-topic-card,
+.dashboard-theme .reading-metric,
+.dashboard-theme .metric-box,
+.dashboard-theme .topic-card,
+.dashboard-theme .s-panel,
+.dashboard-theme .reading-topbar,
+.dashboard-theme .reading-panel,
+.dashboard-theme .word-support-card,
+.dashboard-theme .admin-studio-card,
+.dashboard-theme .card-dark,
+.dashboard-theme .theme-preset-card,
+.dashboard-theme .table-card,
+.dashboard-theme .tree-card,
+.dashboard-theme .rbac-card,
+.dashboard-theme .form-card,
+.dashboard-theme .permission-box,
+.dashboard-theme .tree-level,
+.dashboard-theme .support-item,
+.dashboard-theme .focus-box,
+.dashboard-theme .voice-card,
+.dashboard-theme .hero-stat-card,
+.dashboard-theme .metric-panel,
+.dashboard-theme .course-library-card,
+.dashboard-theme .day-cell,
+.dashboard-theme .tracking-tile,
+.dashboard-theme .translate-inline-panel,
+.dashboard-theme .lesson-question-box,
+.dashboard-theme .mini-banner,
+.dashboard-theme .welcome-voice-card,
+.dashboard-theme .profile-photo-card,
+.dashboard-theme .camera-wrap,
+.dashboard-theme .profile-photo-preview {
+  background: var(--fx-panel) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--fx-shadow) !important;
+  color: var(--text) !important;
+}
+
+.dashboard-theme .mini-banner {
+  min-height: 132px;
+}
+
+.dashboard-theme .hero-progress-ring::after {
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+}
+
+.dashboard-theme .hero-kicker,
+.dashboard-theme .reading-chip,
+.dashboard-theme .pill,
+.dashboard-theme .chip,
+.dashboard-theme .count-chip,
+.dashboard-theme .status-pill,
+.dashboard-theme .calendar-pill,
+.dashboard-theme .hero-pill,
+.dashboard-theme .tag-chip,
+.dashboard-theme .tree-pill,
+.dashboard-theme .course-pill,
+.dashboard-theme .meta-pill,
+.dashboard-theme .weak-pill,
+.dashboard-theme .helper-chip {
+  background: var(--badge-bg) !important;
+  color: var(--badge-text) !important;
+  border: 1px solid var(--badge-border) !important;
+}
+
+.dashboard-theme .menu-link,
+.dashboard-theme .menu-parent,
+.dashboard-theme .menu-child,
+.dashboard-theme .topbar-profile,
+.dashboard-theme .topbar-icon,
+.dashboard-theme .sidebar-user {
+  border-radius: 18px !important;
+}
+
+.dashboard-theme .menu-link:hover,
+.dashboard-theme .menu-parent:hover,
+.dashboard-theme .menu-child:hover,
+.dashboard-theme .menu-child.active,
+.dashboard-theme .menu-link[aria-current="page"] {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important;
+  color: var(--heading-text, var(--text)) !important;
+  border-color: var(--fx-outline) !important;
+}
+
+.dashboard-theme .table,
+.dashboard-theme .table-dark,
+.dashboard-theme .table-light,
+.dashboard-theme .table > :not(caption) > * > * {
+  background: transparent !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.dashboard-theme .alert,
+.dashboard-theme .alert-info,
+.dashboard-theme .alert-warning,
+.dashboard-theme .alert-secondary,
+.dashboard-theme .alert-light {
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.dashboard-theme .btn-outline-light,
+.dashboard-theme .btn-outline-secondary,
+.public-theme .btn-outline-light,
+.public-theme .btn-outline-secondary {
+  background: color-mix(in srgb, var(--surface) 76%, transparent) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+.dashboard-theme .btn-outline-light:hover,
+.dashboard-theme .btn-outline-secondary:hover,
+.public-theme .btn-outline-light:hover,
+.public-theme .btn-outline-secondary:hover {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important;
+  border-color: var(--fx-outline) !important;
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.dashboard-theme .progress,
+.public-theme .progress {
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent) !important;
+}
+
+.dashboard-theme .progress-bar,
+.public-theme .progress-bar {
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 62%, white)) !important;
+}
+
+/* ---------- Learning screen ---------- */
+.dashboard-theme .student-learning-page .card,
+.dashboard-theme .student-learning-page .card-body,
+.dashboard-theme .student-learning-page .lesson-question-box,
+.dashboard-theme .student-learning-page .translate-inline-panel,
+.dashboard-theme .student-learning-page textarea,
+.dashboard-theme .student-learning-page .tracking-tile,
+.dashboard-theme .student-learning-page .progress {
+  color: var(--text) !important;
+}
+
+.dashboard-theme .student-learning-page textarea {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* ---------- Calendar ---------- */
+.dashboard-theme .calendar-pill,
+.dashboard-theme .calendar-summary .calendar-pill,
+.dashboard-theme .calendar-row .day-cell,
+.dashboard-theme .calendar-weekdays span,
+.dashboard-theme .calendar-row .progress,
+.dashboard-theme .day-cell .day-number,
+.dashboard-theme .day-cell .day-score,
+.dashboard-theme .day-cell .day-stat {
+  color: inherit !important;
+}
+
+.dashboard-theme .calendar-row .day-cell {
+  min-height: 82px;
+}
+
+.dashboard-theme .day-cell.active,
+.dashboard-theme .day-cell.today,
+.dashboard-theme .day-cell.i1,
+.dashboard-theme .day-cell.i2,
+.dashboard-theme .day-cell.i3,
+.dashboard-theme .day-cell.i4 {
+  border-color: var(--fx-outline) !important;
+}
+
+.dashboard-theme .day-cell.is-absent {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--surface) 90%, transparent),
+      color-mix(in srgb, var(--surface-2) 78%, transparent)) !important;
+  border-color: color-mix(in srgb, var(--border) 72%, var(--primary) 16%) !important;
+  border-style: dashed !important;
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--shadow) 18%, transparent) !important;
+}
+
+.dashboard-theme .day-cell.is-present {
+  border-color: color-mix(in srgb, var(--primary) 52%, var(--border)) !important;
+  color: var(--text) !important;
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--primary) 20%, transparent) !important;
+}
+
+.dashboard-theme .day-cell.is-present.i1 {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--primary) 22%, var(--surface)),
+    color-mix(in srgb, var(--primary) 12%, var(--surface-2))) !important;
+}
+
+.dashboard-theme .day-cell.is-present.i2 {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--primary) 34%, var(--surface)),
+    color-mix(in srgb, var(--primary) 18%, var(--surface-2))) !important;
+}
+
+.dashboard-theme .day-cell.is-present.i3 {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--primary) 48%, var(--surface)),
+    color-mix(in srgb, var(--primary) 26%, var(--surface-2))) !important;
+}
+
+.dashboard-theme .day-cell.is-present.i4 {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--primary) 62%, var(--surface)),
+    color-mix(in srgb, var(--primary) 36%, var(--surface-2))) !important;
+}
+
+.dashboard-theme .day-cell-top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: .35rem !important;
+}
+
+.dashboard-theme .day-caution {
+  color: color-mix(in srgb, #f59e0b 78%, var(--primary)) !important;
+}
+
+.dashboard-theme .day-present-icon {
+  color: color-mix(in srgb, #22c55e 72%, var(--primary)) !important;
+}
+
+.dashboard-theme .day-meta,
+.dashboard-theme .day-improvement {
+  color: color-mix(in srgb, var(--text) 76%, transparent) !important;
+}
+
+.dashboard-theme .day-meta-absent {
+  color: var(--muted) !important;
+}
+
+/* ---------- Course cards futuristic hover ---------- */
+.dashboard-theme .course-library-card,
+.public-theme .cms-course-card,
+.dashboard-theme .course-card,
+.dashboard-theme .topic-card,
+.dashboard-theme .reading-topic-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+
+.dashboard-theme .course-library-card:hover,
+.public-theme .cms-course-card:hover,
+.dashboard-theme .course-card:hover,
+.dashboard-theme .topic-card:hover,
+.dashboard-theme .reading-topic-card:hover {
+  transform: translateY(-10px) scale(1.012);
+  border-color: var(--fx-outline) !important;
+  box-shadow: var(--fx-shadow-lg) !important;
+}
+
+.dashboard-theme .course-library-card::after,
+.public-theme .cms-course-card::after,
+.dashboard-theme .course-card::after,
+.dashboard-theme .topic-card::after,
+.dashboard-theme .reading-topic-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 0%, color-mix(in srgb, var(--primary) 12%, transparent) 48%, transparent 72%);
+  transform: translateX(-120%);
+  transition: transform .65s ease;
+}
+
+.dashboard-theme .course-library-card:hover::after,
+.public-theme .cms-course-card:hover::after,
+.dashboard-theme .course-card:hover::after,
+.dashboard-theme .topic-card:hover::after,
+.dashboard-theme .reading-topic-card:hover::after {
+  transform: translateX(120%);
+}
+
+/* ---------- Theme screens ---------- */
+.dashboard-theme .card-dark,
+.dashboard-theme .theme-preset-card,
+.dashboard-theme .table.table-dark,
+.dashboard-theme .table.table-dark thead,
+.dashboard-theme .table.table-dark tbody,
+.dashboard-theme .table.table-dark tr,
+.dashboard-theme .table.table-dark td,
+.dashboard-theme .table.table-dark th {
+  background: var(--fx-panel) !important;
+  color: var(--text) !important;
+}
+
+.dashboard-theme .badge.bg-success,
+.dashboard-theme .text-bg-success,
+.public-theme .badge.bg-success,
+.public-theme .text-bg-success {
+  color: #fff !important;
+}
+
+.dashboard-theme .badge.bg-secondary,
+.dashboard-theme .text-bg-secondary,
+.public-theme .badge.bg-secondary,
+.public-theme .text-bg-secondary {
+  color: var(--text) !important;
+}
+
+/* ---------- Font bridge ---------- */
+body,
+.navbar,
+.card,
+.btn,
+.table,
+.dropdown-menu,
+.form-control,
+.form-select,
+textarea,
+select,
+.menu-link,
+.menu-parent,
+.menu-child,
+.topbar-profile,
+.sidebar-brand,
+.sidebar-user,
+.public-theme .site-navbar .nav-link {
+  font-family: var(--font-family) !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand-title, .navbar-brand,
+.topbar-page-title, .hero-title, .section-title,
+.page-title, .display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+  font-family: var(--heading-font-family) !important;
+}
+
+.topbar-kicker,
+.menu-heading,
+.badge,
+.calendar-pill,
+.hero-kicker,
+.lesson-meta-label,
+.reading-chip,
+.pill,
+.chip,
+.status-pill,
+.count-chip,
+code, pre {
+  font-family: var(--accent-font-family) !important;
+}
+
+@media (max-width: 991.98px) {
+  .public-theme .site-navbar {
+    padding: .8rem 10px .15rem;
+  }
+
+  .public-theme .site-navbar .container {
+    gap: .85rem;
+    border-radius: 22px;
+    padding: .75rem .95rem;
+  }
+
+  .public-theme .site-navbar .navbar-collapse {
+    margin-top: .9rem;
+    padding: .85rem;
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--fx-shadow);
+  }
+
+  .public-theme .site-navbar .navbar-nav {
+    align-items: stretch;
+  }
+
+  .public-theme .site-navbar .nav-link,
+  .public-theme .site-navbar .btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (min-width: 992px) {
+  .public-theme .site-navbar,
+  .public-theme .site-navbar .navbar-collapse,
+  .public-theme .site-navbar .navbar-nav,
+  .public-theme .site-navbar .nav-item,
+  .public-theme .site-navbar .dropdown {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+}
+
+
+/* Learning page and dashboard title final correction */
+.dashboard-theme .topbar-page-title,
+.dashboard-theme .page-title,
+.dashboard-theme .student-learning-page h1,
+.dashboard-theme .student-learning-page h2,
+.dashboard-theme .student-learning-page h3,
+.dashboard-theme .student-learning-page h4,
+.dashboard-theme .student-learning-page h5,
+.dashboard-theme .student-learning-page h6,
+.dashboard-theme .student-learning-page .lesson-meta-label,
+.dashboard-theme .student-learning-page .lesson-question-box,
+.dashboard-theme .student-learning-page .fw-bold,
+.dashboard-theme .student-learning-page .fw-semibold,
+.dashboard-theme .student-learning-page strong {
+  color: var(--text) !important;
+}
+
+.dashboard-theme .student-learning-page .card,
+.dashboard-theme .student-learning-page .tracking-tile,
+.dashboard-theme .student-learning-page .alert,
+.dashboard-theme .student-learning-page .lesson-question-box,
+.dashboard-theme .student-learning-page .translate-inline-panel {
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+  border-color: var(--border) !important;
+}
+
+
+/* Cross-project light-mode readability for dashboard/forms */
+html[data-theme="light"] .dashboard-theme .btn-outline-light{
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+}
+html[data-theme="light"] .dashboard-theme .btn-outline-light:hover,
+html[data-theme="light"] .dashboard-theme .btn-outline-light:focus{
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface)) !important;
+  color: var(--heading-text, var(--text)) !important;
+}
+html[data-theme="light"] .dashboard-theme .form-control,
+html[data-theme="light"] .dashboard-theme .form-select,
+html[data-theme="light"] .dashboard-theme select,
+html[data-theme="light"] .dashboard-theme textarea,
+html[data-theme="light"] .dashboard-theme input{
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+  border-color: var(--border) !important;
+}
+html[data-theme="light"] .dashboard-theme input::placeholder,
+html[data-theme="light"] .dashboard-theme textarea::placeholder{
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+html[data-theme="light"] .dashboard-theme .form-check-label,
+html[data-theme="light"] .dashboard-theme .form-label,
+html[data-theme="light"] .dashboard-theme .nav-link,
+html[data-theme="light"] .dashboard-theme .btn,
+html[data-theme="light"] .dashboard-theme a,
+html[data-theme="light"] .dashboard-theme code{
+  color: inherit;
+}
+html[data-theme="light"] .dashboard-theme .manager-shell,
+html[data-theme="light"] .dashboard-theme .soft,
+html[data-theme="light"] .dashboard-theme .stat-box{
+  color: var(--text) !important;
+}
+
+
+/* ---------- Global visibility repair for light/dark themes ---------- */
+:root {
+  --fx-input-bg: color-mix(in srgb, var(--input-bg, var(--surface)) 96%, transparent);
+  --fx-input-border: color-mix(in srgb, var(--input-border, var(--border)) 84%, var(--border));
+}
+
+.dashboard-theme .form-control,
+.dashboard-theme .form-select,
+.dashboard-theme textarea,
+.dashboard-theme select,
+.dashboard-theme input[type="text"],
+.dashboard-theme input[type="number"],
+.dashboard-theme input[type="date"],
+.dashboard-theme input[type="email"],
+.dashboard-theme input[type="password"],
+.dashboard-theme input[type="search"],
+.dashboard-theme input[type="url"] {
+  background: var(--fx-input-bg) !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  border: 1px solid var(--fx-input-border) !important;
+  box-shadow: none !important;
+}
+
+.dashboard-theme .form-control::placeholder,
+.dashboard-theme textarea::placeholder,
+.dashboard-theme input::placeholder {
+  color: color-mix(in srgb, var(--muted) 92%, var(--text) 8%) !important;
+  opacity: 1 !important;
+}
+
+.dashboard-theme .form-control:focus,
+.dashboard-theme .form-select:focus,
+.dashboard-theme textarea:focus,
+.dashboard-theme input:focus,
+.dashboard-theme select:focus {
+  background: color-mix(in srgb, var(--surface) 98%, white 1%) !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--border)) !important;
+  box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--primary) 16%, transparent) !important;
+}
+
+.dashboard-theme option,
+.dashboard-theme select option {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="dark"] .dashboard-theme option,
+html[data-theme="dark"] .dashboard-theme select option {
+  color: #f8fafc !important;
+  background: #111827 !important;
+}
+
+.dashboard-theme .card,
+.dashboard-theme .surface-card,
+.dashboard-theme .portal-card,
+.dashboard-theme .profile-card,
+.dashboard-theme .preferences-card,
+.dashboard-theme .course-library-card,
+.dashboard-theme .course-card,
+.dashboard-theme .theme-preset-card,
+.dashboard-theme .card-dark {
+  color: var(--text) !important;
+}
+
+.dashboard-theme .card h1,
+.dashboard-theme .card h2,
+.dashboard-theme .card h3,
+.dashboard-theme .card h4,
+.dashboard-theme .card h5,
+.dashboard-theme .card h6,
+.dashboard-theme .surface-card h1,
+.dashboard-theme .surface-card h2,
+.dashboard-theme .surface-card h3,
+.dashboard-theme .surface-card h4,
+.dashboard-theme .surface-card h5,
+.dashboard-theme .surface-card h6 {
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.dashboard-theme .sidebar-brand small,
+.dashboard-theme .topbar-profile-role,
+.dashboard-theme .sidebar-user .small,
+.dashboard-theme .menu-heading,
+.dashboard-theme .menu-badge,
+.dashboard-theme .brand-title,
+.dashboard-theme .sidebar-user-name,
+.dashboard-theme .topbar-profile-name {
+  color: inherit !important;
+}
+
+.dashboard-theme .menu-heading,
+.dashboard-theme .sidebar-user .small,
+.dashboard-theme .topbar-profile-role {
+  color: var(--muted) !important;
+}
+
+.dashboard-theme .form-check-input {
+  background-color: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border-color: var(--fx-input-border) !important;
+}
+
+.dashboard-theme .form-check-input:checked {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.dashboard-theme .btn-primary,
+.dashboard-theme .btn-outline-primary,
+.dashboard-theme .btn-outline-light,
+.dashboard-theme .btn-outline-secondary,
+.dashboard-theme .btn-outline-info,
+.dashboard-theme .btn-outline-danger {
+  min-height: 42px;
+}
+
+.dashboard-theme .page-title,
+.dashboard-theme .topbar-page-title,
+.dashboard-theme .brand-title {
+  text-shadow: none !important;
+}
+
+/* ---------- Final theme-controlled public header and visibility guard ---------- */
+body.public-theme:not(.has-sticky-header) .site-navbar {
+  position: relative !important;
+  top: auto !important;
+}
+
+body.public-theme.has-sticky-header .site-navbar {
+  position: sticky !important;
+  top: 0;
+}
+
+body.public-theme .site-navbar {
+  z-index: 1035;
+}
+
+body.public-theme .site-navbar .container {
+  isolation: isolate;
+  overflow: visible;
+  position: relative;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border-color: color-mix(in srgb, var(--primary) 18%, var(--border)) !important;
+}
+
+body.public-theme .site-navbar.bg-transparent .container {
+  background: color-mix(in srgb, var(--surface) 64%, transparent) !important;
+  backdrop-filter: blur(22px) saturate(1.12);
+}
+
+body.public-theme .site-navbar .container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg,
+      transparent 0%,
+      color-mix(in srgb, var(--primary) 18%, transparent) 24%,
+      color-mix(in srgb, var(--fluid-color-1) 16%, transparent) 42%,
+      color-mix(in srgb, var(--fluid-color-3) 12%, transparent) 58%,
+      transparent 78%);
+  opacity: .82;
+  transform: none;
+  animation: none;
+}
+
+body.public-theme .site-navbar .container > * {
+  position: relative;
+  z-index: 1;
+}
+
+body.public-theme .site-navbar .nav-link,
+body.public-theme .site-navbar .dropdown-item,
+body.public-theme .site-navbar .navbar-brand,
+body.public-theme .site-navbar .btn-outline-light,
+body.public-theme .site-navbar .btn-outline-secondary {
+  color: var(--heading-text, var(--text)) !important;
+}
+
+body.public-theme .site-navbar .btn-primary,
+body.public-theme .btn-primary {
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, var(--fluid-color-1))) !important;
+  border-color: color-mix(in srgb, var(--primary) 84%, var(--border)) !important;
+  color: #fff !important;
+}
+
+body.public-theme .form-control,
+body.public-theme .form-select,
+body.public-theme textarea,
+body.public-theme select,
+body.public-theme input[type="text"],
+body.public-theme input[type="number"],
+body.public-theme input[type="date"],
+body.public-theme input[type="email"],
+body.public-theme input[type="password"],
+body.public-theme input[type="search"],
+body.public-theme input[type="url"] {
+  background: color-mix(in srgb, var(--input-bg, var(--surface)) 92%, transparent) !important;
+  border-color: color-mix(in srgb, var(--input-border, var(--border)) 82%, var(--border)) !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+}
+
+body.public-theme .form-control::placeholder,
+body.public-theme textarea::placeholder,
+body.public-theme input::placeholder {
+  color: color-mix(in srgb, var(--muted) 92%, var(--text) 8%) !important;
+  opacity: 1 !important;
+}
+
+body.public-theme option,
+body.public-theme select option {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="dark"] body.public-theme option,
+html[data-theme="dark"] body.public-theme select option {
+  color: #f8fafc !important;
+  background: #111827 !important;
+}
+
+body.public-theme .card,
+body.public-theme .section-card,
+body.public-theme .cms-slide-card,
+body.public-theme .cms-course-card,
+body.public-theme .contact-card,
+body.public-theme .faq-item,
+body.public-theme .feature-card,
+body.public-theme .pricing-card,
+body.public-theme .alert {
+  color: var(--text) !important;
+}
+
+body.public-theme a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item) {
+  color: color-mix(in srgb, var(--primary) 88%, var(--heading-text, var(--text))) !important;
+}
+
+body.public-theme .placement-test-shell {
+  padding-block: clamp(1rem, 2.4vw, 2.2rem) !important;
+}
+
+body.public-theme .placement-test-shell .border {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 18%, var(--border)) !important;
+  color: var(--text) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.public-theme .site-navbar .container::before {
+    animation: none;
+  }
+}

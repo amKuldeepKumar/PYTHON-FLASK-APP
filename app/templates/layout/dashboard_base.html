@@ -1,0 +1,258 @@
+<!doctype html>
+<!-- PHASE 7 / PHASE 11: layout theme bridge. Keeps frontend, auth, admin, student, and superadmin pages in sync with the active SuperAdmin theme. -->
+<html lang="en" data-theme="{{ active_theme_mode | default('dark') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Overview • Fluencify{% endblock %}</title>
+
+  <!-- Core Vendor CSS -->
+  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Superadmin Theme / Shared CSS -->
+  <link href="{{ url_for('theme.tokens_css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/components.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/layouts.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-fx.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/theme-fonts.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/alphabet-background.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/dashboard-sidebar.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/student-portal.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/course-badges.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/dashboard-enhancements.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='shared/css/student-track-separation.css') }}" rel="stylesheet">
+  {% if current_user.is_authenticated and current_user.is_student %}
+    <link href="{{ url_for('static', filename='shared/css/pages/student-chat-widget.css') }}" rel="stylesheet">
+  {% endif %}
+
+  <!-- Page Specific CSS -->
+  {% block extra_css %}{% endblock %}
+
+  <!-- Backward-compatible head block -->
+  {% block head %}{% endblock %}
+<link href="{{ url_for('static', filename='shared/css/dashboard-theme-stack.css') }}" rel="stylesheet">
+<link href="{{ url_for('theme.overrides_css') }}" rel="stylesheet">
+  {% if current_user.is_authenticated and current_user.is_student %}
+    <style>
+      body.dashboard-theme #studentChatWidget.student-chat-widget {
+        bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+        left: auto !important;
+        position: fixed !important;
+        right: max(1rem, env(safe-area-inset-right)) !important;
+        top: auto !important;
+        transform: none !important;
+        z-index: 2147483000 !important;
+      }
+
+      body.dashboard-theme #studentChatWidget .student-chat-panel {
+        left: auto !important;
+        position: absolute !important;
+        right: 0 !important;
+      }
+
+      @media (max-width: 575.98px) {
+        body.dashboard-theme #studentChatWidget.student-chat-widget {
+          bottom: max(0.85rem, env(safe-area-inset-bottom)) !important;
+          right: max(0.85rem, env(safe-area-inset-right)) !important;
+        }
+
+        body.dashboard-theme #studentChatWidget .student-chat-panel {
+          max-width: calc(100vw - 1.7rem);
+          width: min(360px, calc(100vw - 1.7rem));
+        }
+      }
+    </style>
+  {% endif %}
+</head>
+<body class="dashboard-theme">
+  {% from "layout/macros.html" import flash_messages %}
+
+  <div class="workspace-shell d-flex" id="workspaceShell">
+    <aside class="sidebar-shell d-flex flex-column" id="appSidebar">
+      <div class="sidebar-brand">
+        <a href="{{ url_for('main.home') }}" class="sidebar-brand-link">
+          <span class="brand-mark"></span>
+          <div>
+            <div class="brand-title">Fluencify</div>
+            <small>{{ current_user.role.replace('_', ' ') if current_user.is_authenticated else '' }}</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-scroll flex-grow-1">
+        {% set current_path = request.path %}
+        {% for section in sidebar_sections %}
+          <section class="menu-section">
+            <div class="menu-heading">{{ section.title }}</div>
+            <div class="menu-stack">
+              {% for item in section.items %}
+                {% if item.children %}
+                  {% set group_id = 'menu-group-' ~ loop.index0 ~ '-' ~ section.title|lower|replace(' ', '-') %}
+                  {% set ns = namespace(active=false) %}
+                  {% for child in item.children %}
+                    {% set child_base = child.href.rstrip('/') %}
+                    {% if child.href == current_path or (child_base and child_base != '#' and current_path.startswith(child_base ~ '/')) %}
+                      {% set ns.active = true %}
+                    {% endif %}
+                  {% endfor %}
+
+                  <div class="menu-group{% if ns.active %} open{% endif %}">
+                    <button
+                      type="button"
+                      class="menu-parent js-menu-toggle"
+                      data-target="{{ group_id }}"
+                      aria-expanded="{% if ns.active %}true{% else %}false{% endif %}"
+                    >
+                      <span class="menu-main">
+                        <span class="menu-icon"><i class="bi {{ item.icon }}"></i></span>
+                        <span>{{ item.label }}</span>
+                      </span>
+                      <span class="menu-meta">
+                        {% if item.badge %}
+                          <span class="badge menu-badge {{ item.badge_class }}">{{ item.badge }}</span>
+                        {% endif %}
+                        <i class="bi bi-chevron-down menu-chevron"></i>
+                      </span>
+                    </button>
+
+                    <div class="menu-children" id="{{ group_id }}">
+                      {% for child in item.children %}
+                        {% set child_base = child.href.rstrip('/') %}
+                        <a class="menu-child{% if child.href == current_path or (child_base and child_base != '#' and current_path.startswith(child_base ~ '/')) %} active{% endif %}" href="{{ child.href }}">
+                          <span>{{ child.label }}</span>
+                          {% if child.badge %}
+                            <span class="badge menu-badge {{ child.badge_class }}">{{ child.badge }}</span>
+                          {% endif %}
+                        </a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% else %}
+                  {% set item_base = item.href.rstrip('/') %}
+                  {% set is_item_active = item.href == current_path or (item_base and item_base != '#' and current_path.startswith(item_base ~ '/')) %}
+                  <a class="menu-link{% if is_item_active %} active{% endif %}" href="{{ item.href }}" {% if is_item_active %}aria-current="page"{% endif %}>
+                    <span class="menu-main">
+                      <span class="menu-icon"><i class="bi {{ item.icon }}"></i></span>
+                      <span>{{ item.label }}</span>
+                    </span>
+                    <span class="menu-meta">
+                      {% if item.badge %}
+                        <span class="badge menu-badge {{ item.badge_class }}">{{ item.badge }}</span>
+                      {% endif %}
+                    </span>
+                  </a>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img
+            src="{{ current_user.avatar_url if current_user.avatar_url else url_for('static', filename='shared/img/avatar-placeholder.svg') }}"
+            alt="{{ current_user.full_name or current_user.username }}"
+            class="sidebar-user-avatar"
+          >
+          <div>
+            <div class="small text-secondary">Signed in as</div>
+            <div class="sidebar-user-name">{{ current_user.full_name or current_user.username }}</div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mt-3">
+          <a class="btn btn-primary btn-sm sidebar-home-btn" href="{{ url_for('main.home') }}">
+            <i class="bi bi-house-door"></i> Home Website
+          </a>
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('account.profile') }}">
+            <i class="bi bi-person"></i> Account
+          </a>
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-outline-light btn-sm w-100" type="submit">
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-shell flex-grow-1">
+      <div class="topbar">
+        <div class="container-fluid topbar-inner">
+          <div class="topbar-left">
+            <button class="topbar-toggle" type="button" id="sidebarCollapseBtn" aria-label="Toggle sidebar">
+              <i class="bi bi-list"></i>
+            </button>
+            <div>
+              <div class="topbar-kicker">Fluencify Workspace</div>
+              <div class="topbar-page-title">{% block page_title %}Overview{% endblock %}</div>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <a class="topbar-home-link" href="{{ url_for('main.home') }}">
+              <i class="bi bi-house-door"></i>
+              <span>Open Website</span>
+            </a>
+
+            <a class="topbar-icon" href="{{ url_for('account.notifications') }}" aria-label="Notifications">
+              <i class="bi bi-bell"></i>
+              {% if unread_notifications and unread_notifications > 0 %}
+                <span class="topbar-counter">{{ unread_notifications }}</span>
+              {% endif %}
+            </a>
+
+            <a class="topbar-profile" href="{{ url_for('account.profile') }}">
+              <div class="topbar-profile-meta">
+                <div class="topbar-profile-name">{{ current_user.full_name or current_user.username }}</div>
+                <div class="topbar-profile-role">{{ current_user.role.replace('_', ' ') }}</div>
+              </div>
+              <img
+                src="{{ current_user.avatar_url if current_user.avatar_url else url_for('static', filename='shared/img/avatar-placeholder.svg') }}"
+                alt="{{ current_user.full_name or current_user.username }}"
+                class="topbar-profile-avatar"
+              >
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid py-4 dashboard-content-wrap">
+        {{ flash_messages() }}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  {% if current_user.is_authenticated and current_user.is_student and student_chat_widget %}
+    {% include "student/_chat_widget.html" %}
+  {% endif %}
+
+  <!-- Core Vendor JS -->
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- Shared JS -->
+  <script src="{{ url_for('static', filename='shared/js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/dashboard-sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/dashboard-shell.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/ai-voice.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/browser-notifications.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/bootstrap-icon-fallback.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/student-track-separation.js') }}"></script>
+  {% if current_user.is_authenticated and current_user.is_student and student_chat_widget %}
+    <script src="{{ url_for('static', filename='shared/js/student-chat-widget.js') }}"></script>
+  {% endif %}
+
+  <!-- Page Specific JS -->
+  {% block extra_js %}{% endblock %}
+
+  <!-- Backward-compatible scripts block -->
+  <script src="{{ url_for('static', filename='shared/js/phase18-platform-stability.js') }}"></script>
+  <script src="{{ url_for('static', filename='shared/js/alphabet-background.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

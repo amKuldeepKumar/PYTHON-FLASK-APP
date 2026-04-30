@@ -1,0 +1,202 @@
+.analytics-shell {
+  gap: 1.15rem;
+}
+
+.analytics-hero-card {
+  padding: 1.7rem 1.75rem;
+}
+
+.analytics-hero-grid {
+  grid-template-columns: 1.45fr 0.72fr;
+}
+
+.analytics-hero-card .eyebrow,
+.analytics-metric-card .metric-label,
+.analytics-track-card .track-sub,
+.analytics-track-card .track-stats span,
+.analytics-track-card .list-item span,
+.analytics-table thead th {
+  color: var(--student-muted);
+}
+
+.analytics-hero-card .hero-title,
+.analytics-track-card .track-title,
+.analytics-detail-grid .section-title,
+.analytics-metric-card .metric-value,
+.analytics-track-card .track-stats strong,
+.analytics-track-card .list-item strong,
+.analytics-track-card .head strong {
+  color: var(--student-heading);
+}
+
+.analytics-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.analytics-metric-card {
+  padding: 1.1rem 1.15rem;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(147, 197, 253, 0.24), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(238, 246, 255, 0.94));
+  border: 1px solid var(--student-border);
+  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.analytics-metric-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 40%, transparent 70%, rgba(191, 219, 254, 0.18));
+  pointer-events: none;
+}
+
+.analytics-metric-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.analytics-metric-card .metric-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.analytics-metric-card .metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.05;
+  margin-top: 0.38rem;
+}
+
+.analytics-metric-card .metric-value-sm {
+  font-size: 1.55rem;
+}
+
+.analytics-track-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.analytics-track-card {
+  min-height: 100%;
+}
+
+.analytics-track-card .track-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.analytics-track-card .track-title {
+  font-weight: 800;
+  font-size: 1.08rem;
+}
+
+.analytics-track-card .track-sub {
+  font-size: 0.88rem;
+}
+
+.analytics-track-card .score-pill {
+  padding: 0.45rem 0.82rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(14, 165, 233, 0.14));
+  border: 1px solid var(--student-border);
+  font-weight: 800;
+  color: var(--student-heading);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
+}
+
+.analytics-progress-line {
+  margin-bottom: 0.95rem;
+}
+
+.analytics-track-card .track-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.analytics-mini-list {
+  margin-top: 1rem;
+}
+
+.analytics-mini-item {
+  align-items: center;
+  padding: 0.8rem 0.95rem;
+}
+
+.analytics-detail-grid {
+  grid-template-columns: 1.1fr 0.95fr;
+}
+
+.analytics-table-wrap {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--student-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.analytics-table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--student-text);
+  --bs-table-border-color: rgba(37, 99, 235, 0.1);
+}
+
+.analytics-table tbody td {
+  color: var(--student-text);
+}
+
+.analytics-focus-box {
+  min-height: 100%;
+}
+
+@media (max-width: 1399px) {
+  .analytics-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .analytics-track-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 991px) {
+  .analytics-detail-grid,
+  .analytics-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-track-card .track-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .analytics-metric-grid,
+  .analytics-track-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-track-card .track-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-metric-card .metric-value {
+    font-size: 1.65rem;
+  }
+}

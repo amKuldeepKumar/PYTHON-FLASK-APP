@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-labelledby="title desc">
+  <title id="title">Apple</title>
+  <desc id="desc">A simple red apple for nursery practice.</desc>
+  <rect width="320" height="240" rx="28" fill="#fff8ef"/>
+  <ellipse cx="160" cy="138" rx="68" ry="74" fill="#ef4444"/>
+  <ellipse cx="132" cy="109" rx="18" ry="12" fill="#fca5a5" opacity="0.75"/>
+  <rect x="154" y="40" width="12" height="38" rx="6" fill="#7c4a1d"/>
+  <path d="M164 44c16-20 34-27 56-18-8 18-28 32-52 34z" fill="#22c55e"/>
+  <circle cx="226" cy="112" r="10" fill="#fff3"/>
+</svg>

@@ -1,0 +1,24 @@
+.profile-shell{max-width:1400px}
+.profile-top{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}
+.profile-top .meta{color:var(--muted)}
+.profile-badge{padding:.55rem .9rem;border-radius:999px;background:color-mix(in srgb,var(--primary) 14%, var(--surface));border:1px solid var(--border);font-weight:700;box-shadow:0 10px 24px color-mix(in srgb,var(--shadow) 14%,transparent);color:var(--heading-text,var(--text))}
+.profile-card{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:28px;box-shadow:0 24px 60px color-mix(in srgb,var(--shadow) 16%,transparent)!important}
+.profile-card .card-body{padding:1.5rem;color:var(--text)}
+.hint-panel{border-radius:20px;background:color-mix(in srgb,var(--surface-2) 82%, var(--surface));border:1px solid var(--border);padding:1rem 1.1rem;margin-bottom:1rem;color:var(--text)}
+.hint-panel ul{margin-bottom:0;padding-left:1rem}
+.profile-photo-card{display:grid;grid-template-columns:132px 1fr;gap:1.1rem;align-items:center;padding:1rem 1.1rem;border-radius:22px;background:color-mix(in srgb,var(--surface-2) 72%, var(--surface));border:1px solid var(--border)}
+.profile-photo-preview{width:132px;height:132px;border-radius:24px;overflow:hidden;background:color-mix(in srgb,var(--surface-2) 76%, var(--surface));border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.profile-photo-preview img{width:100%;height:100%;object-fit:cover}
+.profile-photo-actions .desc{color:var(--muted)}
+.camera-wrap{padding:1rem;border-radius:18px;background:color-mix(in srgb,var(--surface-2) 72%, var(--surface));border:1px solid var(--border)}
+.camera-wrap video{width:100%;max-width:440px;border-radius:18px;border:1px solid var(--border);background:#050816}
+.section-label{font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.ownership-preview{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:.9rem;margin-bottom:1.1rem}
+.ownership-box{padding:1rem 1.05rem;border-radius:20px;background:color-mix(in srgb,var(--surface-2) 76%, var(--surface));border:1px solid var(--border);color:var(--text)}
+.ownership-box strong{display:block;font-size:1rem;color:var(--heading-text,var(--text))}
+.ownership-box .sub{font-size:.86rem;color:var(--muted);margin-top:.25rem}
+.selection-panel{padding:1rem 1.05rem;border-radius:22px;background:color-mix(in srgb,var(--primary) 10%, var(--surface));border:1px solid var(--border);margin-bottom:1rem}
+.selection-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.selection-copy,.form-text{color:var(--muted)!important;font-size:.92rem}
+.btn-cluster{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.25rem}
+@media (max-width: 991px){.ownership-preview,.selection-grid{grid-template-columns:1fr}.profile-photo-card{grid-template-columns:1fr}.profile-photo-preview{width:110px;height:110px}}

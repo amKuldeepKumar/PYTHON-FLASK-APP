@@ -1,0 +1,28 @@
+.language-result-badge {
+    background: color-mix(in srgb, var(--primary) 16%, transparent) !important;
+    color: var(--heading-text) !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 42%, var(--border)) !important;
+    font-weight: 700;
+    letter-spacing: .01em;
+  }
+  .language-format-card {
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 1rem;
+  }
+  .language-format-card .code-sample {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .28rem .6rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.09);
+    color: var(--heading-text);
+    font-weight: 600;
+    margin: 0 .35rem .45rem 0;
+  }
+  .language-search-row .form-control {
+    min-width: 220px;
+  }

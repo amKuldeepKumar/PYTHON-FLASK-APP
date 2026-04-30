@@ -1,0 +1,78 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Students • Fluencify{% endblock %}
+{% block page_title %}Students{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Students</h2>
+      <p class="text-muted mb-0">Track progress, latest device/browser, and learning performance.</p>
+    </div>
+    {% if panel_role == 'superadmin' %}
+      <div>
+        <a href="{{ url_for('superadmin.students_export') }}" class="btn btn-primary">Download CSV</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Latest Course</th>
+              <th>Browser / OS</th>
+              <th>IP</th>
+              <th>Attempts</th>
+              <th>Accuracy</th>
+              <th>Completion</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+              {% set progress = progress_map.get(student.id, {}) %}
+              {% set login = latest_login_map.get(student.id) %}
+              {% set course_ref = course_map.get(student.id) %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ student.full_name }}</div>
+                  <div class="small text-muted">{{ student.email }}</div>
+                </td>
+                <td>
+                  {% if course_ref %}
+                    {% if course_ref.course is defined %}
+                      {{ course_ref.course.title }}
+                    {% else %}
+                      {{ course_ref.title }}
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted">No active course</span>
+                  {% endif %}
+                </td>
+                <td>{{ login.browser_display if login else 'Unknown' }}</td>
+                <td>{{ login.ip_address if login and login.ip_address else '—' }}</td>
+                <td>{{ progress.attempt_count or 0 }}</td>
+                <td>{{ progress.avg_accuracy or 0 }}%</td>
+                <td>{{ progress.overall_completion or 0 }}%</td>
+                <td>
+                  <span class="badge {% if progress.trend == 'Improving' %}bg-success{% elif progress.trend == 'Needs support' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    {{ progress.trend or 'Stable' }}
+                  </span>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="10" class="text-muted">No students found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

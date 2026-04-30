@@ -1,0 +1,18 @@
+{% extends "layout/auth_base.html" %}
+{% block title %}Reset Password • Fluencify{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-2">Reset password</h4>
+<p class="text-muted small">We’ll send a reset link (placeholder in Phase 1).</p>
+
+<form method="post">
+  {{ form.hidden_tag() }}
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    {{ form.email(class="form-control auth-input", placeholder="you@example.com") }}
+  </div>
+  <button class="btn btn-primary w-100 py-2">{{ form.submit.label.text }}</button>
+  <div class="text-center mt-3 small">
+    Back to <a href="{{ url_for('auth.login') }}">Login</a>
+  </div>
+</form>
+{% endblock %}

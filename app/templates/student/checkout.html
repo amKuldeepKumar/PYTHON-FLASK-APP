@@ -1,0 +1,139 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Checkout • {{ course.title }}{% endblock %}
+{% block page_title %}Checkout{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9">
+    <div class="card border-0 shadow-sm" class="theme-surface-card">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+          <div>
+            <h3 class="fw-bold mb-1">{{ course.title }}</h3>
+            <div class="small text-secondary">Choose full course access or level-wise access.</div>
+            {% if enrollment %}<div class="small text-info mt-2">Current access: {{ 'Full course unlocked' if enrollment.has_full_access() else ('Unlocked levels: ' ~ (enrollment.purchased_levels|join(', '))) }}</div>{% endif %}
+          </div>
+          <a href="{{ url_for('student.course_library') }}" class="btn btn-outline-light">Back to Library</a>
+        </div>
+
+        {% if coupon_error %}<div class="alert alert-danger py-2">{{ coupon_error }}</div>{% endif %}
+        {% if coupon %}<div class="alert alert-success py-2">Coupon {{ coupon.code }} applied successfully.</div>{% endif %}
+
+        <form method="post" class="row g-4">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="col-lg-7">
+            <div class="rounded-4 border border-secondary-subtle p-3 mb-3">
+              <h5 class="mb-3">Choose access plan</h5>
+              {% if reward_overview %}
+              <div class="rounded-3 bg-dark bg-opacity-25 p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                  <div>
+                    <div class="small text-secondary">Course coin overview</div>
+                    <div class="fw-semibold">{{ reward_overview.label }} reward band</div>
+                  </div>
+                  <span class="badge text-bg-warning text-dark">{{ reward_overview.label }}</span>
+                </div>
+                <div class="small text-secondary mt-2">Lesson {{ reward_overview.lesson_base }} to {{ reward_overview.lesson_high }} coins • Speaking {{ reward_overview.speaking_min }} to {{ reward_overview.speaking_max }} coins • Boss {{ reward_overview.boss_reward }}+ coins</div>
+              </div>
+              {% endif %}
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="purchase_scope" id="scopeFull" value="full_course" {% if purchase_scope != 'single_level' %}checked{% endif %}>
+                <label class="form-check-label" for="scopeFull">
+                  <strong>Full course</strong>
+                  <span class="d-block small text-secondary">Level 1 to {{ course.max_level or 1 }} • {{ (course.access_type or 'free')|title }}</span>
+                </label>
+              </div>
+              <div class="rounded-3 bg-dark bg-opacity-25 p-3 mb-3">
+                <div class="small text-secondary">Full course price</div>
+                <div class="fs-4 fw-bold">{% if (course.current_price|float) <= 0 %}Free{% else %}{{ course.currency_code }} {{ '%.2f'|format(course.current_price|float) }}{% endif %}</div>
+                {% if course.sale_price %}<div class="small text-warning">Base {{ course.currency_code }} {{ '%.2f'|format(course.base_price|float) }}</div>{% endif %}
+              </div>
+
+              {% if course.allow_level_purchase %}
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="purchase_scope" id="scopeLevel" value="single_level" {% if purchase_scope == 'single_level' %}checked{% endif %}>
+                <label class="form-check-label" for="scopeLevel">
+                  <strong>Single level</strong>
+                  <span class="d-block small text-secondary">Buy only one level at a time</span>
+                </label>
+              </div>
+              <div class="rounded-3 bg-dark bg-opacity-25 p-3" id="levelPlanWrap">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6">
+                    <label class="form-label">Choose level</label>
+                    <select class="form-select" name="level" id="levelSelect">
+                      {% for level_number in range(1, (course.max_level or 1) + 1) %}
+                        <option value="{{ level_number }}" {% if selected_level == level_number %}selected{% endif %}>Level {{ level_number }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="small text-secondary">Single level price</div>
+                    <div class="fs-5 fw-bold">{% if (course.current_level_price|float) <= 0 %}Free{% else %}{{ course.currency_code }} {{ '%.2f'|format(course.current_level_price|float) }}{% endif %}</div>
+                    {% if course.level_sale_price %}<div class="small text-warning">Base {{ course.currency_code }} {{ '%.2f'|format(course.level_price|float) }}</div>{% endif %}
+                  </div>
+                </div>
+                {% if enrollment and not enrollment.has_full_access() and enrollment.purchased_levels %}
+                  <div class="small text-info mt-2">Already unlocked: {% for item in enrollment.purchased_levels %}Level {{ item }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="rounded-4 border border-secondary-subtle p-3">
+              <label class="form-label">Coupon Code</label>
+              <input class="form-control mb-3" type="text" name="coupon_code" value="{{ coupon_code }}" placeholder="WELCOME20">
+              <div class="small text-secondary mb-3">Demo flow is enabled in this project. Razorpay can be connected later.</div>
+              <button class="btn btn-outline-light" type="submit">Apply Coupon</button>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="rounded-4 border border-secondary-subtle p-3 h-100">
+              <h5 class="mb-3">Order summary</h5>
+              <div class="d-flex justify-content-between small mb-2"><span>Course</span><span>{{ course.title }}</span></div>
+              {% if reward_overview %}
+              <div class="d-flex justify-content-between small mb-2"><span>Reward band</span><span>{{ reward_overview.label }}</span></div>
+              {% endif %}
+              <div class="d-flex justify-content-between small mb-2"><span>Plan</span><span id="summaryPlan">{{ 'Single level' if purchase_scope == 'single_level' else 'Full course' }}</span></div>
+              <div class="d-flex justify-content-between small mb-2"><span>Level</span><span id="summaryLevel">{% if purchase_scope == 'single_level' %}Level {{ selected_level }}{% else %}All levels{% endif %}</span></div>
+              <div class="d-flex justify-content-between small mb-2"><span>Discount</span><span>{{ course.currency_code }} {{ '%.2f'|format(discount_amount or 0) }}</span></div>
+              <hr>
+              <div class="d-flex justify-content-between align-items-center mb-3"><span class="fw-semibold">Payable</span><span class="fs-4 fw-bold" id="summaryTotal"></span></div>
+              {% set full_total = (course.current_price|float) - (discount_amount or 0) %}
+              {% set level_total = (course.current_level_price|float) - (discount_amount or 0) %}
+              <input type="hidden" name="checkout_action" value="start_payment">
+              <button class="btn btn-primary w-100" type="submit" id="payBtn"></button>
+              {% if course.allow_level_purchase and (course.current_level_price|float) <= 0 %}
+              <div class="small text-secondary mt-3">For free levels, you can also unlock directly.</div>
+              <div class="d-grid mt-2">
+                <button class="btn btn-outline-success" type="submit" formaction="{{ url_for('student.enroll_free_level', course_id=course.id, level_number=selected_level) }}" formmethod="post">Unlock selected free level</button>
+              </div>
+              {% endif %}
+              {% if course.allow_coin_redemption and course.coin_redemption_price %}
+              <hr>
+              <div class="small text-secondary mb-2">Coin unlock option</div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Full course with coins</span>
+                <strong>{{ course.coin_redemption_price }} coins</strong>
+              </div>
+              <div class="small text-secondary mb-3">Wallet balance: {{ wallet_summary.wallet.coin_balance if wallet_summary and wallet_summary.wallet else 0 }} coins</div>
+              {% if wallet_summary and wallet_summary.wallet and wallet_summary.wallet.coin_balance >= course.coin_redemption_price %}
+              <input type="hidden" name="next" value="{{ url_for('student.course_detail', course_id=course.id) }}">
+              <button class="btn btn-outline-warning w-100" type="submit" formaction="{{ url_for('student.redeem_course_with_coins', course_id=course.id) }}" formmethod="post">Unlock this course with coins</button>
+              {% else %}
+              <div class="small text-secondary">Need {{ course.coin_redemption_price - (wallet_summary.wallet.coin_balance if wallet_summary and wallet_summary.wallet else 0) }} more coins for direct unlock.</div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/student-checkout.js') }}"></script>
+{% endblock %}

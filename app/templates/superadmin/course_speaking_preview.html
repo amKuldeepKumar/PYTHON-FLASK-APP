@@ -1,0 +1,58 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Speaking Preview • Fluencify{% endblock %}
+{% block page_title %}Student Preview • Speaking{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-course-speaking-preview.css') }}">{% endblock %}
+
+{% block content %}
+<div class="s-hero">
+  <div class="glass-card p-4 p-lg-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <div class="small text-uppercase text-secondary mb-2">Student preview</div>
+        <h2 class="fw-bold mb-3">Speaking practice view</h2>
+        <p class="text-secondary mb-4">This preview reflects only active and published speaking topics with active prompts.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="pill">Active topics <strong>{{ topics|length }}</strong></span>
+          <span class="pill">Active prompts <strong>{{ active_prompt_count }}</strong></span>
+          <span class="pill">Preview only</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-light btn-sm" href="{{ preview_back_url }}">Back to Course Manager</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3">
+          <div class="col-6"><div class="metric-box"><div class="small text-secondary mb-2">Current streak</div><div class="metric-value">0</div><div class="small text-secondary mt-2">days</div></div></div>
+          <div class="col-6"><div class="metric-box"><div class="small text-secondary mb-2">Coin balance</div><div class="metric-value">0</div><div class="small text-secondary mt-2">wallet</div></div></div>
+          <div class="col-6"><div class="metric-box"><div class="small text-secondary mb-2">Longest streak</div><div class="metric-value">0</div><div class="small text-secondary mt-2">days</div></div></div>
+          <div class="col-6"><div class="metric-box"><div class="small text-secondary mb-2">Last 14 days</div><div class="metric-value">0</div><div class="small text-secondary mt-2">completions</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if topics %}
+    <div class="row g-4">
+      {% for topic in topics %}
+        <div class="col-md-6 col-xl-4">
+          <div class="topic-card p-4">
+            <div class="d-flex justify-content-between gap-2 mb-2">
+              <div class="small text-uppercase text-secondary">Speaking topic</div>
+              <span class="badge text-bg-dark">{{ topic.active_prompt_count }} prompts</span>
+            </div>
+            <h4 class="fw-bold mb-2">{{ topic.title }}</h4>
+            <p class="text-secondary mb-3">{{ topic.description or 'Practice this topic with active prompts.' }}</p>
+            <button class="btn btn-primary w-100" type="button" disabled>Start Topic</button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="glass-card p-4">
+      <div class="fw-bold mb-2">No speaking topics are live right now.</div>
+      <div class="text-secondary">Activate and publish at least one speaking topic with active prompts to fill this preview.</div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

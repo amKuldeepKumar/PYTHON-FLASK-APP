@@ -1,0 +1,138 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Security Policy{% endblock %}
+{% block page_title %}Security Policy{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Security Controls</h2>
+
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="border rounded p-3 mb-4">
+              <h3 class="h6 mb-3">OTP Control</h3>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Global OTP mode</label>
+                  {{ form.otp_mode(class="form-select") }}
+                  <div class="form-text">Use OFF while working offline.</div>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Admin OTP override</label>
+                  {{ form.otp_mode_admin(class="form-select") }}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Student OTP override</label>
+                  {{ form.otp_mode_student(class="form-select") }}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Staff OTP override</label>
+                  {{ form.otp_mode_staff(class="form-select") }}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">OTP TTL (minutes)</label>
+                  {{ form.otp_ttl_minutes(class="form-control") }}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">OTP sends/hour</label>
+                  {{ form.otp_max_sends_per_hour(class="form-control") }}
+                </div>
+              </div>
+            </div>
+
+            <div class="border rounded p-3 mb-4">
+              <h3 class="h6 mb-3">Login Protection</h3>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">OTP verify attempts</label>
+                  {{ form.otp_max_verify_attempts(class="form-control") }}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Failed login threshold</label>
+                  {{ form.failed_login_threshold(class="form-control") }}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Lockout minutes</label>
+                  {{ form.lockout_minutes(class="form-control") }}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Suspicious login window (days)</label>
+                  {{ form.suspicious_window_days(class="form-control") }}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Trusted device duration (days)</label>
+                  {{ form.trust_device_days(class="form-control") }}
+                </div>
+              </div>
+            </div>
+
+            <div class="border rounded p-3 mb-4">
+              <h3 class="h6 mb-3">Limits & Uploads</h3>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">API rate limit</label>
+                  {{ form.api_rate_limit(class="form-control") }}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">AI rate limit</label>
+                  {{ form.ai_rate_limit(class="form-control") }}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Max upload MB</label>
+                  {{ form.max_upload_mb(class="form-control") }}
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Allowed extensions</label>
+                  {{ form.allowed_upload_extensions(class="form-control") }}
+                </div>
+              </div>
+            </div>
+
+            <div class="border rounded p-3 mb-4">
+              <h3 class="h6 mb-3">Browser Security</h3>
+              <div class="row g-3">
+                <div class="col-md-4 d-flex align-items-end">
+                  <div class="form-check">
+                    {{ form.csp_report_only(class="form-check-input") }}
+                    <label class="form-check-label ms-2">CSP report-only</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">CSP report URI</label>
+                  {{ form.csp_report_uri(class="form-control") }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="h6">Recommended now</h3>
+          <ul class="small mb-0">
+            <li>Set Global OTP mode to <strong>OFF</strong> while working offline.</li>
+            <li>Later set Admin to <strong>ALWAYS</strong> if needed.</li>
+            <li>Keep Student OTP on <strong>Inherit</strong> until live deployment.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

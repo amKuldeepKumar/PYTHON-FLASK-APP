@@ -1,0 +1,209 @@
+.course-welcome-screen {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: calc(100vh - 13rem);
+}
+
+.course-welcome-shell {
+  background: linear-gradient(180deg, rgba(250, 252, 255, 0.98), rgba(239, 245, 255, 0.94));
+  border: 1px solid rgba(103, 128, 201, 0.14);
+  border-radius: 34px;
+  box-shadow: 0 30px 70px rgba(68, 92, 162, 0.16);
+  margin: 0 auto;
+  max-width: 1040px;
+  padding: 2.4rem;
+  text-align: center;
+}
+
+.course-welcome-avatar {
+  height: 148px;
+  margin: 0 auto 1.1rem;
+  position: relative;
+  width: 148px;
+}
+
+.course-welcome-avatar-ring,
+.course-welcome-orb-core {
+  border-radius: 50%;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.course-welcome-avatar-ring {
+  border: 1px solid rgba(82, 120, 255, 0.18);
+}
+
+.course-welcome-avatar-ring.ring-one {
+  animation: courseWelcomeRing 2.4s infinite ease-out;
+  height: 148px;
+  width: 148px;
+}
+
+.course-welcome-avatar-ring.ring-two {
+  animation: courseWelcomeRing 2.4s infinite ease-out 0.8s;
+  height: 118px;
+  width: 118px;
+}
+
+.course-welcome-orb-core {
+  background: radial-gradient(circle at 35% 35%, #97b2ff, #3f6bff 55%, #2347c8 100%);
+  box-shadow: 0 16px 42px rgba(65, 103, 255, 0.34);
+  height: 82px;
+  width: 82px;
+}
+
+.course-welcome-avatar.is-speaking .course-welcome-orb-core {
+  animation: courseWelcomeCore 1.2s infinite ease-in-out;
+}
+
+.course-welcome-avatar.is-speaking .course-welcome-wavebars span {
+  animation-duration: 0.55s;
+}
+
+.course-welcome-wavebars {
+  align-items: end;
+  display: flex;
+  gap: 0.22rem;
+  height: 34px;
+  justify-content: center;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  z-index: 2;
+}
+
+.course-welcome-wavebars span {
+  animation: courseWelcomeBar 1.1s infinite ease-in-out;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  display: block;
+  height: 20%;
+  width: 5px;
+}
+
+.course-welcome-wavebars span:nth-child(2) { animation-delay: 0.1s; }
+.course-welcome-wavebars span:nth-child(3) { animation-delay: 0.2s; }
+.course-welcome-wavebars span:nth-child(4) { animation-delay: 0.3s; }
+.course-welcome-wavebars span:nth-child(5) { animation-delay: 0.4s; }
+
+.course-welcome-kicker {
+  color: #6c7693;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.course-welcome-title {
+  color: #1a2746;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  font-weight: 800;
+  margin: 0.75rem 0 0.55rem;
+}
+
+.course-welcome-subtitle {
+  color: #5e6c89;
+  font-size: 1.05rem;
+  margin: 0 auto 1.6rem;
+  max-width: 760px;
+}
+
+.course-welcome-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.course-welcome-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(93, 118, 194, 0.12);
+  border-radius: 24px;
+  padding: 1.3rem;
+  text-align: left;
+}
+
+.course-welcome-section-title {
+  color: #243555;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
+.course-welcome-list {
+  color: #4f5f7f;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.course-welcome-list li + li {
+  margin-top: 0.5rem;
+}
+
+.course-welcome-teleprompter {
+  background: #101725;
+  border-radius: 26px;
+  margin: 0 auto 1.5rem;
+  max-width: 840px;
+  min-height: 210px;
+  padding: 1.5rem;
+}
+
+.course-welcome-typing {
+  color: #eef4ff;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  line-height: 1.8;
+  min-height: 150px;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.course-welcome-typing::after {
+  animation: blinkCursor 1s step-end infinite;
+  content: "|";
+  display: inline-block;
+  margin-left: 0.15rem;
+}
+
+.course-welcome-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+@keyframes courseWelcomeRing {
+  0% { opacity: 0.18; transform: translate(-50%, -50%) scale(0.88); }
+  70% { opacity: 0.04; transform: translate(-50%, -50%) scale(1.04); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.12); }
+}
+
+@keyframes courseWelcomeCore {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.07); }
+}
+
+@keyframes courseWelcomeBar {
+  0%, 100% { height: 24%; opacity: 0.8; }
+  50% { height: 100%; opacity: 1; }
+}
+
+@keyframes blinkCursor {
+  50% { opacity: 0; }
+}
+
+@media (max-width: 900px) {
+  .course-welcome-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .course-welcome-shell {
+    padding: 1.4rem;
+  }
+}

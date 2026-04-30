@@ -1,0 +1,94 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Writing Task • {{ task.title }}{% endblock %}
+{% block page_title %}Writing Task{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+          <div>
+            <div class="small text-muted text-uppercase mb-1">Writing Workspace</div>
+            <div class="small text-muted">{{ task.topic_title_snapshot }}</div>
+            <h2 class="mb-2">{{ task.title }}</h2>
+            <div class="text-muted">{{ task.type_label }} • {{ task.level|title }} • {{ task.length_label }}</div>
+          </div>
+          <a class="btn btn-outline-secondary" href="{{ url_for('student.course_writing_home', course_id=course.id) }}">Back</a>
+        </div>
+
+        <div class="border rounded-4 p-4 mb-4 bg-light-subtle">
+          <div class="fw-semibold mb-2">Task Requirement</div>
+          <div class="theme-pre-wrap">{{ task.ai_task_brief }}</div>
+          {% if task.topic and task.topic.description %}
+            <div class="mt-3 pt-3 border-top">
+              <div class="small text-muted text-uppercase mb-1">Topic Context</div>
+              <div class="theme-pre-wrap">{{ task.topic.description }}</div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted text-uppercase mb-1">Transparent rubric</div><div class="fw-semibold mb-2">How this will be scored</div><ul class="mb-0 ps-3 text-muted"><li>Grammar: sentence control, punctuation, tense, and clarity.</li><li>Vocabulary: range, precision, and repetition control.</li><li>Coherence: paragraphing, order, and linking words.</li><li>Task response: relevance, depth, and word-range control.</li></ul></div></div>
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted text-uppercase mb-1">Task structure</div><div class="fw-semibold mb-2">Recommended shape</div><ul class="mb-0 ps-3 text-muted"><li>Start with a clear opening line.</li><li>Develop 2–3 connected points.</li><li>End with a closing sentence that completes the answer.</li><li>Review once before you submit.</li></ul></div></div>
+        </div>
+
+        <form method="post" action="{{ url_for('student.course_writing_submit', course_id=course.id, task_id=task.id) }}" id="writingTaskForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="paste_count" id="pasteCount" value="0">
+          <input type="hidden" name="largest_paste_chars" id="largestPasteChars" value="0">
+          <input type="hidden" name="focus_loss_count" id="focusLossCount" value="0">
+          <input type="hidden" name="draft_seconds" id="draftSeconds" value="0">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Write your answer</label>
+            <textarea class="form-control" id="submission_text" name="submission_text" rows="16" placeholder="Write your paragraph or full answer here..." data-min-words="{{ task.min_words or 0 }}" data-max-words="{{ task.max_words or 0 }}" data-course-id="{{ course.id }}" data-task-id="{{ task.id }}"></textarea>
+          </div>
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between border rounded-4 p-3 mb-3">
+            <div class="small text-muted">
+              <span class="me-3"><strong id="wordCount">0</strong> words</span>
+              <span class="me-3"><strong id="charCount">0</strong> characters</span>
+              <span class="me-3"><strong id="paragraphCount">0</strong> paragraphs</span>
+              <span><strong id="lengthStatus">Waiting to start</strong></span>
+            </div>
+            <div class="small text-muted" id="lengthHint">Write clearly according to the topic requirement, then submit for evaluation.</div>
+          </div>
+          <div class="border rounded-4 p-3 mb-4 bg-light-subtle">
+            <div class="small text-muted text-uppercase mb-1">Integrity checks</div>
+            <div class="small text-muted" id="integrityHint">Normal writing is allowed. Large pasted text is flagged for review so feedback stays fair.</div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary" id="writingSubmitBtn">Submit for AI Evaluation</button>
+            {% if latest_submission %}
+              <a class="btn btn-outline-primary" href="{{ url_for('student.course_writing_result', course_id=course.id, submission_id=latest_submission.id) }}">Open Last AI Feedback</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body p-4">
+        <div class="small text-muted text-uppercase mb-2">Writing Tips</div>
+        <ul class="mb-4 ps-3 text-muted">
+          <li>Stay on the given topic.</li>
+          <li>Use a clear beginning, middle, and ending.</li>
+          <li>Keep your answer inside the target word range.</li>
+          <li>Check grammar, vocabulary, coherence, and task response before submitting.</li>
+        </ul>
+        <div class="small text-muted text-uppercase mb-2">Before you submit</div>
+        <ul class="mb-0 ps-3 text-muted">
+          <li>Fix repeated words.</li>
+          <li>Add one linking phrase if your ideas feel disconnected.</li>
+          <li>Make sure the last line actually answers the task.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='shared/js/student-writing-task.js') }}"></script>
+{% endblock %}

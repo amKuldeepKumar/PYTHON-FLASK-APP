@@ -1,0 +1,116 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Writing Result • Fluencify{% endblock %}
+{% block page_title %}Writing Result{% endblock %}
+{% block content %}
+{% set evaluation = submission.evaluation_data or {} %}
+{% set scores = evaluation.get('scores', {}) %}
+{% set integrity = evaluation.get('integrity', {}) %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+          <div>
+            <div class="small text-muted">{% if submission.task %}{{ submission.task.topic_title_snapshot }}{% else %}{{ submission.topic.title }}{% endif %}</div>
+            <h2 class="mb-2">{% if submission.task %}{{ submission.task.title }}{% else %}{{ submission.topic.title }}{% endif %}</h2>
+            <div class="text-muted">AI writing evaluation with grammar, vocabulary, coherence, and task response.</div>
+          </div>
+          <div class="text-end">
+            <div class="display-6 fw-bold">{{ '%.1f'|format(submission.score or 0) }}/10</div>
+            <div class="small text-muted">Overall score</div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3"><div class="border rounded-4 p-3"><div class="small text-muted">Words</div><div class="fw-semibold">{{ submission.word_count }}</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3"><div class="small text-muted">Characters</div><div class="fw-semibold">{{ submission.char_count }}</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3"><div class="small text-muted">Sentences</div><div class="fw-semibold">{{ submission.sentence_count }}</div></div></div>
+          <div class="col-md-3"><div class="border rounded-4 p-3"><div class="small text-muted">Paragraphs</div><div class="fw-semibold">{{ submission.paragraph_count }}</div></div></div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          {% for card in evaluation.get('rubric_cards', []) %}
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted text-uppercase">{{ card.key|replace('_', ' ') }}</div><div class="fw-semibold">{{ '%.1f'|format(card.score) }}/10 • {{ card.band }}</div><div class="small text-muted mt-2">{{ card.label }}</div></div></div>
+          {% else %}
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Grammar</div><div class="fw-semibold">{{ '%.1f'|format(scores.get('grammar', 0)) }}/10</div></div></div>
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Vocabulary</div><div class="fw-semibold">{{ '%.1f'|format(scores.get('vocabulary', 0)) }}/10</div></div></div>
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Coherence</div><div class="fw-semibold">{{ '%.1f'|format(scores.get('coherence', 0)) }}/10</div></div></div>
+          <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">Task Response</div><div class="fw-semibold">{{ '%.1f'|format(scores.get('task_response', 0)) }}/10</div></div></div>
+          {% endfor %}
+        </div>
+
+        <div class="border rounded-4 p-4 mb-4 bg-light-subtle">
+          <div class="small text-muted text-uppercase mb-2">AI Feedback</div>
+          <div class="fw-semibold mb-2">{{ submission.feedback_text or 'No feedback stored.' }}</div>
+          <div class="text-muted">{{ submission.evaluation_summary or '' }}</div>
+          {% if evaluation.get('rubric_summary') %}<div class="small text-muted mt-2">{{ evaluation.get('rubric_summary') }}</div>{% endif %}
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="border rounded-4 p-4 h-100">
+              <div class="small text-muted text-uppercase mb-2">Strengths</div>
+              <ul class="mb-0 ps-3">{% for item in evaluation.get('strengths', []) %}<li>{{ item }}</li>{% endfor %}</ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="border rounded-4 p-4 h-100">
+              <div class="small text-muted text-uppercase mb-2">Improve next time</div>
+              <ul class="mb-0 ps-3">{% for item in evaluation.get('improvements', []) %}<li>{{ item }}</li>{% endfor %}</ul>
+            </div>
+          </div>
+        </div>
+
+        {% if evaluation.get('rewrite_suggestions') %}
+        <div class="border rounded-4 p-4 mb-4">
+          <div class="small text-muted text-uppercase mb-2">Rewrite suggestions</div>
+          <ul class="mb-0 ps-3">{% for item in evaluation.get('rewrite_suggestions', []) %}<li>{{ item }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+
+        {% if evaluation.get('sentence_alerts') or evaluation.get('error_patterns_found') %}
+        <div class="border rounded-4 p-4 mb-4">
+          <div class="small text-muted text-uppercase mb-2">Line-level checks</div>
+          <ul class="mb-0 ps-3">
+            {% for item in evaluation.get('sentence_alerts', []) %}<li>{{ item }}</li>{% endfor %}
+            {% for item in evaluation.get('error_patterns_found', []) %}<li>{{ item }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="border rounded-4 p-4 mb-4">
+          <div class="small text-muted text-uppercase mb-2">Evaluation focus</div>
+          <div class="text-muted">Length status: {{ evaluation.get('metrics', {}).get('length_status', 'n/a')|replace('_', ' ')|title }}.</div>
+          {% if evaluation.get('keyword_focus') %}<div class="small text-muted mt-2">Task keywords checked: {{ evaluation.get('keyword_focus')|join(', ') }}</div>{% endif %}
+          {% if evaluation.get('task_structure') %}<div class="small text-muted mt-2">Expected task structure: {{ evaluation.get('task_structure')|join(', ') }}</div>{% endif %}
+        </div>
+
+        {% if integrity %}
+        <div class="border rounded-4 p-4 mb-4 bg-light-subtle">
+          <div class="small text-muted text-uppercase mb-2">Writing integrity summary</div>
+          <div class="small text-muted">Paste count: {{ integrity.get('paste_count', 0) }} • Largest paste: {{ integrity.get('largest_paste_chars', 0) }} chars • Focus changes: {{ integrity.get('focus_loss_count', 0) }} • Draft time: {{ integrity.get('draft_seconds', 0) }}s</div>
+        </div>
+        {% endif %}
+
+        <div class="d-flex gap-2 flex-wrap">
+          {% if submission.task_id %}
+          <a class="btn btn-primary" href="{{ url_for('student.course_writing_task', course_id=course.id, task_id=submission.task_id) }}">Write Again</a>
+          {% else %}
+          <a class="btn btn-primary" href="{{ url_for('student.course_writing_topic_workspace', course_id=course.id, topic_id=submission.topic_id) }}">Write Again</a>
+          {% endif %}
+          <a class="btn btn-outline-secondary" href="{{ url_for('student.course_writing_history', course_id=course.id) }}">View History</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="small text-muted text-uppercase mb-2">Submitted answer</div>
+        <div style="white-space:pre-wrap;">{{ submission.submission_text }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

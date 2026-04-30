@@ -1,0 +1,33 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Interview History • Fluencify{% endblock %}
+{% block page_title %}Interview History{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/interview-prep.css') }}">{% endblock %}
+{% block content %}
+<div class="interview-shell">
+  <section class="card-surface">
+    <div class="section-head">
+      <h2 class="mb-0">Past AI interview sessions</h2>
+      <a class="btn btn-primary" href="{{ url_for('student.course_interview_start', course_id=course.id) }}">Start New Interview</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead><tr><th>Started</th><th>Persona</th><th>Status</th><th>Completion</th><th>Score</th><th></th></tr></thead>
+        <tbody>
+          {% for row in sessions %}
+            <tr>
+              <td>{{ row.created_at.strftime('%d %b %Y %I:%M %p') if row.created_at else '-' }}</td>
+              <td>{{ (row.ai_persona or 'recruiter').replace('_', ' ')|title }}</td>
+              <td>{{ (row.status or 'active').replace('_', ' ')|title }}</td>
+              <td>{{ '%.0f'|format(row.completion_percent or 0) }}%</td>
+              <td>{{ '%.1f'|format(row.final_score or 0) }}/10</td>
+              <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.course_interview_result', course_id=course.id, session_id=row.id) if row.is_completed else url_for('student.course_interview_session', course_id=course.id, session_id=row.id) }}">Open</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="text-center text-secondary py-4">No interview sessions yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

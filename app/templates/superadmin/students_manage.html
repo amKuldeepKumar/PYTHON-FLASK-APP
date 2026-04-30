@@ -1,0 +1,466 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Student Directory • Fluencify{% endblock %}
+{% block page_title %}Student Directory{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/superadmin-students.css') }}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">
+            {% if editing_student %}
+              Edit Student Linking
+            {% elif password_student %}
+              Change Student Password
+            {% else %}
+              Student Linking Rules
+            {% endif %}
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if editing_student %}
+          <form method="post" action="{{ url_for('superadmin.students_edit', student_id=editing_student.id) }}">
+            {{ edit_form.hidden_tag() }}
+            <div class="mb-3">
+              <label class="form-label">{{ edit_form.full_name.label.text }}</label>
+              {{ edit_form.full_name(class='form-control') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ edit_form.username.label.text }}</label>
+              {{ edit_form.username(class='form-control') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ edit_form.email.label.text }}</label>
+              {{ edit_form.email(class='form-control') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ edit_form.organization_id.label.text }}</label>
+              {{ edit_form.organization_id(class='form-select') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ edit_form.teacher_id.label.text }}</label>
+              {{ edit_form.teacher_id(class='form-select') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ edit_form.managed_by_user_id.label.text }}</label>
+              {{ edit_form.managed_by_user_id(class='form-select') }}
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ edit_form.current_level.label.text }}</label>
+                {{ edit_form.current_level(class='form-select') }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ edit_form.target_exam.label.text }}</label>
+                {{ edit_form.target_exam(class='form-select') }}
+              </div>
+            </div>
+            <div class="form-check my-3">
+              {{ edit_form.is_active(class='form-check-input') }}
+              <label class="form-check-label">{{ edit_form.is_active.label.text }}</label>
+            </div>
+            <div class="d-flex gap-2">
+              {{ edit_form.submit(class='btn btn-primary') }}
+              <a href="{{ url_for('superadmin.students', focus_student_id=editing_student.id) }}" class="btn btn-outline-light">Cancel</a>
+            </div>
+          </form>
+          {% elif password_student %}
+          <form method="post" action="{{ url_for('superadmin.students_password', student_id=password_student.id) }}">
+            {{ password_form.hidden_tag() }}
+            <div class="mb-3">
+              <label class="form-label">{{ password_form.new_password.label.text }}</label>
+              {{ password_form.new_password(class='form-control') }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ password_form.confirm_password.label.text }}</label>
+              {{ password_form.confirm_password(class='form-control') }}
+            </div>
+            <div class="d-flex gap-2">
+              {{ password_form.submit(class='btn btn-primary') }}
+              <a href="{{ url_for('superadmin.students', focus_student_id=password_student.id) }}" class="btn btn-outline-light">Cancel</a>
+            </div>
+          </form>
+          {% else %}
+          <div class="small text-muted mb-3">
+            Pick a student from the table or from the dashboard access list. The full login, IP, location, course, and ownership details now open on this page instead of stretching the dashboard.
+          </div>
+          <div class="small text-muted">
+            Students must be linked by dropdown only. Select institute and teacher when you edit a learner. No manual typing is needed.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <form class="row g-3" method="get">
+            <input type="hidden" name="quick_filter" value="{{ current_quick_filter }}">
+            <div class="col-md-4">
+              <input type="text" name="q" class="form-control" placeholder="Search student or institute" value="{{ q or '' }}">
+            </div>
+            <div class="col-md-3">
+              <select name="admin_id" class="form-select">
+                {% for id, label in admin_choices %}
+                <option value="{{ id }}" {% if selected_admin_id == id %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select name="teacher_id" class="form-select">
+                {% for id, label in teacher_choices %}
+                <option value="{{ id }}" {% if selected_teacher_id == id %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2 d-grid">
+              <button class="btn btn-outline-light">Apply</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <h5 class="mb-1">Student List</h5>
+              <div class="small text-muted">Use the student name to open the slide-out profile with access, location, session, and ownership details.</div>
+            </div>
+            {% if focused_student_detail %}
+            <a href="{{ url_for('superadmin.students', q=q, admin_id=selected_admin_id, teacher_id=selected_teacher_id, quick_filter=current_quick_filter) }}" class="btn btn-sm btn-outline-light">Clear selected student</a>
+            {% endif %}
+          </div>
+          <div class="student-filter-row mb-4">
+            {% for key, label in [('all', 'All'), ('live', 'Live'), ('idle', 'Idle'), ('paid', 'Paid'), ('independent', 'Independent'), ('institute', 'Institute')] %}
+            <a
+              href="{{ url_for('superadmin.students', q=q, admin_id=selected_admin_id, teacher_id=selected_teacher_id, quick_filter=key) }}"
+              class="student-filter-chip{% if current_quick_filter == key %} active{% endif %}"
+            >
+              <span>{{ label }}</span>
+              <span class="student-filter-count">{{ quick_filter_counts.get(key, 0) }}</span>
+            </a>
+            {% endfor %}
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle student-directory-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Institute</th>
+                  <th>Teacher</th>
+                  <th>Latest Course</th>
+                  <th>Recent Access</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in student_rows %}
+                {% set student = row.student %}
+                {% set course_ref = row.course_ref %}
+                <tr class="student-list-row{% if focused_student_id == student.id %} table-active{% endif %}">
+                  <td>
+                    <div class="student-row-identity">
+                      <img
+                        src="{{ row.avatar_url }}"
+                        alt="{{ student.full_name }}"
+                        class="student-row-avatar"
+                      >
+                      <div>
+                        <div class="fw-semibold">
+                          <a class="text-decoration-none" href="{{ url_for('superadmin.students', q=q, admin_id=selected_admin_id, teacher_id=selected_teacher_id, quick_filter=current_quick_filter, focus_student_id=student.id) }}">
+                            {{ student.full_name }}
+                          </a>
+                        </div>
+                        <div class="small text-muted">{{ student.email }}</div>
+                        <div class="student-row-chips mt-2">
+                          <span class="student-chip {{ row.activity_chip_class }}">{{ row.activity_label }}</span>
+                          <span class="student-chip {{ row.payment_chip_class }}">{{ row.payment_label }}</span>
+                          <span class="student-chip {{ row.scope_chip_class }}">{{ row.scope_label }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="fw-semibold">{{ student.organization_name or 'Independent' }}</div>
+                    <div class="small text-muted">{{ 'Direct learner' if row.is_independent else 'Institute-linked' }}</div>
+                  </td>
+                  <td>{{ student.assigned_teacher.full_name if student.assigned_teacher else 'Not assigned' }}</td>
+                  <td>
+                    {% if course_ref %}
+                      <div class="fw-semibold">
+                        {% if course_ref.course is defined %}
+                          {{ course_ref.course.title }}
+                        {% else %}
+                          {{ course_ref.title }}
+                        {% endif %}
+                      </div>
+                      <div class="small text-muted">{{ progress_map.get(student.id, {}).get('overall_completion', 0) }}% completion</div>
+                    {% else %}
+                      <span class="text-muted">No active course</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="student-row-access">{{ row.location_text }}</div>
+                    <div class="small text-muted">{{ row.recent_time.strftime('%Y-%m-%d %H:%M') if row.recent_time else 'No activity' }}</div>
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2 flex-wrap">
+                      <a href="{{ url_for('superadmin.students', q=q, admin_id=selected_admin_id, teacher_id=selected_teacher_id, quick_filter=current_quick_filter, focus_student_id=student.id) }}" class="btn btn-sm btn-outline-light">View</a>
+                      <a href="{{ url_for('superadmin.students_edit', student_id=student.id) }}" class="btn btn-sm btn-outline-light">Link</a>
+                      <a href="{{ url_for('superadmin.students_password', student_id=student.id) }}" class="btn btn-sm btn-outline-light">Password</a>
+                      <form method="post" action="{{ url_for('superadmin.students_delete', student_id=student.id) }}" onsubmit="return confirm('Delete this student?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="6" class="text-muted">No students found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if focused_student_detail %}
+{% set detail = focused_student_detail %}
+{% set detail_student = detail.student %}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="studentAccessDrawer" aria-labelledby="studentAccessDrawerLabel" data-bs-scroll="true" style="width: min(880px, 92vw);">
+  <div class="offcanvas-header border-bottom student-drawer-header">
+    <div class="student-drawer-hero">
+      <div class="student-drawer-avatar">
+        {{ (detail_student.full_name or detail_student.username or 'S')[0]|upper }}
+      </div>
+      <div class="student-drawer-hero-copy">
+        <div class="student-drawer-kicker">Student Intelligence</div>
+        <h4 class="mb-1" id="studentAccessDrawerLabel">{{ detail_student.full_name }}</h4>
+        <div class="text-muted mb-2">{{ detail_student.email }}</div>
+        <div class="student-drawer-badges">
+          <span class="student-chip student-chip-role">Student</span>
+          <span class="student-chip {% if detail.latest_session and detail.latest_session.is_active %}student-chip-live{% else %}student-chip-recent{% endif %}">
+            {{ 'Live now' if detail.latest_session and detail.latest_session.is_active else 'Recent access' }}
+          </span>
+          <span class="student-chip student-chip-trend">{{ detail.progress.trend }}</span>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="student-drawer-actions mb-4">
+      <a href="{{ url_for('superadmin.students_edit', student_id=detail_student.id) }}" class="btn btn-outline-light"><i class="bi bi-diagram-3 me-1"></i>Edit Linking</a>
+      <a href="{{ url_for('superadmin.students_password', student_id=detail_student.id) }}" class="btn btn-outline-light"><i class="bi bi-key me-1"></i>Change Password</a>
+      <a href="{{ url_for('superadmin.students', q=q, admin_id=selected_admin_id, teacher_id=selected_teacher_id) }}" class="btn btn-outline-light"><i class="bi bi-x-circle me-1"></i>Clear Selected Student</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-6 col-xl-3">
+        <div class="student-metric-card">
+          <div class="student-metric-label">Owner</div>
+          <div class="fw-semibold">{{ detail.scope.owner_name }}</div>
+          <div class="small text-muted">{{ detail.scope.owner_label }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="student-metric-card">
+          <div class="student-metric-label">Institute</div>
+          <div class="fw-semibold">{{ detail.scope.institute_name }}</div>
+          <div class="small text-muted">Teacher: {{ detail.scope.teacher_name }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="student-metric-card">
+          <div class="student-metric-label">Latest Login</div>
+          <div class="fw-semibold">{{ detail.latest_login.created_at.strftime('%Y-%m-%d %H:%M') if detail.latest_login else 'Unknown' }}</div>
+          <div class="small text-muted">{{ detail.latest_login_location if detail.latest_login else 'No login row' }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="student-metric-card">
+          <div class="student-metric-label">Latest Session</div>
+          <div class="fw-semibold">{{ detail.latest_session.last_seen_at.strftime('%Y-%m-%d %H:%M') if detail.latest_session else 'Unknown' }}</div>
+          <div class="small text-muted">{{ detail.latest_session_location if detail.latest_session else 'No session row' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-xl-6">
+        <div class="student-drawer-panel h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Recent Platform Access</h5>
+            <span class="student-chip student-chip-soft">{{ detail.access_rows|length }} session{{ '' if detail.access_rows|length == 1 else 's' }}</span>
+          </div>
+          <div class="student-session-stack">
+            {% for row in detail.access_rows %}
+            <article class="student-session-card">
+              <div class="student-session-head">
+                <span class="student-chip {% if row.is_active %}student-chip-live{% else %}student-chip-recent{% endif %}">
+                  {{ 'Active' if row.is_active else 'Recent' }}
+                </span>
+                <span class="student-session-env">{{ row.browser_display }}</span>
+              </div>
+              <div class="student-session-grid">
+                <div class="student-mini-card">
+                  <div class="student-mini-label">IP Address</div>
+                  <div class="student-mini-value">{{ row.ip_address }}</div>
+                </div>
+                <div class="student-mini-card">
+                  <div class="student-mini-label">Location</div>
+                  <div class="student-mini-value">{{ row.location_with_flag }}</div>
+                </div>
+                <div class="student-mini-card">
+                  <div class="student-mini-label">Login Time</div>
+                  <div class="student-mini-value">{{ row.login_at.strftime('%Y-%m-%d %H:%M') if row.login_at else 'Unknown' }}</div>
+                </div>
+                <div class="student-mini-card">
+                  <div class="student-mini-label">Last Seen</div>
+                  <div class="student-mini-value">{{ row.last_seen_at.strftime('%Y-%m-%d %H:%M') if row.last_seen_at else 'Unknown' }}</div>
+                </div>
+              </div>
+              <div class="student-session-footer">
+                Logout: {{ row.logout_at.strftime('%Y-%m-%d %H:%M') if row.logout_at else 'Active / not revoked' }}
+              </div>
+            </article>
+            {% else %}
+            <div class="text-muted">No recent session rows are available for this student.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-6">
+        <div class="student-drawer-panel h-100 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Course Access Overview</h5>
+            <span class="student-chip student-chip-soft">{{ detail.progress.active_enrollments }} active</span>
+          </div>
+          <div class="student-course-stack">
+            {% for row in detail.course_access_rows %}
+            <article class="student-course-card">
+              <div class="student-course-art {{ row.course_visual.accent_class }}">
+                <span>{{ row.course_visual.initials }}</span>
+              </div>
+              <div class="student-course-copy">
+                <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-2">
+                  <div>
+                    <div class="fw-semibold">{{ row.course_title }}</div>
+                    <div class="small text-muted">{{ row.track_type }}</div>
+                  </div>
+                  <span class="student-chip {% if row.purchase_state == 'Paid' %}student-chip-live{% else %}student-chip-soft{% endif %}">
+                    {{ row.purchase_state }}
+                  </span>
+                </div>
+                <div class="student-course-meta">
+                  <span class="student-chip student-chip-soft">{{ row.purchase_scope }}</span>
+                  <span class="student-chip student-chip-soft">{{ row.course_visual.track_label }}</span>
+                </div>
+                <div class="small text-muted mt-2">Enrolled: {{ row.enrolled_at.strftime('%Y-%m-%d %H:%M') if row.enrolled_at else 'Unknown' }}</div>
+                <div class="student-course-value">
+                  {% if row.amount > 0 %}
+                    {{ row.currency_code }} {{ '%.2f'|format(row.amount) }}
+                  {% else %}
+                    Free / direct
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+            {% else %}
+            <div class="text-muted">No course access rows are available for this student.</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="student-drawer-panel h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Performance Snapshot</h5>
+            <span class="student-chip student-chip-soft">{{ detail.progress.trend }}</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="small text-muted">Overall completion</div>
+              <div class="fw-semibold">{{ detail.progress.overall_completion }}%</div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Attempts</div>
+              <div class="fw-semibold">{{ detail.progress.attempt_count }}</div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Accuracy</div>
+              <div class="fw-semibold">{{ detail.progress.avg_accuracy }}</div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Confidence</div>
+              <div class="fw-semibold">{{ detail.progress.avg_confidence }}</div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Grammar</div>
+              <div class="fw-semibold">{{ detail.progress.avg_grammar }}</div>
+            </div>
+            <div class="col-6">
+              <div class="small text-muted">Clarity</div>
+              <div class="fw-semibold">{{ detail.progress.avg_clarity }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="student-drawer-panel mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Access Timeline</h5>
+        <span class="student-chip student-chip-soft">{{ detail.timeline_rows|length }} events</span>
+      </div>
+      <div class="student-timeline">
+        {% for item in detail.timeline_rows %}
+        <article class="student-timeline-item">
+          <div class="student-timeline-dot">
+            <i class="bi {{ item.icon }}"></i>
+          </div>
+          <div class="student-timeline-card">
+            <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-1">
+              <div>
+                <div class="fw-semibold">{{ item.title }}</div>
+                <div class="small text-muted">{{ item.subtitle }}</div>
+              </div>
+              <span class="student-chip {{ item.badge_class }}">{{ item.badge }}</span>
+            </div>
+            <div class="small text-muted">{{ item.meta }}</div>
+            <div class="student-timeline-time">{{ item.stamp.strftime('%Y-%m-%d %H:%M') if item.stamp else 'Unknown time' }}</div>
+          </div>
+        </article>
+        {% else %}
+        <div class="text-muted">No timeline events are available for this student.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% if focused_student_detail %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var drawerElement = document.getElementById('studentAccessDrawer');
+    if (!drawerElement || typeof bootstrap === 'undefined' || !bootstrap.Offcanvas) {
+      return;
+    }
+    bootstrap.Offcanvas.getOrCreateInstance(drawerElement).show();
+  });
+</script>
+{% endif %}
+{% endblock %}

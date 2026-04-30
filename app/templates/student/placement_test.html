@@ -1,0 +1,76 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Placement Test • Fluencify{% endblock %}
+{% block page_title %}Placement Test{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/student-recommendation-pro.css') }}">
+{% endblock %}
+{% block content %}
+<div class="rec-page">
+  <section class="rec-hero rec-hero--test">
+    <div class="rec-hero__copy">
+      <span class="rec-kicker"><i class="bi bi-clipboard2-check"></i> Smart Placement Test</span>
+      <h1>Check your level and get a course path that fits you</h1>
+      <p>This test checks your goal, comfort level, MCQ accuracy, and short answers. The result recommends the right course path for you.</p>
+      <div class="rec-pill-row">
+        <span>8–10 min</span><span>{{ form_blueprint.total_questions }} questions</span><span>Personalized path</span>
+      </div>
+    </div>
+    <div class="rec-score-card">
+      <div class="rec-score-card__icon"><i class="bi bi-graph-up-arrow"></i></div>
+      <div class="rec-mini-grid">
+        <div><span>Latest Level</span><strong>{{ result.recommended_level|title if result else 'Pending' }}</strong></div>
+        <div><span>Goal</span><strong>{{ result.goal.replace('_', ' ')|title if result and result.goal else 'Choose' }}</strong></div>
+        <div><span>Status</span><strong>{{ 'Completed' if result else 'Ready' }}</strong></div>
+      </div>
+    </div>
+  </section>
+
+  {% if result %}
+  <section class="rec-section-card">
+    <div class="rec-section-head">
+      <div><span class="rec-kicker">Your result</span><h2>{{ result.recommended_level|title }} level recommended</h2></div>
+      <span class="rec-score-badge">{{ result.overall_score }}/100</span>
+    </div>
+    <p class="rec-muted">{{ result.summary }}</p>
+    <p class="rec-muted">{{ result.fit_summary }}</p>
+    <div class="rec-overview-grid rec-overview-grid--four">
+      <article class="rec-info-card"><h3>Grammar</h3><strong>{{ result.grammar_score }}/100</strong><p>Sentence structure</p></article>
+      <article class="rec-info-card"><h3>Reading</h3><strong>{{ result.reading_score }}/100</strong><p>Meaning and accuracy</p></article>
+      <article class="rec-info-card"><h3>Writing</h3><strong>{{ result.writing_score }}/100</strong><p>Short answer clarity</p></article>
+      <article class="rec-info-card"><h3>Speaking</h3><strong>{{ result.speaking_score }}/100</strong><p>Expression readiness</p></article>
+    </div>
+    <div class="rec-actions mt-3">
+      <a href="{{ url_for('student.learning_path') }}" class="btn rec-btn rec-btn--primary">Open Learning Path</a>
+      <a href="{{ url_for('student.course_library') }}" class="btn rec-btn rec-btn--light">View Courses</a>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="rec-form-card">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="rec-section-head"><div><span class="rec-kicker">Step 1</span><h2>Your profile</h2></div></div>
+      <div class="rec-form-grid">
+        {% for field in form_blueprint.profile_fields %}
+        <label class="rec-field"><span>{{ field.label }}</span><select name="{{ field.name }}" required><option value="">Select</option>{% for value, label in field.options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label>
+        {% endfor %}
+      </div>
+
+      <div class="rec-section-head rec-form-gap"><div><span class="rec-kicker">Step 2</span><h2>Quick MCQ check</h2></div></div>
+      <div class="rec-question-list">
+        {% for item in form_blueprint.mcq_questions %}
+        <label class="rec-question"><span>MCQ {{ loop.index }} — {{ item.label }}</span><select name="mcq_{{ item.key }}" required><option value="">Select answer</option>{% for value, option_label in item.options %}<option value="{{ value }}">{{ option_label }}</option>{% endfor %}</select></label>
+        {% endfor %}
+      </div>
+
+      <div class="rec-section-head rec-form-gap"><div><span class="rec-kicker">Step 3</span><h2>Short answers</h2></div></div>
+      <div class="rec-question-list">
+        {% for item in form_blueprint.short_answer_questions %}
+        <label class="rec-question"><span>{{ loop.index }}. {{ item.question }}</span><textarea name="answer_{{ item.key }}" rows="4" placeholder="{{ item.placeholder }}"></textarea></label>
+        {% endfor %}
+      </div>
+      <div class="rec-actions rec-form-gap"><button class="btn rec-btn rec-btn--primary" type="submit">Submit Smart Placement Test</button><a href="{{ url_for('student.course_library') }}" class="btn rec-btn rec-btn--light">Back to Library</a></div>
+    </form>
+  </section>
+</div>
+{% endblock %}

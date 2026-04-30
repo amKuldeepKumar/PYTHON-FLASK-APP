@@ -1,0 +1,177 @@
+/* Theme-driven dashboard polish so every preset visibly updates cards, stats, and hero sections. */
+:root {
+  --workspace-panel: color-mix(in srgb, var(--surface) 92%, transparent);
+  --workspace-panel-strong: color-mix(in srgb, var(--surface-2) 94%, var(--surface));
+  --workspace-panel-border: color-mix(in srgb, var(--border) 100%, transparent);
+  --workspace-muted: color-mix(in srgb, var(--muted) 96%, transparent);
+  --workspace-soft: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.dashboard-hero {
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 18%, transparent), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent)) !important;
+  border: 1px solid var(--workspace-panel-border) !important;
+  color: var(--text) !important;
+  box-shadow: 0 22px 60px color-mix(in srgb, var(--shadow) 36%, transparent);
+}
+
+.dashboard-hero h1,
+.dashboard-hero h2,
+.dashboard-hero h3,
+.dashboard-hero h4,
+.dashboard-hero h5,
+.dashboard-hero h6,
+.dashboard-hero .display-5,
+.dashboard-hero .display-6,
+.dashboard-card h1,
+.dashboard-card h2,
+.dashboard-card h3,
+.chart-card h1,
+.chart-card h2,
+.chart-card h3,
+.roadmap-card h1,
+.roadmap-card h2,
+.roadmap-card h3,
+.status-card h1,
+.status-card h2,
+.status-card h3 {
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.dashboard-hero .hero-kicker,
+.dashboard-card .card-kicker,
+.dashboard-note,
+.dashboard-legend-note,
+.dashboard-roadmap-copy,
+.metric-note,
+.chart-subtitle {
+  color: var(--workspace-muted) !important;
+}
+
+.dashboard-hero .badge {
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
+}
+
+.dashboard-card,
+.chart-card,
+.roadmap-card,
+.status-card,
+.soft,
+.theme-surface-card {
+  background: var(--workspace-panel-strong) !important;
+  border: 1px solid var(--workspace-panel-border) !important;
+  border-radius: 22px;
+  box-shadow: 0 20px 48px color-mix(in srgb, var(--shadow) 24%, transparent);
+  color: var(--text) !important;
+}
+
+.dashboard-card .card-body,
+.chart-card .card-body,
+.roadmap-card .card-body,
+.status-card .card-body {
+  padding: 1.25rem;
+}
+
+.metric-value,
+.metric-number,
+.stat-value,
+.value {
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  word-break: break-word;
+  color: var(--heading-text, var(--text)) !important;
+}
+
+.metric-label,
+.stat-label,
+.topbar-profile-role,
+.sidebar-brand small,
+.menu-heading,
+.small.text-secondary,
+.text-secondary,
+.muted,
+.mini,
+.small.text-muted {
+  color: var(--muted) !important;
+}
+
+.chart-wrap {
+  position: relative;
+  min-height: 320px;
+}
+
+.chart-wrap.chart-wrap-sm {
+  min-height: 280px;
+}
+
+.chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.roadmap-mini-card {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, white 4%), color-mix(in srgb, var(--surface-2) 88%, transparent));
+  border: 1px solid color-mix(in srgb, var(--border) 100%, transparent) !important;
+  min-height: 100%;
+}
+
+.status-list .list-group-item {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.dashboard-card .menu-icon,
+.chart-card .menu-icon,
+.roadmap-card .menu-icon {
+  color: var(--primary) !important;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
+}
+
+.dashboard-card .menu-icon .bi,
+.chart-card .menu-icon .bi,
+.roadmap-card .menu-icon .bi {
+  color: inherit !important;
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-hero .d-flex {
+    align-items: flex-start !important;
+  }
+
+  .chart-wrap,
+  .chart-wrap.chart-wrap-sm {
+    min-height: 260px;
+  }
+}
+
+.bi-fallback-active .bi::before {
+  content: none !important;
+}
+
+.bi-fallback-active .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  font-family: inherit !important;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bi-fallback-active .bi::after {
+  content: attr(data-fallback);
+  display: inline-block;
+  font-size: 1em;
+  line-height: 1;
+}
+
+.bi-fallback-active .menu-chevron::after {
+  font-size: .92em;
+}

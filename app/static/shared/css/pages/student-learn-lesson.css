@@ -1,0 +1,302 @@
+
+.student-learning-page {
+  color: var(--text) !important;
+  --translate-primary: var(--primary, #8b5cf6);
+  --translate-primary-soft: color-mix(in srgb, var(--primary) 12%, transparent);
+  --translate-primary-border: color-mix(in srgb, var(--primary) 30%, var(--border));
+  --translate-primary-strong: color-mix(in srgb, var(--primary) 82%, transparent);
+  --translate-surface: color-mix(in srgb, var(--surface) 92%, transparent);
+  --translate-surface-2: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  --translate-border: var(--border);
+  --translate-border-2: color-mix(in srgb, var(--border) 90%, transparent);
+  --translate-text-soft: var(--muted);
+  --translate-text-muted: var(--muted);
+}
+
+.student-learning-page .card,
+.student-learning-page .card-body,
+.student-learning-page .border,
+.student-learning-page .rounded-4 {
+  color: inherit;
+}
+
+.student-learning-page .lesson-meta-label {
+  color: var(--text) !important;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.student-learning-page .lesson-readable {
+  color: var(--text) !important;
+  line-height: 1.7;
+}
+
+.student-learning-page .lesson-help-text,
+.student-learning-page .lesson-stat-line,
+.student-learning-page .lesson-soft-text {
+  color: var(--muted) !important;
+  line-height: 1.6;
+}
+
+.student-learning-page .lesson-info-box {
+  background: var(--translate-surface);
+  border-color: var(--translate-border) !important;
+}
+
+.student-learning-page .lesson-question-box {
+  background: color-mix(in srgb, var(--surface) 94%, transparent) !important;
+  color: var(--text) !important;
+  border-color: var(--translate-border-2) !important;
+}
+
+.student-learning-page .lesson-image-card {
+  background: linear-gradient(135deg, color-mix(in srgb, #ffffff 82%, transparent), color-mix(in srgb, var(--primary) 10%, var(--surface)));
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 1.4rem;
+  padding: 1rem;
+  box-shadow: 0 18px 38px color-mix(in srgb, var(--shadow) 14%, transparent);
+}
+
+.student-learning-page .lesson-question-image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 1rem;
+  background: color-mix(in srgb, #ffffff 74%, var(--surface));
+}
+
+.student-learning-page .progress {
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent) !important;
+  overflow: hidden;
+}
+
+.student-learning-page .progress-bar {
+  color: var(--text-on-primary, #fff) !important;
+  font-weight: 700;
+  transition: width 0.25s ease;
+}
+
+.student-learning-page .alert {
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.student-learning-page .alert-secondary {
+  background: color-mix(in srgb, var(--surface) 90%, transparent) !important;
+  color: var(--text) !important;
+}
+
+.student-learning-page .alert-warning {
+  background: color-mix(in srgb, #f59e0b 12%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+.student-learning-page .alert-info {
+  background: color-mix(in srgb, #06b6d4 12%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+.student-learning-page .alert-primary {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+.student-learning-page .alert-success {
+  background: color-mix(in srgb, #10b981 12%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+.student-learning-page .form-label,
+.student-learning-page .fw-semibold,
+.student-learning-page .fw-bold,
+.student-learning-page h1,
+.student-learning-page h2,
+.student-learning-page h3,
+.student-learning-page h4,
+.student-learning-page h5,
+.student-learning-page h6,
+.student-learning-page strong {
+  color: var(--text) !important;
+}
+
+.student-learning-page .form-control,
+.student-learning-page textarea.form-control,
+.student-learning-page input.form-control {
+  color: var(--text) !important;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border-color: var(--translate-border) !important;
+}
+
+.student-learning-page .form-control::placeholder {
+  color: var(--muted) !important;
+}
+
+.student-learning-page .form-text,
+.student-learning-page .text-muted,
+.student-learning-page .small.text-muted {
+  color: var(--muted) !important;
+}
+
+.student-learning-page .badge.bg-primary-subtle {
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface)) !important;
+  color: var(--text) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--border));
+}
+
+.student-learning-page ul,
+.student-learning-page li,
+.student-learning-page p,
+.student-learning-page span,
+.student-learning-page div {
+  color: inherit;
+}
+
+.student-learning-page .lesson-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.student-learning-page .translate-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border)) !important;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--shadow) 16%, transparent);
+}
+
+.student-learning-page .translate-toggle-label,
+.student-learning-page .translate-state-text,
+.student-learning-page .translate-inline-panel,
+.student-learning-page .translate-inline-panel .translate-panel-title,
+.student-learning-page .translate-inline-panel .translate-panel-body {
+  color: var(--text) !important;
+}
+
+.student-learning-page .translate-switch {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 84%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--border);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.student-learning-page .translate-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--shadow) 22%, transparent);
+  transition: transform 0.2s ease;
+}
+
+.student-learning-page .translate-switch[data-active="true"] {
+  background: var(--translate-primary-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 50%, var(--border));
+}
+
+.student-learning-page .translate-switch[data-active="true"]::after {
+  transform: translateX(20px);
+}
+
+.student-learning-page .translate-switch:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.student-learning-page .translate-inline-panel {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border)) !important;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  margin-top: 0.95rem;
+}
+
+.student-learning-page .translate-inline-panel .translate-panel-meta {
+  color: var(--muted) !important;
+  font-size: 0.82rem;
+  margin-bottom: 0.55rem;
+}
+
+.student-learning-page .translate-inline-panel.d-none {
+  display: none !important;
+}
+
+.student-learning-page .tracking-tile {
+  border: 1px solid var(--translate-border) !important;
+  border-radius: 0.85rem;
+  padding: 0.75rem;
+  height: 100%;
+  background: color-mix(in srgb, var(--surface) 94%, transparent) !important;
+}
+
+.student-learning-page .support-tool-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.student-learning-page.is-nursery-course .lesson-question-box {
+  font-size: 1.35rem !important;
+  line-height: 1.65;
+  padding: 1.4rem !important;
+  border-radius: 1.35rem !important;
+}
+
+.student-learning-page.is-nursery-course .lesson-question-image {
+  max-height: 420px;
+}
+
+.student-learning-page .nursery-lesson-intro {
+  background: linear-gradient(135deg, color-mix(in srgb, #fde68a 55%, white), color-mix(in srgb, #93c5fd 28%, white));
+  border: 1px solid color-mix(in srgb, #f59e0b 28%, var(--border));
+  border-radius: 1.2rem;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--shadow) 12%, transparent);
+}
+
+.student-learning-page .nursery-lesson-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-learning-page .nursery-lesson-copy {
+  margin-top: 0.55rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text) !important;
+}
+
+.student-learning-page .nursery-answer-box {
+  font-size: 1.15rem;
+  line-height: 1.75;
+  min-height: 170px;
+}
+
+.student-learning-page .nursery-action-btn {
+  min-height: 50px;
+  padding-inline: 1.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+}

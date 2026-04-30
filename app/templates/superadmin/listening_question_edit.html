@@ -1,0 +1,26 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Edit Listening Question{% endblock %}
+{% block page_title %}Edit Listening Question{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="card shadow-sm border-0"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <div class="small text-uppercase text-muted">{{ lesson.title }}</div>
+        <h2 class="h4 mb-0">Edit Question</h2>
+      </div>
+      <a class="btn btn-outline-secondary" href="{{ url_for('superadmin.listening_questions', course_id=lesson.course.id if lesson.course else 0, lesson_id=lesson.id) }}">Back</a>
+    </div>
+    <form method="post" class="row g-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-12"><label class="form-label">Prompt</label><textarea class="form-control" rows="3" name="prompt" required>{{ question.prompt }}</textarea></div>
+      <div class="col-md-6"><label class="form-label">Correct Answer</label><input class="form-control" type="text" name="model_answer" value="{{ question.model_answer or '' }}"></div>
+      <div class="col-md-6"><label class="form-label">Expected Keywords</label><input class="form-control" type="text" name="expected_keywords" value="{{ question.expected_keywords or '' }}"></div>
+      <div class="col-md-6"><label class="form-label">Explanation</label><textarea class="form-control" rows="3" name="explanation">{{ question.hint_text or '' }}</textarea></div>
+      <div class="col-md-6"><label class="form-label">Alternative Answers</label><textarea class="form-control" rows="3" name="alt_answers">{% for item in question.answer_patterns_list %}{% if item != question.model_answer %}{{ item }}
+{% endif %}{% endfor %}</textarea></div>
+      <div class="col-12"><button class="btn btn-primary" type="submit">Save Question</button></div>
+    </form>
+  </div></div>
+</div>
+{% endblock %}

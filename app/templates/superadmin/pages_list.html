@@ -1,0 +1,206 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Front Pages CMS • Fluencify{% endblock %}
+{% block page_title %}Front Pages{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='shared/css/page-builder.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-studio-shell">
+  <section class="studio-hero studio-hero-tight mb-4">
+    <div>
+      <div class="studio-kicker">Website management</div>
+      <h1 class="studio-title mb-2">Front Pages CMS</h1>
+      <p class="studio-copy mb-0">
+        Create, organize, publish, redirect, and optimize every website page from one cleaner workspace.
+      </p>
+    </div>
+
+    <div class="studio-hero-actions cms-top-actions">
+      <a href="{{ url_for('superadmin.pages_list') }}"
+         class="btn btn-ghost{% if not include_deleted %} active{% endif %}">
+        Active Pages
+      </a>
+      <a href="{{ url_for('superadmin.pages_list', view='trash') }}"
+         class="btn btn-ghost{% if include_deleted %} active{% endif %}">
+        Trash
+      </a>
+      <a href="{{ url_for('superadmin.pages_create') }}" class="btn btn-primary btn-glow">
+        Create Page
+      </a>
+    </div>
+  </section>
+
+  <section class="cms-toolbar-card mb-4">
+    <div class="cms-stat-grid">
+      <div class="cms-stat-card">
+        <span class="cms-stat-label">Total shown</span>
+        <strong>{{ pages|length }}</strong>
+      </div>
+      <div class="cms-stat-card">
+        <span class="cms-stat-label">Published</span>
+        <strong>{{ pages|selectattr('is_published')|list|length }}</strong>
+      </div>
+      <div class="cms-stat-card">
+        <span class="cms-stat-label">In menu</span>
+        <strong>{{ pages|selectattr('is_in_menu')|list|length }}</strong>
+      </div>
+      <div class="cms-stat-card">
+        <span class="cms-stat-label">With redirects</span>
+        <strong>{{ pages|selectattr('redirect_to')|list|length }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="cms-table-card">
+    <div class="pages-cms-wrap">
+      <div class="table-responsive">
+        <table class="pages-cms-table">
+          <thead>
+            <tr>
+              <th style="width: 29%;">Page</th>
+              <th style="width: 25%;">SEO</th>
+              <th style="width: 16%;">Redirect</th>
+              <th style="width: 12%;">Status</th>
+              <th style="width: 10%;">Updated</th>
+              <th class="text-end" style="width: 18%;">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for page in pages %}
+              {% set content = page.content_for('en') %}
+              {% set section_count = (parse_json_list(content.sections_json)|length) if content and content.sections_json else 0 %}
+              {% set faq_count = (parse_json_list(content.faq_json)|length) if content and content.faq_json else 0 %}
+              {% set links_count = (parse_json_list(content.links_json)|length) if content and content.links_json else 0 %}
+
+              <tr>
+                <td>
+                  <div class="page-cell">
+                    <div class="page-main-title">{{ page.title or 'Untitled Page' }}</div>
+
+                    <div class="page-slug-wrap">
+                      <span class="page-slug">/{{ page.slug or '' }}</span>
+                    </div>
+
+                    <div class="meta-line">
+                      <span class="meta-pill">Menu {{ 'On' if page.is_in_menu else 'Off' }}</span>
+                      <span class="meta-pill">Order {{ page.menu_order or 0 }}</span>
+                      <span class="meta-pill">{{ section_count }} sections</span>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="seo-cell">
+                    <div class="seo-title">
+                      {{ content.meta_title if content and content.meta_title else 'SEO title not set' }}
+                    </div>
+
+                    <div class="seo-desc">
+                      {{ content.meta_description if content and content.meta_description else 'No SEO description added yet.' }}
+                    </div>
+
+                    <div class="count-row">
+                      <span class="count-badge">{{ faq_count }} FAQs</span>
+                      <span class="count-badge">{{ links_count }} links</span>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  {% if content and content.redirect_from and content.redirect_to %}
+                    <div class="redirect-cell">
+                      <div class="redirect-active">
+                        {{ content.redirect_from }} <span class="redirect-arrow">→</span> {{ content.redirect_to }}
+                      </div>
+                      <span class="redirect-code">{{ content.redirect_code or 301 }}</span>
+                    </div>
+                  {% else %}
+                    <div class="redirect-cell">
+                      <div class="redirect-empty">No redirect rule</div>
+                    </div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if page.deleted_at %}
+                    <span class="status-badge status-deleted">Deleted</span>
+                  {% elif page.is_published %}
+                    <span class="status-badge status-published">Published</span>
+                  {% else %}
+                    <span class="status-badge status-draft">Draft</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="updated-time">
+                    {{ page.updated_at.strftime('%d %b %Y') if page.updated_at else '-' }}
+                  </div>
+                  <div class="updated-subtime">
+                    {{ page.updated_at.strftime('%I:%M %p') if page.updated_at else '' }}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="cms-actions">
+                    <a href="{{ url_for('superadmin.pages_edit', page_id=page.id) }}"
+                       class="btn btn-outline-light btn-sm">
+                      Edit
+                    </a>
+
+                    {% if page.deleted_at %}
+                      <form method="post" action="{{ url_for('superadmin.pages_restore', page_id=page.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                          Restore
+                        </button>
+                      </form>
+                    {% else %}
+                      {% if page.is_published %}
+                        <form method="post" action="{{ url_for('superadmin.pages_unpublish', page_id=page.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button type="submit" class="btn btn-outline-warning btn-sm">
+                            Draft
+                          </button>
+                        </form>
+                      {% else %}
+                        <form method="post" action="{{ url_for('superadmin.pages_publish', page_id=page.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button type="submit" class="btn btn-outline-success btn-sm">
+                            Publish
+                          </button>
+                        </form>
+                      {% endif %}
+
+                      <form method="post"
+                            action="{{ url_for('superadmin.pages_delete', page_id=page.id) }}"
+                            onsubmit="return confirm('Move this page to trash?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                          Delete
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="cms-empty">
+                  <div class="cms-empty-icon">📄</div>
+                  <div class="cms-empty-title">No pages found</div>
+                  <div class="cms-empty-copy">
+                    Start by creating your first front page from the button above.
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

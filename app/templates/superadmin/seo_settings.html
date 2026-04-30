@@ -1,0 +1,74 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}SEO Settings • SuperAdmin{% endblock %}
+{% block page_title %}SEO Settings{% endblock %}
+
+{% block content %}
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div class="row g-4">
+    <div class="col-xl-6">
+      <div class="card card-dark h-100">
+        <div class="card-body">
+          <div class="text-secondary text-uppercase small fw-bold mb-2">Core SEO</div>
+          <h3 class="h4 mb-3">Site metadata</h3>
+          <label class="form-label">{{ form.site_name.label }}</label>
+          {{ form.site_name(class='form-control mb-3') }}
+          <label class="form-label">{{ form.default_meta_title.label }}</label>
+          {{ form.default_meta_title(class='form-control mb-3') }}
+          <label class="form-label">{{ form.default_meta_description.label }}</label>
+          {{ form.default_meta_description(class='form-control mb-3', rows='4') }}
+          <label class="form-label">{{ form.custom_json_ld.label }}</label>
+          {{ form.custom_json_ld(class='form-control', rows='8', placeholder='{"@context":"https://schema.org"}') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-6">
+      <div class="card card-dark h-100">
+        <div class="card-body">
+          <div class="text-secondary text-uppercase small fw-bold mb-2">Crawl control</div>
+          <h3 class="h4 mb-3">robots.txt and sitemap</h3>
+          <label class="form-label">{{ form.robots_policy.label }}</label>
+          {{ form.robots_policy(class='form-control mb-3') }}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 form-check ms-2">{{ form.robots_enabled(class='form-check-input') }} <label class='form-check-label'>{{ form.robots_enabled.label.text }}</label></div>
+            <div class="col-md-5 form-check ms-2">{{ form.sitemap_enabled(class='form-check-input') }} <label class='form-check-label'>{{ form.sitemap_enabled.label.text }}</label></div>
+            <div class="col-md-6 form-check ms-2">{{ form.sitemap_include_pages(class='form-check-input') }} <label class='form-check-label'>{{ form.sitemap_include_pages.label.text }}</label></div>
+            <div class="col-md-5 form-check ms-2">{{ form.sitemap_include_public_reading(class='form-check-input') }} <label class='form-check-label'>{{ form.sitemap_include_public_reading.label.text }}</label></div>
+            <div class="col-md-6 form-check ms-2">{{ form.sitemap_include_courses(class='form-check-input') }} <label class='form-check-label'>{{ form.sitemap_include_courses.label.text }}</label></div>
+          </div>
+          <label class="form-label">{{ form.extra_robots_lines.label }}</label>
+          {{ form.extra_robots_lines(class='form-control mb-3', rows='4') }}
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-light btn-sm" target="_blank" href="{{ url_for('main.htaccess_preview') }}">Preview .htaccess</a>
+            <a class="btn btn-outline-light btn-sm" target="_blank" href="{{ url_for('main.robots') }}">Open robots.txt</a>
+            <a class="btn btn-outline-light btn-sm" target="_blank" href="{{ url_for('main.sitemap') }}">Open sitemap.xml</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-12">
+      <div class="card card-dark">
+        <div class="card-body">
+          <div class="text-secondary text-uppercase small fw-bold mb-2">Apache setup</div>
+          <h3 class="h4 mb-3">.htaccess builder</h3>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4 form-check ms-2">{{ form.htaccess_enabled(class='form-check-input') }} <label class='form-check-label'>{{ form.htaccess_enabled.label.text }}</label></div>
+            <div class="col-md-3 form-check ms-2">{{ form.htaccess_force_https(class='form-check-input') }} <label class='form-check-label'>{{ form.htaccess_force_https.label.text }}</label></div>
+            <div class="col-md-3 form-check ms-2">{{ form.htaccess_force_www(class='form-check-input') }} <label class='form-check-label'>{{ form.htaccess_force_www.label.text }}</label></div>
+            <div class="col-md-4 form-check ms-2">{{ form.htaccess_enable_compression(class='form-check-input') }} <label class='form-check-label'>{{ form.htaccess_enable_compression.label.text }}</label></div>
+            <div class="col-md-4 form-check ms-2">{{ form.htaccess_enable_browser_cache(class='form-check-input') }} <label class='form-check-label'>{{ form.htaccess_enable_browser_cache.label.text }}</label></div>
+          </div>
+          <label class="form-label">{{ form.htaccess_custom_rules.label }}</label>
+          {{ form.htaccess_custom_rules(class='form-control', rows='6') }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    {{ form.submit(class='btn btn-primary') }}
+  </div>
+</form>
+{% endblock %}

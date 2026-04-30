@@ -1,0 +1,21 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Bulk Upload • Fluencify{% endblock %}
+{% block page_title %}Bulk Upload{% endblock %}
+{% block content %}
+<h1 class="mb-2">Bulk Upload</h1><p class="text-secondary mb-4">Bulk question upload entry point. Open a course builder to upload directly into a lesson.</p>
+<div class="card bg-dark border-secondary rounded-4"><div class="card-body p-4">
+  <div class="row g-3">
+    {% for course in courses %}
+      <div class="col-md-6 col-xl-4">
+        <div class="p-3 rounded-4 border border-secondary-subtle h-100">
+          <div class="fw-bold mb-1">{{ course.title }}</div>
+          <div class="small text-secondary mb-3">{{ course.lesson_count }} lessons • {{ course.question_count }} questions</div>
+          <a href="{{ url_for('superadmin.course_detail', course_id=course.id) }}" class="btn btn-outline-light btn-sm">Open Builder</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12 text-secondary">No courses available yet.</div>
+    {% endfor %}
+  </div>
+</div></div>
+{% endblock %}

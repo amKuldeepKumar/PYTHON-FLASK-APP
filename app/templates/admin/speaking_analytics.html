@@ -1,0 +1,140 @@
+{% extends "layout/dashboard_base.html" %}
+{% block title %}Speaking Analytics • Admin • Fluencify{% endblock %}
+{% block page_title %}Speaking Analytics{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='shared/css/pages/admin-speaking-analytics.css') }}">{% endblock %}
+
+{% block content %}
+{% set summary = analytics.summary %}
+<div class="d-grid gap-4">
+  <section class="analytics-card">
+    <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+      <div>
+        <div class="small text-uppercase text-secondary mb-2">Phase 6E • Student speaking growth visibility</div>
+        <h2 class="fw-bold mb-2">Admin speaking analytics</h2>
+        <p class="text-secondary mb-0">Track speaking metrics, total time spent, attempts count, score trends, weak areas, and per-student progress graphs.</p>
+      </div>
+      <form method="get" class="d-flex gap-2 flex-wrap align-items-end">
+        <div>
+          <label class="form-label small text-secondary">Open a student report</label>
+          <select name="student_id" class="form-select">
+            <option value="">All students</option>
+            {% for row in analytics.students %}
+              <option value="{{ row.student.id }}" {% if selected_student_id and selected_student_id == row.student.id %}selected{% endif %}>{{ row.student.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">View</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="row g-3">
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Students</div><div class="metric-value">{{ summary.student_count or 0 }}</div><div class="small text-secondary mt-2">students in your scope</div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Active speakers</div><div class="metric-value">{{ summary.active_speakers or 0 }}</div><div class="small text-secondary mt-2">students with speaking attempts</div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Attempts count</div><div class="metric-value">{{ summary.attempts_count or 0 }}</div><div class="small text-secondary mt-2">all submissions in tenant scope</div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Time spent</div><div class="metric-value">{{ summary.time_spent_text or '0s' }}</div><div class="small text-secondary mt-2">combined speaking time</div></div></div>
+    <div class="col-12 col-md-6 col-xl-6"><div class="metric-card"><div class="metric-label">Average score</div><div class="metric-value">{{ '%.1f'|format(summary.avg_score or 0) }}/10</div><div class="small text-secondary mt-2">average across learners in scope</div></div></div>
+    <div class="col-12 col-md-6 col-xl-6"><div class="metric-card"><div class="metric-label">Students needing help</div><div class="metric-value">{{ summary.students_with_weak_areas or 0 }}</div><div class="small text-secondary mt-2">learners with at least one weak area</div></div></div>
+  </section>
+
+  <section class="row g-4">
+    <div class="col-12 col-xl-7">
+      <div class="analytics-card h-100">
+        <h4 class="fw-bold mb-1">Top student progress graph</h4>
+        <div class="small text-secondary mb-3">Average score and attempts count for your strongest active speakers.</div>
+        <div class="chart-wrap"><canvas id="scopeSpeakingChart"></canvas></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-5">
+      <div class="analytics-card h-100">
+        <h4 class="fw-bold mb-1">Student progress table</h4>
+        <div class="small text-secondary mb-3">Open any student report for detailed weak areas and personal score trends.</div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr><th>Student</th><th>Attempts</th><th>Avg score</th><th>Trend</th><th>Weak areas</th><th></th></tr>
+            </thead>
+            <tbody>
+              {% for row in analytics.students %}
+                <tr>
+                  <td>{{ row.student.full_name }}</td>
+                  <td>{{ row.attempts_count }}</td>
+                  <td>{{ '%.1f'|format(row.avg_score) }}/10</td>
+                  <td>{{ row.score_trend }}</td>
+                  <td>{{ row.weak_areas_count }}</td>
+                  <td><a class="btn btn-sm btn-outline-light" href="{{ url_for('admin.speaking_analytics', student_id=row.student.id) }}">Open</a></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="text-center text-secondary py-4">No students found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if analytics.selected_student %}
+    {% set student_row = analytics.selected_student %}
+    {% set report = student_row.report %}
+    {% set detail = report.summary %}
+    <section class="analytics-card">
+      <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start mb-3">
+        <div>
+          <h3 class="fw-bold mb-1">{{ student_row.student.full_name }} • detailed report</h3>
+          <div class="small text-secondary">Attempts {{ detail.attempts_count or 0 }} • Completed sessions {{ detail.sessions_completed or 0 }} • Time spent {{ detail.time_spent_text or '0s' }}</div>
+        </div>
+        <a class="btn btn-outline-light" href="{{ url_for('admin.speaking_analytics') }}">Back to all students</a>
+      </div>
+      <div class="row g-4">
+        <div class="col-12 col-xl-8">
+          <div class="chart-wrap"><canvas id="selectedStudentChart"></canvas></div>
+        </div>
+        <div class="col-12 col-xl-4">
+          <div class="d-grid gap-2">
+            <div class="metric-card"><div class="metric-label">Average score</div><div class="metric-value">{{ '%.1f'|format(detail.avg_score or 0) }}/10</div></div>
+            <div class="metric-card"><div class="metric-label">Score trend</div><div class="metric-value">{{ detail.score_trend or 'Not enough data' }}</div><div class="small text-secondary mt-2">Delta {{ '%+.1f'|format(detail.score_trend_delta or 0) }}</div></div>
+            <div class="metric-card"><div class="metric-label">Weak areas</div><div class="metric-value">{{ detail.weak_areas_count or 0 }}</div><div class="small text-secondary mt-2">Average relevance {{ '%.1f'|format(detail.avg_relevance or 0) }}%</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 mt-1">
+        <div class="col-12 col-xl-6">
+          <h5 class="fw-bold mb-3">Weak areas</h5>
+          <div class="d-grid gap-2">
+            {% for item in report.weak_areas %}
+              <div class="metric-card">
+                <div class="fw-semibold mb-1">{{ item.label }}</div>
+                <div class="small text-secondary">Attempts {{ item.attempts }} • Score {{ '%.1f'|format(item.avg_score) }}/10 • Relevance {{ '%.0f'|format(item.avg_relevance) }}% • Retry {{ '%.0f'|format(item.retry_rate) }}%</div>
+              </div>
+            {% else %}
+              <div class="metric-card">No major weak area visible for this student yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-12 col-xl-6">
+          <h5 class="fw-bold mb-3">Recent attempts</h5>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead><tr><th>Date</th><th>Topic</th><th>Score</th><th>Relevance</th></tr></thead>
+              <tbody>
+                {% for row in report.recent_attempts %}
+                <tr><td>{{ row.date_label }}</td><td>{{ row.topic }}</td><td>{{ '%.1f'|format(row.score) }}/10</td><td>{{ '%.0f'|format(row.relevance) }}%</td></tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center text-secondary py-4">No speaking attempts yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='shared/js/chart-admin-speaking-analytics.js') }}"></script>
+{% endblock %}
