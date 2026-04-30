@@ -3,11 +3,12 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass
+from typing import Optional
 
 from ..models.lms import Course, Lesson, Question, Subsection
 
 
-@dataclass(slots=True)
+@dataclass
 class ListeningScriptDraft:
     title: str
     script_text: str
@@ -49,12 +50,12 @@ class ListeningGenerationService:
     }
 
     @staticmethod
-    def _clean_topic(title: str | None) -> str:
+    def _clean_topic(title: Optional[str]) -> str:
         text = (title or 'Listening topic').strip()
         return text or 'Listening topic'
 
     @staticmethod
-    def _difficulty_label(course: Course | None) -> str:
+    def _difficulty_label(course: Optional[Course]) -> str:
         value = (getattr(course, 'difficulty', '') or 'basic').strip().lower()
         if value.startswith('adv'):
             return 'advanced'
@@ -63,7 +64,7 @@ class ListeningGenerationService:
         return 'basic'
 
     @classmethod
-    def target_minutes_for(cls, course: Course | None, lesson: Lesson | None = None) -> int:
+    def target_minutes_for(cls, course: Optional[Course], lesson: Optional[Lesson] = None) -> int:
         difficulty = cls._difficulty_label(course)
         minimum_minutes, _ = cls.DURATION_RULES[difficulty]
         requested = int(getattr(lesson, 'estimated_minutes', 0) or 0) if lesson else 0
@@ -72,7 +73,7 @@ class ListeningGenerationService:
         return minimum_minutes
 
     @classmethod
-    def target_word_count_for(cls, course: Course | None, lesson: Lesson | None = None) -> int:
+    def target_word_count_for(cls, course: Optional[Course], lesson: Optional[Lesson] = None) -> int:
         difficulty = cls._difficulty_label(course)
         minimum_minutes, minimum_words = cls.DURATION_RULES[difficulty]
         target_minutes = cls.target_minutes_for(course, lesson)
@@ -140,7 +141,7 @@ class ListeningGenerationService:
         )
 
     @classmethod
-    def build_script(cls, course: Course | None, lesson: Lesson) -> ListeningScriptDraft:
+    def build_script(cls, course: Optional[Course], lesson: Lesson) -> ListeningScriptDraft:
         topic = cls._clean_topic(lesson.title)
         difficulty = cls._difficulty_label(course)
         target_minutes = cls.target_minutes_for(course, lesson)
