@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 from hashlib import sha1
 from pathlib import Path
 import json
@@ -13,7 +14,7 @@ from flask import current_app, url_for
 from ..models.lms import Course, Lesson
 
 
-@dataclass(slots=True)
+@dataclass
 class ListeningPlaybackConfig:
     replay_limit: int
     allowed_speeds: list[float]
@@ -40,14 +41,14 @@ class ListeningAudioService:
         return (lesson.explanation_tts_text or lesson.explanation_text or '').strip()
 
     @staticmethod
-    def _safe_voice_name(course: Course | None) -> str:
+    def _safe_voice_name(course: Optional[Course]) -> str:
         language = (getattr(course, 'language_code', '') or 'en').lower()
         if language.startswith('en'):
             return 'en'
         return 'en'
 
     @staticmethod
-    def build_config(course: Course | None, lesson: Lesson | None = None) -> ListeningPlaybackConfig:
+    def build_config(course: Optional[Course], lesson: Optional[Lesson] = None) -> ListeningPlaybackConfig:
         difficulty = ((getattr(course, 'difficulty', '') or '') if course else '').strip().lower()
         level_hint = ''
         if lesson and lesson.level and lesson.level.title:
@@ -59,7 +60,7 @@ class ListeningAudioService:
         return ListeningPlaybackConfig(replay_limit=2, allowed_speeds=[0.9, 1.0, 1.1], caption_default='off', caption_locked=False)
 
     @classmethod
-    def _cache_key(cls, course: Course | None, lesson: Lesson) -> str:
+    def _cache_key(cls, course: Optional[Course], lesson: Lesson) -> str:
         payload = {
             'lesson_id': lesson.id,
             'course_id': getattr(course, 'id', None),
@@ -69,16 +70,16 @@ class ListeningAudioService:
         return sha1(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()[:16]
 
     @classmethod
-    def cached_path(cls, course: Course | None, lesson: Lesson) -> Path:
+    def cached_path(cls, course: Optional[Course], lesson: Lesson) -> Path:
         return cls._uploads_dir() / f'lesson_{lesson.id}_{cls._cache_key(course, lesson)}.wav'
 
     @classmethod
-    def cached_exists(cls, course: Course | None, lesson: Lesson) -> bool:
+    def cached_exists(cls, course: Optional[Course], lesson: Lesson) -> bool:
         path = cls.cached_path(course, lesson)
         return path.exists() and path.stat().st_size > 64
 
     @classmethod
-    def _synth_with_espeak(cls, course: Course | None, script: str, target: Path) -> bool:
+    def _synth_with_espeak(cls, course: Optional[Course], script: str, target: Path) -> bool:
         if not shutil.which('espeak'):
             return False
         cmd = [
@@ -124,7 +125,7 @@ class ListeningAudioService:
         return target.exists() and target.stat().st_size > 64
 
     @classmethod
-    def ensure_audio(cls, course: Course | None, lesson: Lesson) -> Path | None:
+    def ensure_audio(cls, course: Optional[Course], lesson: Lesson) -> Optional[Path]:
         script = cls.script_text(lesson)
         if not script:
             return None
@@ -155,7 +156,7 @@ class ListeningAudioService:
         return None
 
     @classmethod
-    def audio_url(cls, course: Course | None, lesson: Lesson) -> str | None:
+    def audio_url(cls, course: Optional[Course], lesson: Lesson) -> Optional[str]:
         path = cls.ensure_audio(course, lesson)
         if not path:
             return None
