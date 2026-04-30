@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from flask_login import current_user
 from sqlalchemy import desc
@@ -21,23 +21,23 @@ REVIEW_AUDIT_ACTION = "publish_review_state"
 REVIEW_NOTE_ACTION = "publish_review_note"
 
 
-@dataclass(slots=True)
+@dataclass
 class ReviewItem:
     item_type: str
     item_id: int
     title: str
-    course_id: int | None
-    course_title: str | None
+    course_id: Optional[int]
+    course_title: Optional[str]
     module_label: str
     state: str
     is_published: bool
     is_ready: bool
     readiness_note: str
-    edit_url: str | None = None
-    source_url: str | None = None
+    edit_url: Optional[str] = None
+    source_url: Optional[str] = None
     question_count: int = 0
-    note: str | None = None
-    reviewed_by: str | None = None
+    note: Optional[str] = None
+    reviewed_by: Optional[str] = None
 
 
 class PublishReviewService:
@@ -48,7 +48,7 @@ class PublishReviewService:
         return f"{item_type}:{item_id}"
 
     @classmethod
-    def _latest_review_audit(cls, item_type: str, item_id: int, action: str = REVIEW_AUDIT_ACTION) -> AuditLog | None:
+    def _latest_review_audit(cls, item_type: str, item_id: int, action: str = REVIEW_AUDIT_ACTION) -> Optional[AuditLog]:
         return (
             AuditLog.query.filter_by(action=action, target=cls._audit_target(item_type, item_id))
             .order_by(desc(AuditLog.id))
@@ -56,7 +56,7 @@ class PublishReviewService:
         )
 
     @classmethod
-    def _latest_state_from_audit(cls, item_type: str, item_id: int) -> tuple[str | None, str | None, str | None]:
+    def _latest_state_from_audit(cls, item_type: str, item_id: int) -> tuple[Optional[str], Optional[str], Optional[str]]:
         row = cls._latest_review_audit(item_type, item_id)
         if not row:
             return None, None, None
