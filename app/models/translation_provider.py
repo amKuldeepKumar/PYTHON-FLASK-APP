@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from ..extensions import db
 
@@ -58,7 +59,7 @@ class TranslationProvider(db.Model):
             return "Mock / Manual"
         return (self.provider_type or "Unknown").replace("_", " ").title()
 
-    def consume_credit(self, amount: float | None = None) -> None:
+    def consume_credit(self, amount: Optional[float] = None) -> None:
         if self.credits_remaining is None:
             return
         cost = float(amount if amount is not None else (self.per_request_cost or 0))
