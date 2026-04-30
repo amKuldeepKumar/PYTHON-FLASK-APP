@@ -20,6 +20,7 @@ from .extensions import db
 from .models.translation_cache import TranslationCache, make_cache_key
 from .services.language_service import language_label, resolve_language_code
 from .services.session_service import get_device_preference
+from typing import Optional
 
 
 FALLBACK_CHAIN = {
@@ -31,7 +32,7 @@ FALLBACK_CHAIN = {
 }
 
 
-def resolve_fallback_chain(code: str | None) -> list[str]:
+def resolve_fallback_chain(code: Optional[str]) -> list[str]:
     if not code:
         return ["en"]
     code = code.strip()
@@ -46,7 +47,7 @@ def resolve_fallback_chain(code: str | None) -> list[str]:
     return chain
 
 
-def _request_lang_arg() -> str | None:
+def _request_lang_arg() -> Optional[str]:
     try:
         value = (request.args.get("lang") or "").strip().lower()
         return value or None
@@ -92,7 +93,7 @@ def get_learning_language_code(default: str = "en") -> str:
     return default
 
 
-def get_cached_translation(source_text: str, src_lang: str, target_lang: str, context: str | None = None, version: str | None = None) -> str | None:
+def get_cached_translation(source_text: str, src_lang: str, target_lang: str, context: Optional[str] = None, version: Optional[str] = None) -> Optional[str]:
     key = make_cache_key(source_text, src_lang, target_lang, context, version)
     row = TranslationCache.query.filter_by(cache_key=key).first()
     if not row:
@@ -107,7 +108,7 @@ def get_cached_translation(source_text: str, src_lang: str, target_lang: str, co
     return row.translated_text
 
 
-def set_cached_translation(source_text: str, translated_text: str, src_lang: str, target_lang: str, context: str | None = None, version: str | None = None, ttl_seconds: int | None = None) -> TranslationCache:
+def set_cached_translation(source_text: str, translated_text: str, src_lang: str, target_lang: str, context: Optional[str] = None, version: Optional[str] = None, ttl_seconds: Optional[int] = None) -> TranslationCache:
     key = make_cache_key(source_text, src_lang, target_lang, context, version)
     row = TranslationCache.query.filter_by(cache_key=key).first()
     if row:
@@ -129,7 +130,7 @@ def set_cached_translation(source_text: str, translated_text: str, src_lang: str
     return row
 
 
-def cache_text_for_runtime(source_text: str | None, src_lang: str, target_lang: str, context: str, version: str | None = None, ttl_seconds: int | None = 86400) -> str | None:
+def cache_text_for_runtime(source_text: Optional[str], src_lang: str, target_lang: str, context: str, version: Optional[str] = None, ttl_seconds: Optional[int] = 86400) -> Optional[str]:
     if source_text in (None, ""):
         return source_text
     if src_lang == target_lang:
@@ -142,7 +143,7 @@ def cache_text_for_runtime(source_text: str | None, src_lang: str, target_lang: 
     return source_text
 
 
-def build_cached_content_proxy(content, src_lang: str, target_lang: str, context_prefix: str, version: str | None = None):
+def build_cached_content_proxy(content, src_lang: str, target_lang: str, context_prefix: str, version: Optional[str] = None):
     fields = [
         "title", "subtitle", "body_html", "sections_json", "faq_json", "links_json",
         "hero_title", "hero_subtitle", "hero_cta_text", "hero_cta_url", "hero_image",

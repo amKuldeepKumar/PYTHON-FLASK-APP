@@ -7,9 +7,10 @@ from flask_login import current_user
 
 from .extensions import db
 from .models.audit import AuditLog
+from typing import Optional
 
 
-def audit(action: str, target: str | None = None, meta: str | None = None) -> None:
+def audit(action: str, target: Optional[str] = None, meta: Optional[str] = None) -> None:
     """Best-effort audit logging with chained hashes for tamper evidence."""
     try:
         actor_id = getattr(current_user, "id", None) if current_user.is_authenticated else None

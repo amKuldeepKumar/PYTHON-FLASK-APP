@@ -6,6 +6,7 @@ import re
 from flask import Response, abort, current_app, jsonify, render_template, request, url_for, redirect, send_from_directory, session, flash
 from sqlalchemy import func
 from flask_login import current_user
+from typing import Optional
 
 from . import bp
 from ...models.lms import Course
@@ -26,16 +27,16 @@ from ...services.whatsapp_service import WhatsAppService
 PUBLIC_PLACEMENT_TEST_SESSION_KEY = "student_placement_test_result"
 
 
-def _public_placement_result() -> dict | None:
+def _public_placement_result() -> Optional[dict]:
     payload = session.get(PUBLIC_PLACEMENT_TEST_SESSION_KEY) or {}
     return payload if isinstance(payload, dict) and payload else None
 
-def _slugify(value: str | None) -> str:
+def _slugify(value: Optional[str]) -> str:
     text = re.sub(r"[^a-z0-9]+", "-", (value or "").strip().lower()).strip("-")
     return text or "item"
 
 
-def _normalized_html_text(value: str | None) -> str:
+def _normalized_html_text(value: Optional[str]) -> str:
     text = re.sub(r"<[^>]+>", " ", value or "")
     text = re.sub(r"\s+", " ", text).strip().lower()
     return text
@@ -143,7 +144,7 @@ def _reading_passage_json_ld(topic: ReadingTopic, passage: ReadingPassage, quest
     }, ensure_ascii=False)
 
 
-def _render_page(slug: str, fallback_template: str | None = None):
+def _render_page(slug: str, fallback_template: Optional[str] = None):
     page, content, lang_used = resolve_page_content(slug, preferred_lang=(request.args.get("lang") or None))
     weekly_leaders = EconomyService.leaderboard("weekly", limit=10) if slug == "home" else []
     monthly_leaders = EconomyService.leaderboard("monthly", limit=10) if slug == "home" else []

@@ -9,12 +9,13 @@ from ...models.speaking_topic import SpeakingTopic
 from ...rbac import require_role
 from ...services.speaking.prompt_service import PromptService
 from ...services.speaking.analytics_service import SpeakingAnalyticsService
+from typing import Optional
 
 
 LEVEL_CHOICES = ("basic", "intermediate", "advanced")
 
 
-def _owner_admin_id() -> int | None:
+def _owner_admin_id() -> Optional[int]:
     return current_user.scope_admin_id() or current_user.id
 
 

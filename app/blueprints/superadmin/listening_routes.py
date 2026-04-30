@@ -9,12 +9,13 @@ from ...models.lms import Course, Level, Lesson, Chapter, Subsection, Question
 from ...rbac import require_role
 from ...services.listening_audio_service import ListeningAudioService
 from ...services.listening_generation_service import ListeningGenerationService
+from typing import Optional
 
 LISTENING_TRACK_TYPES = ("listening",)
 WORKFLOW_CHOICES = {"draft", "review", "published", "approved", "rejected", "pending", "live"}
 
 
-def _safe_int(value, default=0, minimum: int | None = None) -> int:
+def _safe_int(value, default=0, minimum: Optional[int] = None) -> int:
     try:
         parsed = int(value)
     except (TypeError, ValueError):

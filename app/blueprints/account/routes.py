@@ -9,6 +9,7 @@ from pathlib import Path
 
 from flask import current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from typing import Optional
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.utils import secure_filename
 
@@ -120,7 +121,7 @@ def _profile_photo_folder() -> Path:
     return root
 
 
-def _save_profile_upload(file_storage) -> str | None:
+def _save_profile_upload(file_storage) -> Optional[str]:
     if not file_storage or not getattr(file_storage, "filename", ""):
         return None
 
@@ -141,7 +142,7 @@ def _save_profile_upload(file_storage) -> str | None:
     return f"/static/uploads/profile_photos/{new_name}"
 
 
-def _save_camera_image(data_url: str) -> str | None:
+def _save_camera_image(data_url: str) -> Optional[str]:
     if not data_url:
         return None
     match = data_url.split(",", 1)
@@ -173,7 +174,7 @@ def _save_camera_image(data_url: str) -> str | None:
     return f"/static/uploads/profile_photos/{new_name}"
 
 
-def _handle_profile_photo_post() -> tuple[str | None, bool]:
+def _handle_profile_photo_post() -> tuple[Optional[str], bool]:
     remove_avatar = request.form.get("remove_avatar") == "1"
     if remove_avatar:
         return None, True
@@ -226,7 +227,7 @@ def _teacher_catalog() -> list[dict]:
     return items
 
 
-def _teacher_choices_for_profile(selected_org_id: int | None) -> tuple[list[tuple[int, str]], list[dict]]:
+def _teacher_choices_for_profile(selected_org_id: Optional[int]) -> tuple[list[tuple[int, str]], list[dict]]:
     catalog = _teacher_catalog()
     org_id = int(selected_org_id or 0)
     if org_id:

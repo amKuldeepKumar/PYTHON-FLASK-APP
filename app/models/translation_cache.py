@@ -11,9 +11,10 @@ from datetime import datetime, timedelta
 import hashlib
 
 from ..extensions import db
+from typing import Optional
 
 
-def make_cache_key(source_text: str, src_lang: str, tgt_lang: str, context: str | None, version: str | None) -> str:
+def make_cache_key(source_text: str, src_lang: str, tgt_lang: str, context: Optional[str], version: Optional[str]) -> str:
     raw = "\n".join([
         (src_lang or "").strip(),
         (tgt_lang or "").strip(),
@@ -49,7 +50,7 @@ class TranslationCache(db.Model):
         return self.expires_at is not None and self.expires_at <= datetime.utcnow()
 
     @staticmethod
-    def compute_expiry(ttl_seconds: int | None) -> datetime | None:
+    def compute_expiry(ttl_seconds: Optional[int]) -> Optional[datetime]:
         if not ttl_seconds:
             return None
         return datetime.utcnow() + timedelta(seconds=int(ttl_seconds))

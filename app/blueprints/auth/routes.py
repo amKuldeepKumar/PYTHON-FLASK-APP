@@ -3,6 +3,7 @@ from urllib.parse import urlsplit
 
 from flask import current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from typing import Optional
 
 from . import bp
 from .forms import LoginForm, OtpForm, RegisterForm, ResetPasswordForm, ResetRequestForm
@@ -61,7 +62,7 @@ def _redirect_after_login(user: User):
     return redirect(url_for(endpoint))
 
 
-def _is_safe_next_url(target: str | None) -> bool:
+def _is_safe_next_url(target: Optional[str]) -> bool:
     value = (target or "").strip()
     if not value:
         return False
@@ -69,7 +70,7 @@ def _is_safe_next_url(target: str | None) -> bool:
     return not parsed.scheme and not parsed.netloc and value.startswith("/")
 
 
-def _resolve_next_url() -> str | None:
+def _resolve_next_url() -> Optional[str]:
     for candidate in (
         request.form.get("next"),
         request.args.get("next"),

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from flask import url_for
 from flask_login import current_user
+from typing import Optional
 
 from .i18n import get_ui_language_code, resolve_fallback_chain
 from .models.page import Page, PageContent
@@ -14,7 +15,7 @@ class TopMenuItem:
     label: str
     href: str
     children: tuple["TopMenuItem", ...] = field(default_factory=tuple)
-    languages: set[str] | None = None
+    languages: Optional[set[str]] = None
 
 
 @dataclass(frozen=True)
@@ -22,9 +23,9 @@ class SidebarItem:
     label: str
     href: str = "#"
     icon: str = "bi-circle"
-    perm: str | None = None
-    roles: tuple[str, ...] | None = None
-    badge: str | None = None
+    perm: Optional[str] = None
+    roles: Optional[tuple[str, ...]] = None
+    badge: Optional[str] = None
     badge_class: str = "text-bg-secondary"
     disabled: bool = False
     children: tuple["SidebarItem", ...] = field(default_factory=tuple)
@@ -52,7 +53,7 @@ PHASE_BADGES = {
 }
 
 
-def _safe_url(endpoint: str | None, endpoint_args: dict | None = None) -> str:
+def _safe_url(endpoint: Optional[str], endpoint_args: Optional[dict] = None) -> str:
     if not endpoint:
         return "#"
     try:
@@ -66,9 +67,9 @@ def _phase_item(
     endpoint: str,
     phase_key: str,
     icon: str,
-    endpoint_args: dict | None = None,
-    perm: str | None = None,
-    roles: tuple[str, ...] | None = None,
+    endpoint_args: Optional[dict] = None,
+    perm: Optional[str] = None,
+    roles: Optional[tuple[str, ...]] = None,
 ) -> SidebarItem:
     badge, badge_class = PHASE_BADGES.get(phase_key, ("LIVE", "text-bg-success"))
     return SidebarItem(
@@ -86,9 +87,9 @@ def _live_item(
     label: str,
     endpoint: str,
     icon: str,
-    endpoint_args: dict | None = None,
-    perm: str | None = None,
-    roles: tuple[str, ...] | None = None,
+    endpoint_args: Optional[dict] = None,
+    perm: Optional[str] = None,
+    roles: Optional[tuple[str, ...]] = None,
 ) -> SidebarItem:
     badge, badge_class = PHASE_BADGES["live"]
     return SidebarItem(
@@ -102,7 +103,7 @@ def _live_item(
     )
 
 
-def _is_language_allowed(languages: set[str] | None) -> bool:
+def _is_language_allowed(languages: Optional[set[str]]) -> bool:
     if not languages:
         return True
     chain = resolve_fallback_chain(get_ui_language_code("en"))

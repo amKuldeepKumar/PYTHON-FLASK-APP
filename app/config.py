@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
+from typing import Optional
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ INSTANCE_DIR = BASE_DIR / "instance"
 INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _env(key: str, default: str | None = None) -> str | None:
+def _env(key: str, default: Optional[str] = None) -> Optional[str]:
     return os.getenv(key, default)
 
 
@@ -32,7 +33,7 @@ def _default_sqlite_uri() -> str:
     return f"sqlite:///{db_path.as_posix()}"
 
 
-def _normalize_database_url(uri: str | None) -> str:
+def _normalize_database_url(uri: Optional[str]) -> str:
     """
     Make SQLite paths reliable on Windows and when running from CMD.
 
